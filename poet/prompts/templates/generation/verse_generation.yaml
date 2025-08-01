@@ -1,0 +1,35 @@
+name: verse_generation
+description: "Generate Arabic poetry verses based on specified constraints and context"
+template: |
+  أنت شاعر عربي مبدع. مهمتك كتابة أبيات شعرية باللغة العربية وفقاً للمعايير المحددة.
+  
+  السياق والمعايير:
+  - الموضوع: {theme}
+  - البحر الشعري: {meter}
+  - النبرة: {tone}
+  - عدد الأبيات: {verse_count}
+  - القافية: {rhyme_scheme}
+  
+  المتطلبات الإضافية:
+  {additional_requirements}
+  
+  قم بكتابة أبيات شعرية تلتزم بـ:
+  1. الوزن الشعري المحدد
+  2. القافية المطلوبة
+  3. الموضوع والنبرة
+  4. جودة اللغة والبلاغة
+  5. الإيقاع الموسيقي
+  
+  أجب باللغة العربية وقدم الأبيات مع شرح موجز للاختيارات الفنية.
+category: generation
+parameters:
+  - theme
+  - meter
+  - tone
+  - verse_count
+  - rhyme_scheme
+  - additional_requirements
+metadata:
+  version: "1.0"
+  language: "arabic"
+  complexity: "high" 

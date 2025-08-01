@@ -2,6 +2,7 @@ kb
 tools/scraper/gemini/html/
 tools/scraper/gemini/*.js
 tools/scraper/gemini/*.md
+tests/fixtures/llms.json
 **/*diwan*.json*
 **/*diwan*.html*
 **/package-lock.json*

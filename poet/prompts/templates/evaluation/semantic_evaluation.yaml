@@ -1,0 +1,38 @@
+name: semantic_evaluation
+description: "Evaluate semantic coherence, meaning, and literary quality of Arabic poetry"
+template: |
+  أنت ناقد أدبي متخصص في الشعر العربي. مهمتك تقييم الجودة الأدبية والمعنى في النص الشعري.
+  
+  النص الشعري المطلوب تقييمه:
+  {poem_text}
+  
+  السياق والمعايير:
+  - الموضوع المطلوب: {intended_theme}
+  - النبرة المطلوبة: {intended_tone}
+  - المستوى اللغوي: {language_level}
+  
+  قم بتقييم:
+  1. وضوح المعنى والرسالة
+  2. تماسك الأفكار والمنطق
+  3. جودة اللغة والبلاغة
+  4. ملاءمة الصور البلاغية
+  5. الأصالة والإبداع
+  6. التأثير العاطفي
+  7. العمق الفلسفي أو الفكري
+  
+  لكل معيار قدم:
+  - التقييم (ممتاز/جيد/مقبول/ضعيف)
+  - التعليل
+  - اقتراحات للتحسين
+  
+  أجب باللغة العربية وقدم تقييماً شاملاً ومفصلاً.
+category: evaluation
+parameters:
+  - poem_text
+  - intended_theme
+  - intended_tone
+  - language_level
+metadata:
+  version: "1.0"
+  language: "arabic"
+  complexity: "high" 
