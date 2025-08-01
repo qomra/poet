@@ -1,0 +1,59 @@
+# Default configuration for Poet Library
+
+# Data Sources
+data:
+  local_knowledge_path: "kb/"  # Path to local knowledge directory containing ashaar dataset
+  rhyme_dict_path: "kb/fahras.json"
+  enable_search: false  # Enable external search (SerpAPI)
+  search_api_key: null
+
+# Model Selection
+models:
+  primary: "gpt-4o"
+  fallback: "gpt-3.5-turbo"
+  local: null
+  
+# LLM Provider Settings
+llm:
+  openai:
+    api_key: null
+    base_url: "https://api.openai.com/v1"
+    timeout: 30
+    max_retries: 3
+  
+  anthropic:
+    api_key: null
+    base_url: null
+    timeout: 30
+    max_retries: 3
+  
+  gemini:
+    api_key: null
+    timeout: 30
+    max_retries: 3
+
+# Generation Parameters  
+generation:
+  max_iterations: 5
+  creativity_weight: 0.7
+  constraint_strictness: 0.9
+  temperature: 0.7
+  max_tokens: 2000
+
+# Quality Thresholds
+evaluation:
+  min_prosody_score: 0.85
+  min_semantic_coherence: 0.75
+  max_refinement_cycles: 3
+  
+# Performance Settings
+performance:
+  corpus_cache_size: 1000
+  search_result_limit: 50
+  parallel_requests: false
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: null  # Set to file path to enable file logging

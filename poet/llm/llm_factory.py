@@ -19,6 +19,7 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
         REAL_LLM_PROVIDER: Specify which provider to use (default: openai)
     """
     if not os.getenv("TEST_REAL_LLMS"):
+        print("DEBUG: TEST_REAL_LLMS not set, returning None")
         return None
     
     provider = os.getenv("REAL_LLM_PROVIDER", "openai").lower()
@@ -26,6 +27,7 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
     # Load configuration
     config_data = _load_llm_config()
     if not config_data or provider not in config_data:
+        print(f"DEBUG: No config data or provider not found, returning None")
         return None
     
     provider_config = config_data[provider]
