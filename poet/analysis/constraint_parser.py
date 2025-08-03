@@ -115,7 +115,7 @@ class ConstraintParser:
             ValueError: If structure is invalid
         """
         required_fields = [
-            'meter', 'rhyme', 'line_count', 'theme', 'tone',
+            'meter', 'qafiya', 'line_count', 'theme', 'tone',
             'imagery', 'keywords', 'register', 'era', 'poet_style', 'sections',
             'ambiguities', 'suggestions', 'reasoning'
         ]
@@ -144,7 +144,7 @@ class ConstraintParser:
         # Convert null values to None and handle type conversions
         constraints = UserConstraints(
             meter=data.get('meter') if data.get('meter') != 'null' else None,
-            rhyme=data.get('rhyme') if data.get('rhyme') != 'null' else None,
+            qafiya=data.get('qafiya') if data.get('qafiya') != 'null' else None,
             line_count=data.get('line_count') if data.get('line_count') != 'null' else None,
             theme=data.get('theme') if data.get('theme') != 'null' else None,
             tone=data.get('tone') if data.get('tone') != 'null' else None,

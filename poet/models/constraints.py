@@ -15,7 +15,7 @@ class UserConstraints:
     
     # Prosodic constraints
     meter: Optional[str] = None
-    rhyme: Optional[str] = None
+    qafiya: Optional[str] = None
     line_count: Optional[int] = None
     
     # Thematic constraints  
@@ -43,7 +43,7 @@ class UserConstraints:
     def __post_init__(self):
         """Basic validation after initialization"""
         # Strip whitespace from string fields
-        string_fields = ['meter', 'rhyme', 'theme', 'tone', 'register', 'era', 'poet_style']
+        string_fields = ['meter', 'qafiya', 'theme', 'tone', 'register', 'era', 'poet_style']
         for field_name in string_fields:
             value = getattr(self, field_name)
             if value:
@@ -63,7 +63,7 @@ class UserConstraints:
         """Convert constraints to dictionary"""
         return {
             "meter": self.meter,
-            "rhyme": self.rhyme, 
+            "qafiya": self.qafiya, 
             "line_count": self.line_count,
             "theme": self.theme,
             "tone": self.tone,
@@ -81,7 +81,7 @@ class UserConstraints:
         """Create constraints from dictionary"""
         return cls(
             meter=data.get("meter"),
-            rhyme=data.get("rhyme"),
+            qafiya=data.get("qafiya"),
             line_count=data.get("line_count"),
             theme=data.get("theme"),
             tone=data.get("tone"),
@@ -103,8 +103,8 @@ class UserConstraints:
         parts = []
         if self.meter:
             parts.append(f"البحر: {self.meter}")
-        if self.rhyme:
-            parts.append(f"القافية: {self.rhyme}")
+        if self.qafiya:
+            parts.append(f"القافية: {self.qafiya}")
         if self.line_count:
             parts.append(f"الأبيات: {self.line_count}")
         if self.theme:

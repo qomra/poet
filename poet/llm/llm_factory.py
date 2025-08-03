@@ -19,7 +19,6 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
         REAL_LLM_PROVIDER: Specify which provider to use (default: openai)
     """
     if not os.getenv("TEST_REAL_LLMS"):
-        print("DEBUG: TEST_REAL_LLMS not set, returning None")
         return None
     
     provider = os.getenv("REAL_LLM_PROVIDER", "openai").lower()

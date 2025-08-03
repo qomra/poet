@@ -240,6 +240,10 @@ ARABIC_LETTERS_MAP = {
   "ـی": "ی", # Farsi Yeh final
 }
 
+from collections import Counter
+
+# Add a counter to your map function
+rhyme_counter = Counter()
 
 
 def load_ashaar_dataset():
@@ -322,7 +326,68 @@ def identify_rhyme_pattern(words: List[str]) -> str:
 
     return last_letter
 
-def map_single_letter(item):
+def get_last_words(verses: List[str]) -> List[str]:
+    """Get the last words from each verse."""
+    verses = [clean_verse(v.strip()) for v in verses]
+    if len(verses) % 2 != 0 or len(verses) <= 1:
+        return []
+    verses = [v for v in verses if len(v) > 0]
+    last_words = [v.split()[-1] for v in verses if len(v.split()) > 0]
+    return last_words
+
+def remove_vowls(words: List[str]) -> List[str]:
+    # remove from words "ي" or "ا" or "وا"
+    last_words_no_vowls = []
+    for w in words:
+        if w[-1] == "ي" or w[-1] == "ا":
+            last_words_no_vowls.append(w[:-1])
+        elif w[-1] == "وا":
+            last_words_no_vowls.append(w[:-2])
+        else:
+            last_words_no_vowls.append(w)
+    return last_words_no_vowls
+
+def map_motrakab_1(item):
+
+    verses = item["poem verses"]
+    last_words = get_last_words(verses)
+    if len(last_words) < 2:
+        return {"longer_rhyme":"","rhyme_type":""}
+    
+    last_words = remove_vowls(last_words)
+    
+    # if any of the last words has shaddah at the letter before the last, then return that as motrakab type
+    # then analyze if the last 2 letters are the same, then return the last 2 letters as the rhyme
+    # else return the last letter as the rhyme
+    # ignore words that are less than 2 letters
+    shaddah_flag = False
+    rhyme_type = ""
+    for w in last_words:
+        if len(w) < 2:
+            continue
+        if w[-2] in SHADDA_MARKS:
+            shaddah_flag = True
+            rhyme_type = "متراكب"
+            rhyme_counter['has_motrakab'] += 1
+            break
+    if not shaddah_flag:
+        return {"longer_rhyme":"","rhyme_type":""}
+    
+    # check if the last 2 letters are the same for all words
+    words_no_tashkeel = [strip_tashkeel(w) for w in last_words]
+    words_no_tashkeel = [w for w in words_no_tashkeel if len(w) >= 2]
+    if len(words_no_tashkeel) < 2:
+        return {"longer_rhyme":"","rhyme_type":""}
+    # get first 2 letters of the first word
+    first_2_letters = words_no_tashkeel[0][:2]
+    # check if the first 2 letters are the same for all words
+    for w in words_no_tashkeel:
+        if w[:2] != first_2_letters:
+            return {"longer_rhyme":w[-1],"rhyme_type":rhyme_type}
+    
+    return {"longer_rhyme":first_2_letters,"rhyme_type":rhyme_type}
+
+def map_motraakab(item):
     """
     Map each single rhyme letter to the indices of poems containing it.
     Methodology:
@@ -333,47 +398,79 @@ def map_single_letter(item):
     5. At this phase, only target poems that have no vowls at the rhyme and are not 2-3 letters rhymes
     6. Update the item longer_rhyme with the last letter whether with tashkeel or without
     """
-    
     verses = item["poem verses"]
-    if len(verses) % 2 != 0 or len(verses) <= 1:
-        return {"longer_rhyme":""}
-    
-    # Get ajz (even verses) and extract last words
-    ajz = [clean_verse(v.strip()) for v in verses[1::2]]
-    ajz = [a for a in ajz if len(a) > 0]
-    last_words = [a.split()[-1] for a in ajz if len(a.split()) > 0]
+    last_words = get_last_words(verses)
     
     if len(last_words) < 2:
-        return {"longer_rhyme":""}
+        return {"longer_rhyme":"","rhyme_type":""}
             
     # remove tashkeel from last_words
     last_words_no_tashkeel = [strip_tashkeel(w) for w in last_words]
     # remove strings with length less than 2
-    last_words_no_tashkeel = [w for w in last_words_no_tashkeel if len(w) >= 2]
+    last_words_no_tashkeel = [w for w in last_words_no_tashkeel if len(w) >= 3]
     if len(last_words_no_tashkeel) < 2:
-        return {"longer_rhyme":""}
+        return {"longer_rhyme":"","rhyme_type":""}
+    
+    last_words_no_vowls = remove_vowls(last_words_no_tashkeel)
+    
+    last_words_no_tashkeel = [w for w in last_words_no_vowls if len(w) >= 3]
+    if len(last_words_no_tashkeel) < 2:
+        return {"longer_rhyme":"","rhyme_type":""}
     
     # check if any of the last words ends with a vowl or the letter before last is a vowl
     is_any_vowl = any(w[-1] in VOWEL_LETTERS for w in last_words_no_tashkeel)
-    if is_any_vowl:
-        return {"longer_rhyme":""}
+    is_any_vowl2 = any(w[-2] in VOWEL_LETTERS for w in last_words_no_tashkeel)
+    is_any_vowl3 = any(w[-3] in VOWEL_LETTERS for w in last_words_no_tashkeel)    
+    if is_any_vowl or is_any_vowl2 or is_any_vowl3:
+        return {"longer_rhyme":"","rhyme_type":""}
+    
     # check if the letter before last is all similar
     is_all_similar = all(w[-2] == last_words_no_tashkeel[0][-2] for w in last_words_no_tashkeel)
     if is_all_similar:
-        return {"longer_rhyme":""}
+        return {"longer_rhyme":"","rhyme_type":""}
     # check if the letter is in the ARABIC_LETTERS_MAP
     if last_words_no_tashkeel[0][-1] in ARABIC_LETTERS_MAP:
         rhyme_letter = ARABIC_LETTERS_MAP[last_words_no_tashkeel[0][-1]]
     else:
-        return {"longer_rhyme":""}
+        return {"longer_rhyme":"","rhyme_type":""}
 
     # if the original letter has tashkeel, then add the tashkeel to the rhyme_letter
     # update the item with longer_rhyme
     word = last_words[0]
     if word[-1] in TANWEEN_MARKS:
         rhyme_letter = word[-1] + rhyme_letter
+    rhyme_counter['has_longer_rhyme'] += 1
+    return {"longer_rhyme":rhyme_letter,"rhyme_type":"متراكب"}
 
-    return {"longer_rhyme":rhyme_letter}
+def map_rhyme_letter(item):
+    """
+    Map each single rhyme letter to the indices of poems containing it.
+    """
+    verses = item["poem verses"]
+    if len(verses) < 2:
+        return {"poem qafiya":""}
+    
+    # get the last words
+    last_words = get_last_words(verses)
+    if len(last_words) < 1:
+        return {"poem qafiya":""}
+    
+    # remove vowls from last words
+    last_words_no_vowls = remove_vowls(last_words)
+    words_no_tashkeel = [strip_tashkeel(w) for w in last_words_no_vowls]
+    words_no_tashkeel = [w for w in words_no_tashkeel if len(w) >= 2]
+    if len(words_no_tashkeel) < 1:
+        return {"poem qafiya":""}
+    first_word = words_no_tashkeel[0]
+    last_letter = first_word[-1]
+    if last_letter in ARABIC_LETTERS_MAP:
+        rhyme_letter = ARABIC_LETTERS_MAP[last_letter]
+        # increment the counter
+        rhyme_counter['has_rhyme_letter'] += 1
+        return {"poem qafiya":rhyme_letter}
+    else:
+        return {"poem qafiya":""}
+    
 
 def main():
     """Main extraction process."""
@@ -385,17 +482,21 @@ def main():
     # create new column called longer_rhyme
     dataset = dataset.add_column(name="longer_rhyme", column=[""]*len(dataset))
 
-    dataset = dataset.map(map_single_letter)
-    
-    # get unique non None longer_rhyme values and save them to text file
-    longer_rhyme_values = dataset["longer_rhyme"]
-    longer_rhyme_values = list(set(longer_rhyme_values))
-    with open(project_root / "kb" / "ashaar" / "longer_rhyme_values.txt", "w", encoding="utf-8") as f:
-        for value in longer_rhyme_values:
-            f.write(value + "\n")
-    
+    #dataset = dataset.map(map_motraakab)
+    #dataset = dataset.map(map_motrakab_1)
+    dataset = dataset.map(map_rhyme_letter)
+    # print the number of items that have longer_rhyme
+    #print(f"Number of items that have longer_rhyme: {rhyme_counter['has_longer_rhyme']}")
+    # print(f"Number of items that have motrakab: {rhyme_counter['has_motrakab']}")
+    print(f"Number of items that have rhyme letter: {rhyme_counter['has_rhyme_letter']}")
 
-   
+    # Save dataset to disk
+    output_path = project_root / "kb" / "ashaar_with_rhymes"
+    print(f"Saving dataset to: {output_path}")
+    dataset.save_to_disk(str(output_path))
+    print(f"Dataset saved successfully to: {output_path}")
+
+
     print(f"\n{'='*60}")
     print("EXTRACTION COMPLETE")
     print(f"{'='*60}")

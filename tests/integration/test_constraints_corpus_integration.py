@@ -19,6 +19,7 @@ class TestConstraintsCorpusIntegration:
         constraints = UserConstraints(
             meter="بحر الكامل",
             theme="غزل",
+            qafiya="ق",
             line_count=2
         )
         
@@ -27,7 +28,7 @@ class TestConstraintsCorpusIntegration:
         assert isinstance(result, RetrievalResult)
         assert len(result.examples) <= 3
         assert all(isinstance(ex, PoemRecord) for ex in result.examples)
-        assert result.retrieval_strategy in ["best_match_exact", "best_match_mixed"]
+        assert result.retrieval_strategy in ["best_match_or", "best_match_and"]
         
         # Check that examples match constraints
         for example in result.examples:
@@ -37,7 +38,8 @@ class TestConstraintsCorpusIntegration:
         """Test exact match retrieval strategy"""
         constraints = UserConstraints(
             meter="بحر الكامل",
-            theme="غزل"
+            theme="غزل",
+            qafiya="ق"
         )
         
         result = knowledge_retriever.retrieve_examples(
@@ -59,6 +61,7 @@ class TestConstraintsCorpusIntegration:
         constraints = UserConstraints(
             meter="بحر الكامل",
             theme="غزل",
+            qafiya="ق",
             poet_style="ابن المعتز"
         )
         
@@ -180,11 +183,7 @@ class TestConstraintsCorpusIntegration:
         
         # Should have some results due to fallback logic
         assert len(result.examples) > 0
-        assert result.retrieval_strategy in ["best_match_exact", "best_match_mixed"]
-        
-        if result.retrieval_strategy == "best_match_mixed":
-            assert "exact_matches" in result.metadata
-            assert "total_candidates" in result.metadata
+        assert result.retrieval_strategy in ["best_match_or", "best_match_and"]
     
     def test_empty_constraints_handling(self, knowledge_retriever):
         """Test handling of empty/minimal constraints"""
@@ -241,4 +240,4 @@ class TestConstraintsCorpusIntegration:
         # Strategies should be recorded correctly
         assert exact_result.retrieval_strategy == "exact_match"
         assert diverse_result.retrieval_strategy == "diverse"
-        assert best_result.retrieval_strategy in ["best_match_exact", "best_match_mixed"] 
+        assert best_result.retrieval_strategy in ["best_match_or", "best_match_and"] 

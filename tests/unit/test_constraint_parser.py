@@ -71,7 +71,7 @@ class TestConstraintParser:
         
         # Verify parsed constraints
         assert result.meter == expected_constraints["meter"]
-        assert result.rhyme == expected_constraints["rhyme"]
+        assert result.qafiya == expected_constraints["qafiya"]
         assert result.line_count == expected_constraints["line_count"]
         assert result.theme == expected_constraints["theme"]
         assert result.tone == expected_constraints["tone"]
@@ -113,7 +113,7 @@ class TestConstraintParser:
         
         # Verify parsed constraints
         assert result.meter == expected_constraints["meter"]
-        assert result.rhyme == expected_constraints["rhyme"]
+        assert result.qafiya == expected_constraints["qafiya"]
         assert result.line_count == expected_constraints["line_count"]
         assert result.theme == expected_constraints["theme"]
         assert result.tone == expected_constraints["tone"]
@@ -144,7 +144,7 @@ class TestConstraintParser:
         ```json
         {
             "meter": "بحر الكامل",
-            "rhyme": "ق"
+            "qafiya": "ق"
             // missing comma and closing brace
         }
         ```
@@ -159,7 +159,7 @@ class TestConstraintParser:
         """Test handling of response with missing required fields"""
         incomplete_response = {
             "meter": "بحر الكامل",
-            "rhyme": "ق"
+            "qafiya": "ق"
             # missing many required fields
         }
         
@@ -219,7 +219,7 @@ class TestConstraintParser:
         # Mock refined response
         refined_constraints = {
             "meter": "بحر الكامل",
-            "rhyme": None,
+            "qafiya": None,
             "line_count": None,
             "theme": "غزل",
             "tone": "حزينة",
@@ -277,7 +277,7 @@ class TestConstraintParser:
         """Test handling of null values in LLM response"""
         response_with_nulls = {
             "meter": "بحر الكامل",
-            "rhyme": "null",
+            "qafiya": "null",
             "line_count": "null",
             "theme": "غزل",
             "tone": "null",
@@ -304,7 +304,7 @@ class TestConstraintParser:
         
                  # Verify null values are converted to None
         assert result.meter == "بحر الكامل"
-        assert result.rhyme is None
+        assert result.qafiya is None
         assert result.line_count is None
         assert result.theme == "غزل"
         assert result.tone is None
@@ -397,7 +397,7 @@ class TestConstraintParser:
         if llm_type == "mock":
             # For mock LLM, we can assert exact matches
             assert result.meter == expected_constraints["meter"]
-            assert result.rhyme == expected_constraints["rhyme"]
+            assert result.qafiya == expected_constraints["qafiya"]
             assert result.line_count == expected_constraints["line_count"]
             assert result.theme == expected_constraints["theme"]
             assert result.tone == expected_constraints["tone"]
@@ -406,7 +406,7 @@ class TestConstraintParser:
         else:
             # For real LLM, check that some constraints were extracted
             constraint_fields = [
-                result.meter, result.rhyme, result.theme, result.tone, 
+                result.meter, result.qafiya, result.theme, result.tone, 
                 result.imagery, result.keywords
             ]
             populated_fields = sum(1 for field in constraint_fields if field)
@@ -437,7 +437,7 @@ class TestConstraintParser:
         if llm_type == "mock":
             # For mock LLM, we can assert exact matches
             assert result.meter == expected_constraints["meter"]
-            assert result.rhyme == expected_constraints["rhyme"]
+            assert result.qafiya == expected_constraints["qafiya"]
             assert result.line_count == expected_constraints["line_count"]
             assert result.theme == expected_constraints["theme"]
             assert result.tone == expected_constraints["tone"]
@@ -446,7 +446,7 @@ class TestConstraintParser:
         else:
             # For real LLM, check that some constraints were extracted
             constraint_fields = [
-                result.meter, result.rhyme, result.theme, result.tone, 
+                result.meter, result.qafiya, result.theme, result.tone, 
                 result.imagery, result.keywords
             ]
             populated_fields = sum(1 for field in constraint_fields if field)

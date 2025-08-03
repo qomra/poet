@@ -98,6 +98,11 @@ class KnowledgeRetriever:
             all_examples.extend([ex for ex in theme_examples if ex not in all_examples])
             metadata["theme_examples"] = len(theme_examples)
         
+        if constraints.qafiya:
+            qafiya_examples = self.corpus_manager.find_by_qafiya(constraints.qafiya, limit=2)
+            all_examples.extend([ex for ex in qafiya_examples if ex not in all_examples])
+            metadata["qafiya_examples"] = len(qafiya_examples)
+        
         if constraints.poet_style:
             poet_examples = self.corpus_manager.find_by_poet(constraints.poet_style, limit=2)
             all_examples.extend([ex for ex in poet_examples if ex not in all_examples])
@@ -127,6 +132,7 @@ class KnowledgeRetriever:
         return SearchCriteria(
             meter=constraints.meter,
             theme=constraints.theme,
+            qafiya=constraints.qafiya,
             poet_name=constraints.poet_style,
             poet_era=constraints.era,
             language_type=constraints.register,
@@ -177,6 +183,18 @@ class KnowledgeRetriever:
                     validation["suggestions"].append(f"Similar themes available: {variations}")
                     validation["available_options"]["themes"] = variations
         
+        # Check qafiya availability
+        if constraints.qafiya:
+            if not self.corpus_manager.validate_qafiya_exists(constraints.qafiya):
+                validation["feasible"] = False
+                validation["issues"].append(f"Qafiya '{constraints.qafiya}' not found in corpus")
+                
+                # Suggest available qafiyas
+                available_qafiyas = self.corpus_manager.get_available_qafiya()
+                if available_qafiyas:
+                    validation["suggestions"].append(f"Available qafiyas: {available_qafiyas[:5]}")
+                    validation["available_options"]["qafiyas"] = available_qafiyas
+        
         # Check if combination yields any results
         if validation["feasible"]:
             search_criteria = self._constraints_to_search_criteria(constraints, mode="AND")
@@ -209,6 +227,10 @@ class KnowledgeRetriever:
         if constraints.theme:
             theme_results = self.corpus_manager.find_by_theme(constraints.theme)
             stats["theme_matches"] = len(theme_results)
+        
+        if constraints.qafiya:
+            qafiya_results = self.corpus_manager.find_by_qafiya(constraints.qafiya)
+            stats["qafiya_matches"] = len(qafiya_results)
         
         if constraints.poet_style:
             poet_results = self.corpus_manager.find_by_poet(constraints.poet_style)
@@ -245,12 +267,14 @@ class KnowledgeRetriever:
         suggestions = {
             "meters": [],
             "themes": [],
+            "qafiyas": [],
             "poets": []
         }
         
         # Get available options from corpus
         available_meters = self.corpus_manager.get_available_meters()
         available_themes = self.corpus_manager.get_available_themes()
+        available_qafiyas = self.corpus_manager.get_available_qafiya()
         available_poets = self.corpus_manager.get_available_poets()
         
         # Suggest popular options (top 5 by frequency)
@@ -259,6 +283,9 @@ class KnowledgeRetriever:
         
         if available_themes:
             suggestions["themes"] = available_themes[:5]
+        
+        if available_qafiyas:
+            suggestions["qafiyas"] = available_qafiyas[:5]
         
         if available_poets:
             suggestions["poets"] = available_poets[:5]

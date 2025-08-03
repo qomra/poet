@@ -51,7 +51,7 @@ template: |
   ```json
   {{
     "meter": "البحر المستخرج أو null",
-    "rhyme": "حرف القافية أو null",
+    "qafiya": "حرف القافية أو null",
     "line_count": عدد_الأبيات_أو_null,
     "theme": "الموضوع الرئيسي أو null",
     "tone": "النبرة العاطفية أو null",

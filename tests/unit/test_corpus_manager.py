@@ -13,6 +13,7 @@ class TestPoemRecord:
             'poem title': 'Test Poem',
             'poem meter': 'بحر الكامل',
             'poem verses': 'بيت أول\nبيت ثاني',
+            'poem qafiya': 'ق',
             'poem theme': 'غزل',
             'poem url': 'http://example.com',
             'poet name': 'شاعر تجريبي',
@@ -29,6 +30,7 @@ class TestPoemRecord:
         assert poem.title == 'Test Poem'
         assert poem.meter == 'بحر الكامل'
         assert poem.verses == 'بيت أول\nبيت ثاني'
+        assert poem.qafiya == 'ق'
         assert poem.theme == 'غزل'
         assert poem.poet_name == 'شاعر تجريبي'
     
@@ -41,12 +43,13 @@ class TestPoemRecord:
         assert poem.title == 'Test Only'
         assert poem.meter == ''
         assert poem.verses == ''
+        assert poem.qafiya == ''
         assert poem.theme == ''
     
     def test_matches_meter(self):
         """Test meter matching"""
         poem = PoemRecord(
-            title='Test', meter='بحر الكامل', verses='', theme='',
+            title='Test', meter='بحر الكامل', verses='', qafiya='', theme='',
             url='', poet_name='', poet_description='', poet_url='',
             poet_era='', poet_location='', description='', language_type=''
         )
@@ -59,7 +62,7 @@ class TestPoemRecord:
     def test_matches_theme(self):
         """Test theme matching"""
         poem = PoemRecord(
-            title='Test', meter='', verses='', theme='غزل وحب',
+            title='Test', meter='', verses='', qafiya='', theme='غزل وحب',
             url='', poet_name='', poet_description='', poet_url='',
             poet_era='', poet_location='', description='', language_type=''
         )
@@ -68,10 +71,22 @@ class TestPoemRecord:
         assert poem.matches_theme('حب')
         assert not poem.matches_theme('هجاء')
     
+    def test_matches_qafiya(self):
+        """Test qafiya matching"""
+        poem = PoemRecord(
+            title='Test', meter='', verses='', qafiya='ق', theme='',
+            url='', poet_name='', poet_description='', poet_url='',
+            poet_era='', poet_location='', description='', language_type=''
+        )
+        
+        assert poem.matches_qafiya('ق')
+        assert not poem.matches_qafiya('ع')
+        assert not poem.matches_qafiya('')
+    
     def test_matches_poet(self):
         """Test poet matching"""
         poem = PoemRecord(
-            title='Test', meter='', verses='', theme='',
+            title='Test', meter='', verses='', qafiya='', theme='',
             url='', poet_name='أحمد شوقي', poet_description='', poet_url='',
             poet_era='', poet_location='', description='', language_type=''
         )
@@ -84,7 +99,7 @@ class TestPoemRecord:
         """Test verse count calculation"""
         # Test with newlines
         poem1 = PoemRecord(
-            title='Test', meter='', verses='بيت أول\nبيت ثاني\nبيت ثالث', theme='',
+            title='Test', meter='', verses='بيت أول\nبيت ثاني\nبيت ثالث', qafiya='', theme='',
             url='', poet_name='', poet_description='', poet_url='',
             poet_era='', poet_location='', description='', language_type=''
         )
@@ -92,7 +107,7 @@ class TestPoemRecord:
         
         # Test with empty verses
         poem2 = PoemRecord(
-            title='Test', meter='', verses='', theme='',
+            title='Test', meter='', verses='', qafiya='', theme='',
             url='', poet_name='', poet_description='', poet_url='',
             poet_era='', poet_location='', description='', language_type=''
         )
@@ -100,7 +115,7 @@ class TestPoemRecord:
         
         # Test with mixed empty lines
         poem3 = PoemRecord(
-            title='Test', meter='', verses='بيت أول\n\nبيت ثاني\n', theme='',
+            title='Test', meter='', verses='بيت أول\n\nبيت ثاني\n', qafiya='', theme='',
             url='', poet_name='', poet_description='', poet_url='',
             poet_era='', poet_location='', description='', language_type=''
         )
@@ -115,6 +130,7 @@ class TestSearchCriteria:
         
         assert criteria.meter is None
         assert criteria.theme is None
+        assert criteria.qafiya is None
         assert criteria.poet_name is None
         assert criteria.keywords is None
     
@@ -123,6 +139,7 @@ class TestSearchCriteria:
         criteria = SearchCriteria(
             meter='الكامل',
             theme='غزل',
+            qafiya='ق',
             min_verses=2,
             max_verses=5,
             keywords=['حب', 'شوق'],
@@ -131,6 +148,7 @@ class TestSearchCriteria:
         
         assert criteria.meter == 'الكامل'
         assert criteria.theme == 'غزل'
+        assert criteria.qafiya == 'ق'
         assert criteria.min_verses == 2
         assert criteria.max_verses == 5
         assert criteria.keywords == ['حب', 'شوق']
@@ -184,6 +202,11 @@ class TestCorpusManager:
         # Check poet index
         assert 'ابن المعتز' in corpus_manager._poet_index
         assert 'أحمد شوقي' in corpus_manager._poet_index
+        
+        # Check qafiya index
+        assert 'ق' in corpus_manager._qafiya_index
+        assert 'ع' in corpus_manager._qafiya_index
+        assert len(corpus_manager._qafiya_index['ق']) == 2  # Two poems with ق qafiya
     
     def test_compute_statistics(self, corpus_manager):
         """Test statistics computation"""
@@ -195,6 +218,8 @@ class TestCorpusManager:
         assert stats['unique_poets'] == 3  # ابن المعتز، أحمد شوقي، المتنبي
         assert 'بحر الكامل' in stats['meters']
         assert 'غزل' in stats['themes']
+        assert 'ق' in stats['qafiya']
+        assert 'ع' in stats['qafiya']
     
     def test_search_by_meter(self, corpus_manager):
         """Test searching by meter"""
@@ -220,6 +245,14 @@ class TestCorpusManager:
         assert len(results) == 2
         assert all('ابن المعتز' in poem.poet_name for poem in results)
     
+    def test_search_by_qafiya(self, corpus_manager):
+        """Test searching by qafiya"""
+        criteria = SearchCriteria(qafiya='ق')
+        results = corpus_manager.search(criteria)
+        
+        assert len(results) == 2  # Two poems with ق qafiya
+        assert all('ق' in poem.qafiya for poem in results)
+    
     def test_search_by_verse_count(self, corpus_manager):
         """Test searching by verse count"""
         criteria = SearchCriteria(min_verses=2, max_verses=2)
@@ -243,7 +276,8 @@ class TestCorpusManager:
         """Test searching with multiple criteria"""
         criteria = SearchCriteria(
             meter='الكامل',
-            theme='غزل'
+            theme='غزل',
+            qafiya='ق'
         )
         results = corpus_manager.search(criteria)
         
@@ -251,6 +285,7 @@ class TestCorpusManager:
         for poem in results:
             assert 'الكامل' in poem.meter
             assert 'غزل' in poem.theme
+            assert 'ق' in poem.qafiya
     
     def test_search_or_mode(self, corpus_manager):
         """Test OR search mode"""
@@ -317,11 +352,19 @@ class TestCorpusManager:
         assert len(results) == 1
         assert results[0].poet_name == 'المتنبي'
     
+    def test_find_by_qafiya(self, corpus_manager):
+        """Test convenience method find_by_qafiya"""
+        results = corpus_manager.find_by_qafiya('ق')
+        
+        assert len(results) == 2
+        assert all('ق' in poem.qafiya for poem in results)
+    
     def test_get_examples_for_constraints(self, corpus_manager):
         """Test getting examples for specific constraints"""
         results = corpus_manager.get_examples_for_constraints(
             meter='الكامل',
             theme='غزل',
+            qafiya='ق',
             verse_count=2
         )
         
@@ -329,6 +372,7 @@ class TestCorpusManager:
         for poem in results:
             assert 'الكامل' in poem.meter
             assert 'غزل' in poem.theme
+            assert 'ق' in poem.qafiya
     
     def test_get_available_meters(self, corpus_manager):
         """Test getting available meters"""
@@ -357,6 +401,15 @@ class TestCorpusManager:
         assert 'المتنبي' in poets
         assert len(poets) == 3
     
+    def test_get_available_qafiya(self, corpus_manager):
+        """Test getting available qafiya"""
+        qafiyas = corpus_manager.get_available_qafiya()
+        
+        assert 'ق' in qafiyas
+        assert 'ع' in qafiyas
+        assert 'د' in qafiyas
+        assert len(qafiyas) == 3
+    
     def test_sample_random(self, corpus_manager):
         """Test random sampling"""
         sample = corpus_manager.sample_random(2)
@@ -379,6 +432,12 @@ class TestCorpusManager:
         assert corpus_manager.validate_theme_exists('غزل')
         assert corpus_manager.validate_theme_exists('مدح')
         assert not corpus_manager.validate_theme_exists('رثاء')  # Not in test data
+    
+    def test_validate_qafiya_exists(self, corpus_manager):
+        """Test qafiya validation"""
+        assert corpus_manager.validate_qafiya_exists('ق')
+        assert corpus_manager.validate_qafiya_exists('ع')
+        assert not corpus_manager.validate_qafiya_exists('ز')  # Not in test data
     
     def test_get_meter_variations(self, corpus_manager):
         """Test getting meter variations"""

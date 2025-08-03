@@ -49,6 +49,7 @@ def sample_corpus_data():
             'poem title': 'قصيدة الكامل الأولى',
             'poem meter': 'بحر الكامل',
             'poem verses': 'وَمُتَيَّمٍ جَرَحَ الفُراقُ فُؤادَهُ\nفَالدَمعُ مِن أَجفانِهِ يَتَدَفَّقُ',
+            'poem qafiya': 'ق',
             'poem theme': 'غزل',
             'poem url': 'http://example.com/1',
             'poet name': 'ابن المعتز',
@@ -63,6 +64,7 @@ def sample_corpus_data():
             'poem title': 'قصيدة الطويل في الهجاء',
             'poem meter': 'بحر الطويل',
             'poem verses': 'تَمَكَّنَ هَذا الدَهرُ مِمّا يَسوءُني\nوَلَجَّ فَما يَخلي صَفاتِيَ مِن قَرعِ\nوَأَبلَيتُ آمالي بِوَصلٍ يَكُدُّها',
+            'poem qafiya': 'ع',
             'poem theme': 'هجاء',
             'poem url': 'http://example.com/2',
             'poet name': 'ابن المعتز',
@@ -77,6 +79,7 @@ def sample_corpus_data():
             'poem title': 'قصيدة الكامل الثانية',
             'poem meter': 'بحر الكامل',
             'poem verses': 'بَهَرَتهُ ساعَةُ فِرقَةٍ فَكَأَنَّما\nفي كُلِّ عُضوٍ مِنهُ قَلبٌ يَخفِقُ',
+            'poem qafiya': 'ق',
             'poem theme': 'غزل',
             'poem url': 'http://example.com/3',
             'poet name': 'أحمد شوقي',
@@ -91,6 +94,7 @@ def sample_corpus_data():
             'poem title': 'قصيدة مدح',
             'poem meter': 'بحر الوافر',
             'poem verses': 'يا أيها الملك المعظم شأنه\nفي كل أرض ذكره يتردد',
+            'poem qafiya': 'د',
             'poem theme': 'مدح',
             'poem url': 'http://example.com/4',
             'poet name': 'المتنبي',
@@ -123,9 +127,8 @@ def temp_local_knowledge_dir(sample_corpus_data, mock_dataset):
         ashaar_dir.mkdir()
         
         # Mock the load_dataset function to return our test data
-        with patch('poet.data.corpus_manager.load_dataset') as mock_load:
-            mock_dataset_dict = {'train': mock_dataset}
-            mock_load.return_value = mock_dataset_dict
+        with patch('poet.data.corpus_manager.load_from_disk') as mock_load:
+            mock_load.return_value = mock_dataset
             
             yield str(temp_path)
 
@@ -155,7 +158,7 @@ def session_temp_local_knowledge_dir(sample_corpus_data, session_mock_dataset):
         ashaar_dir.mkdir()
         
         # Mock the load_dataset function to return our test data
-        with patch('poet.data.corpus_manager.load_dataset') as mock_load:
+        with patch('poet.data.corpus_manager.load_from_disk') as mock_load:
             mock_dataset_dict = {'train': session_mock_dataset}
             mock_load.return_value = mock_dataset_dict
             
@@ -175,7 +178,8 @@ def real_corpus_manager():
     from pathlib import Path
     from poet.data.corpus_manager import CorpusManager
     
-    kb_path = Path("kb")
+    kb_path = Path(f"{project_root}/kb")
+    
     if not kb_path.exists():
         pytest.skip("Real kb/ directory not found")
         

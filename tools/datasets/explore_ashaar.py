@@ -13,7 +13,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from datasets import load_dataset
+    from datasets import load_from_disk
     DATASETS_AVAILABLE = True
 except ImportError:
     DATASETS_AVAILABLE = False
@@ -32,7 +32,7 @@ def explore_ashaar_dataset():
     
     print(f"Loading ashaar dataset from: {kb_path}")
     try:
-        dataset_dict = load_dataset(str(kb_path))
+        dataset_dict = load_from_disk(str(kb_path))
         
         # Get the main split
         if 'train' in dataset_dict:
