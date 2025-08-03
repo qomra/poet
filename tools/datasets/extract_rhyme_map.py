@@ -322,48 +322,59 @@ def identify_rhyme_pattern(words: List[str]) -> str:
 
     return last_letter
 
-
-def map_rhyme_to_poem(dataset):
-    """Map the rhyme to the poem."""
-    mapped_rhyme = {}
-    for i, item in enumerate(dataset):
-        if i % 10000 == 0:
-            print(f"Processing item {i} of {len(dataset)}")
-        verses = item["poem verses"]
-        if len(verses) % 2 != 0 and len(verses) <= 1:
-            continue
-        
-        ajz = [clean_verse(v.strip()) for v in verses[1::2]]
-        ajz = [a for a in ajz if len(a) > 0]
-        darb = [a.split()[-1] for a in ajz if len(a.split()) > 0]
-        rhyme = identify_rhyme_pattern(darb)
-        if rhyme is not None:
-            # if all letters in the rhyme are alphabetic, then add it to the mapped_rhyme
-            no_tashkeel_rhyme = strip_tashkeel(rhyme)
-            if all(letter.isalpha() for letter in no_tashkeel_rhyme):
-                # check if the rhyme is in the ARABIC_LETTERS_MAP
-                if no_tashkeel_rhyme in ARABIC_LETTERS_MAP:
-                    rhyme = ARABIC_LETTERS_MAP[no_tashkeel_rhyme]
-                else:
-                    print(f"Rhyme {rhyme} not found in ARABIC_LETTERS_MAP")
-                    continue
-                if rhyme not in mapped_rhyme:
-                    mapped_rhyme[rhyme] = []
-                mapped_rhyme[rhyme].append(i) 
-    return mapped_rhyme
-
-
-def save_rhyme_dictionary(all_rhyme_words: Dict[str, Set[str]],  output_path: Path):
-    """Save the rhyme dictionary to JSON files."""
-    output_path.mkdir(parents=True, exist_ok=True)
+def map_single_letter(item):
+    """
+    Map each single rhyme letter to the indices of poems containing it.
+    Methodology:
+    1. Get last words from each verse
+    2. Loop over them and check if any ends with a vowl or the letter before last is a vowl
+    3. If any, skip
+    4. Also, set a flag for similarity. If the letter before last is all similar then skip
+    5. At this phase, only target poems that have no vowls at the rhyme and are not 2-3 letters rhymes
+    6. Update the item longer_rhyme with the last letter whether with tashkeel or without
+    """
     
-    # Save all rhyme words
-    all_words_file = output_path / "rhyme_map.json"
-    with open(all_words_file, 'w', encoding='utf-8') as f:
-        json.dump(all_rhyme_words, f, ensure_ascii=False, indent=2)
+    verses = item["poem verses"]
+    if len(verses) % 2 != 0 or len(verses) <= 1:
+        return {"longer_rhyme":""}
     
-    print(f"Saved {len(all_rhyme_words):,} rhyme words to: {all_words_file}")
+    # Get ajz (even verses) and extract last words
+    ajz = [clean_verse(v.strip()) for v in verses[1::2]]
+    ajz = [a for a in ajz if len(a) > 0]
+    last_words = [a.split()[-1] for a in ajz if len(a.split()) > 0]
     
+    if len(last_words) < 2:
+        return {"longer_rhyme":""}
+            
+    # remove tashkeel from last_words
+    last_words_no_tashkeel = [strip_tashkeel(w) for w in last_words]
+    # remove strings with length less than 2
+    last_words_no_tashkeel = [w for w in last_words_no_tashkeel if len(w) >= 2]
+    if len(last_words_no_tashkeel) < 2:
+        return {"longer_rhyme":""}
+    
+    # check if any of the last words ends with a vowl or the letter before last is a vowl
+    is_any_vowl = any(w[-1] in VOWEL_LETTERS for w in last_words_no_tashkeel)
+    if is_any_vowl:
+        return {"longer_rhyme":""}
+    # check if the letter before last is all similar
+    is_all_similar = all(w[-2] == last_words_no_tashkeel[0][-2] for w in last_words_no_tashkeel)
+    if is_all_similar:
+        return {"longer_rhyme":""}
+    # check if the letter is in the ARABIC_LETTERS_MAP
+    if last_words_no_tashkeel[0][-1] in ARABIC_LETTERS_MAP:
+        rhyme_letter = ARABIC_LETTERS_MAP[last_words_no_tashkeel[0][-1]]
+    else:
+        return {"longer_rhyme":""}
+
+    # if the original letter has tashkeel, then add the tashkeel to the rhyme_letter
+    # update the item with longer_rhyme
+    word = last_words[0]
+    if word[-1] in TANWEEN_MARKS:
+        rhyme_letter = word[-1] + rhyme_letter
+
+    return {"longer_rhyme":rhyme_letter}
+
 def main():
     """Main extraction process."""
     print("Ashaar Rhyme Words Extractor")
@@ -371,14 +382,18 @@ def main():
     
     # Load dataset
     dataset = load_ashaar_dataset()
+    # create new column called longer_rhyme
+    dataset = dataset.add_column(name="longer_rhyme", column=[""]*len(dataset))
+
+    dataset = dataset.map(map_single_letter)
     
-    # Extract rhyme words
-    rhyme_map = map_rhyme_to_poem(dataset)
-   
+    # get unique non None longer_rhyme values and save them to text file
+    longer_rhyme_values = dataset["longer_rhyme"]
+    longer_rhyme_values = list(set(longer_rhyme_values))
+    with open(project_root / "kb" / "ashaar" / "longer_rhyme_values.txt", "w", encoding="utf-8") as f:
+        for value in longer_rhyme_values:
+            f.write(value + "\n")
     
-    # Save results
-    output_path = project_root / "kb"
-    save_rhyme_dictionary(rhyme_map, output_path)
 
    
     print(f"\n{'='*60}")
