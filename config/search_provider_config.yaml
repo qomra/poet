@@ -1,0 +1,116 @@
+# config/search_provider_config.yaml
+
+# Search Provider Configuration
+# This file configures external search providers for the poetry system
+
+# Default search provider
+default_provider: "serper"
+
+# Serper (SerpAPI) Configuration
+serper:
+  enabled: true
+  api_key: "${SERPER_API_KEY}"  # Set via environment variable
+  engine: "google"  # google, bing, yahoo, etc.
+  location: "Saudi Arabia"  # Geographic location for results
+  language: "ar"  # Language for results (ar for Arabic)
+  safe_search: "active"  # active, off
+  timeout: 30  # Request timeout in seconds
+  max_results: 10  # Default max results per query
+  
+  # Specialized search settings for Arabic poetry
+  arabic_poetry:
+    enhanced_queries: true  # Add "شعر عربي" to queries
+    preferred_sources: ["wikipedia.org", "adab.com", "diwanalarab.com"]
+    location: "Saudi Arabia"
+    language: "ar"
+    
+  # Rate limiting
+  rate_limit:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    
+  # Error handling
+  retry_attempts: 3
+  retry_delay: 1  # seconds
+
+# Google Custom Search (Alternative)
+google_custom_search:
+  enabled: false
+  api_key: "${GOOGLE_API_KEY}"
+  search_engine_id: "${GOOGLE_SEARCH_ENGINE_ID}"
+  base_url: "https://www.googleapis.com/customsearch/v1"
+  
+# Bing Search (Alternative)
+bing_search:
+  enabled: false
+  api_key: "${BING_API_KEY}"
+  endpoint: "https://api.bing.microsoft.com/v7.0/search"
+  
+# Search Provider Factory Settings
+factory:
+  # Provider selection strategy
+  selection_strategy: "priority"  # priority, round_robin, fallback
+  
+  # Provider priority order (for priority strategy)
+  priority_order:
+    - "serper"
+    - "google_custom_search"
+    - "bing_search"
+    
+  # Fallback settings
+  fallback:
+    enabled: true
+    max_fallback_attempts: 2
+    
+# Search Query Enhancement
+query_enhancement:
+  enabled: true
+  
+  # Arabic poetry specific enhancements
+  arabic_poetry:
+    add_language_context: true
+    add_poetry_keywords: true
+    preferred_keywords: ["شعر", "قصيدة", "شاعر", "عربي"]
+    
+  # Query preprocessing
+  preprocessing:
+    remove_noise_words: true
+    enhance_poet_names: true
+    add_biography_context: true
+    
+# Result Processing
+result_processing:
+  # Filtering
+  filtering:
+    enabled: true
+    min_relevance_score: 0.3
+    exclude_domains: ["spam.com", "malware.com"]
+    preferred_domains: ["wikipedia.org", "academic.edu"]
+    
+  # Deduplication
+  deduplication:
+    enabled: true
+    similarity_threshold: 0.8
+    
+  # Ranking
+  ranking:
+    enabled: true
+    factors:
+      - "relevance_score"
+      - "source_authority"
+      - "content_freshness"
+      - "arabic_content_bonus"
+
+# Logging and Monitoring
+logging:
+  level: "INFO"
+  log_queries: true
+  log_results_count: true
+  log_response_times: true
+  
+# Performance Settings
+performance:
+  cache_enabled: true
+  cache_ttl: 3600  # 1 hour
+  max_concurrent_requests: 5
+  request_timeout: 30 
