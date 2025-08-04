@@ -1,6 +1,7 @@
 # tests/unit/test_corpus_manager.py
 
 import pytest
+from pathlib import Path
 from unittest.mock import patch, Mock
 from poet.data.corpus_manager import CorpusManager, PoemRecord, SearchCriteria
 
@@ -167,7 +168,9 @@ class TestCorpusManager:
         with patch('poet.data.corpus_manager.DATASETS_AVAILABLE', True):
             manager = CorpusManager(temp_local_knowledge_dir)
             
-            assert manager.local_knowledge_path.name == temp_local_knowledge_dir.split('/')[-1]
+            # Use pathlib for cross-platform path handling
+            expected_name = Path(temp_local_knowledge_dir).name
+            assert manager.local_knowledge_path.name == expected_name
             assert not manager.is_loaded()
     
     def test_load_corpus_success(self, corpus_manager):

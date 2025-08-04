@@ -15,6 +15,7 @@ class PromptCategory(Enum):
     EVALUATION = "evaluation"
     REFINEMENT = "refinement"
     PLANNING = "planning"
+    SEARCH = "search"
 
 @dataclass
 class PromptTemplate:

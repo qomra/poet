@@ -32,6 +32,73 @@
                 "suggestions": null,
                 "reasoning": "النص واضح جداً في تحديد جميع المتطلبات: البحر (الكامل)، القافية (القاف)، عدد الأبيات (2)، الموضوع (غزل)، والنبرة (حزينة). الصور البلاغية محددة بوضوح (الدموع، الفراق، القلب النابض). الأسلوب كلاسيكي فصيح."
             }
+        },
+        "web_search": {
+            "queries": [
+                {
+                    "query": "بحر الكامل في الشعر العربي أمثلة وقواعد",
+                    "purpose": "العثور على معلومات تقنية وأمثلة للبحر المحدد"
+                },
+                {
+                    "query": "قصيدة غزل حزينة في العصر الكلاسيكي",
+                    "purpose": "العثور على أمثلة للغزل الحزين"
+                },
+                {
+                    "query": "ابن المعتز أسلوب شعري غزلي",
+                    "purpose": "العثور على معلومات عن أسلوب الشاعر"
+                }
+            ],
+            "search_results": [
+                {
+                    "title": "بحر الكامل وأوزانه في الشعر العربي",
+                    "url": "https://example.com/kamil",
+                    "snippet": "شرح مفصل لبحر الكامل وأوزانه وقواعده في الشعر العربي مع أمثلة"
+                },
+                {
+                    "title": "قصائد غزل حزينة كلاسيكية",
+                    "url": "https://example.com/ghazal_sad",
+                    "snippet": "مجموعة من قصائد الغزل الحزين في العصر الكلاسيكي"
+                },
+                {
+                    "title": "ابن المعتز وأسلوبه في الغزل",
+                    "url": "https://example.com/ibn_mutazz",
+                    "snippet": "تحليل لأسلوب ابن المعتز في شعر الغزل ومميزاته"
+                }
+            ],
+            "evaluation": {
+                "evaluated_results": [
+                    {
+                        "result_index": 0,
+                        "relevance_score": 9,
+                        "quality_score": 8,
+                        "usefulness_score": 9,
+                        "is_worth_following": true,
+                        "key_insights": ["قواعد بحر الكامل", "أمثلة شعرية ممتازة"],
+                        "recommendation": "مفيد جداً لتوليد الشعر"
+                    },
+                    {
+                        "result_index": 1,
+                        "relevance_score": 8,
+                        "quality_score": 7,
+                        "usefulness_score": 8,
+                        "is_worth_following": true,
+                        "key_insights": ["أمثلة غزل حزين", "نماذج عاطفية"],
+                        "recommendation": "مفيد للغزل الحزين"
+                    },
+                    {
+                        "result_index": 2,
+                        "relevance_score": 7,
+                        "quality_score": 6,
+                        "usefulness_score": 7,
+                        "is_worth_following": true,
+                        "key_insights": ["أسلوب ابن المعتز"],
+                        "recommendation": "مفيد للأسلوب"
+                    }
+                ],
+                "overall_assessment": "نتائج ممتازة تغطي جميع جوانب الطلب",
+                "gaps_identified": [],
+                "followup_needed": false
+            }
         }
     },
     {
@@ -66,6 +133,73 @@
                 "ambiguities": ["النبرة مركبة: حزينة وساخرة - تم اختيار الحزينة كنبرة أساسية"],
                 "suggestions": "يمكن دمج السخرية في الأسلوب البلاغي مع الحفاظ على النبرة الحزينة الأساسية",
                 "reasoning": "النص محدد بوضوح: البحر (الطويل)، القافية (العين)، عدد الأبيات (6)، الموضوع (هجاء الزمن). النبرة مركبة (حزينة وساخرة) لكن الحزن هو الأساس. الصور البلاغية واضحة حول قسوة الدهر واللؤم."
+            }
+        },
+        "web_search": {
+            "queries": [
+                {
+                    "query": "بحر الطويل في الشعر العربي قواعد وأمثلة",
+                    "purpose": "العثور على معلومات تقنية عن بحر الطويل"
+                },
+                {
+                    "query": "قصيدة هجاء الزمن والدهر في الشعر العربي",
+                    "purpose": "العثور على أمثلة لهجاء الزمن"
+                },
+                {
+                    "query": "ابن المعتز هجاء وسخرية أسلوب شعري",
+                    "purpose": "العثور على معلومات عن أسلوب الهجاء للشاعر"
+                }
+            ],
+            "search_results": [
+                {
+                    "title": "بحر الطويل وأوزانه في الشعر العربي",
+                    "url": "https://example.com/tawil",
+                    "snippet": "شرح مفصل لبحر الطويل وأوزانه وقواعده في الشعر العربي"
+                },
+                {
+                    "title": "قصائد هجاء الزمن والدهر",
+                    "url": "https://example.com/satire_time",
+                    "snippet": "مجموعة من قصائد هجاء الزمن والدهر في الشعر العربي"
+                },
+                {
+                    "title": "ابن المعتز وأسلوب الهجاء",
+                    "url": "https://example.com/ibn_mutazz_satire",
+                    "snippet": "تحليل لأسلوب ابن المعتز في الهجاء والسخرية"
+                }
+            ],
+            "evaluation": {
+                "evaluated_results": [
+                    {
+                        "result_index": 0,
+                        "relevance_score": 8,
+                        "quality_score": 7,
+                        "usefulness_score": 8,
+                        "is_worth_following": true,
+                        "key_insights": ["قواعد بحر الطويل", "أمثلة شعرية"],
+                        "recommendation": "مفيد للتقنية الشعرية"
+                    },
+                    {
+                        "result_index": 1,
+                        "relevance_score": 9,
+                        "quality_score": 8,
+                        "usefulness_score": 9,
+                        "is_worth_following": true,
+                        "key_insights": ["أمثلة هجاء ممتازة", "نماذج سخرية"],
+                        "recommendation": "مفيد جداً للهجاء"
+                    },
+                    {
+                        "result_index": 2,
+                        "relevance_score": 7,
+                        "quality_score": 6,
+                        "usefulness_score": 7,
+                        "is_worth_following": true,
+                        "key_insights": ["أسلوب الهجاء"],
+                        "recommendation": "مفيد للأسلوب"
+                    }
+                ],
+                "overall_assessment": "نتائج جيدة تغطي الهجاء وبحر الطويل",
+                "gaps_identified": [],
+                "followup_needed": false
             }
         }
     }

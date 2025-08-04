@@ -2,17 +2,17 @@
 
 import pytest
 from poet.models.constraints import UserConstraints
-from poet.analysis.knowledge_retriever import KnowledgeRetriever, RetrievalResult
+from poet.analysis.knowledge_retriever import CorpusKnowledgeRetriever, CorpusRetrievalResult
 from poet.data.corpus_manager import PoemRecord
 
 
 class TestConstraintsCorpusIntegration:
-    """Integration tests for constraints and corpus search via KnowledgeRetriever"""
+    """Integration tests for constraints and corpus search via Corp"""
     
     @pytest.fixture
     def knowledge_retriever(self, corpus_manager):
-        """Create KnowledgeRetriever with test corpus"""
-        return KnowledgeRetriever(corpus_manager)
+        """Create CorpusKnowledgeRetriever with test corpus"""
+        return CorpusKnowledgeRetriever(corpus_manager)
     
     def test_basic_constraint_to_corpus_retrieval(self, knowledge_retriever):
         """Test basic constraint parsing to corpus retrieval"""
@@ -23,15 +23,15 @@ class TestConstraintsCorpusIntegration:
             line_count=2
         )
         
-        result = knowledge_retriever.retrieve_examples(constraints, max_examples=3)
+        result = knowledge_retriever.search(constraints, max_results=3)
         
-        assert isinstance(result, RetrievalResult)
-        assert len(result.examples) <= 3
-        assert all(isinstance(ex, PoemRecord) for ex in result.examples)
+        assert isinstance(result, CorpusRetrievalResult)
+        assert len(result.corpus_results) <= 3
+        assert all(isinstance(ex, PoemRecord) for ex in result.corpus_results)
         assert result.retrieval_strategy in ["best_match_or", "best_match_and"]
         
         # Check that examples match constraints
-        for example in result.examples:
+        for example in result.corpus_results:
             assert "الكامل" in example.meter or "غزل" in example.theme
     
     def test_exact_match_strategy(self, knowledge_retriever):
@@ -42,9 +42,9 @@ class TestConstraintsCorpusIntegration:
             qafiya="ق"
         )
         
-        result = knowledge_retriever.retrieve_examples(
+        result = knowledge_retriever.search(
             constraints, 
-            max_examples=5, 
+            max_results=5, 
             strategy="exact_match"
         )
         
@@ -52,7 +52,7 @@ class TestConstraintsCorpusIntegration:
         assert result.search_criteria.search_mode == "AND"
         
         # All examples should match both constraints
-        for example in result.examples:
+        for example in result.corpus_results:
             assert "الكامل" in example.meter
             assert "غزل" in example.theme
     
@@ -65,16 +65,16 @@ class TestConstraintsCorpusIntegration:
             poet_style="ابن المعتز"
         )
         
-        result = knowledge_retriever.retrieve_examples(
+        result = knowledge_retriever.search(
             constraints,
-            max_examples=4,
+            max_results=4,
             strategy="diverse"
         )
         
         assert result.retrieval_strategy == "diverse"
         assert "meter_examples" in result.metadata
         assert "theme_examples" in result.metadata
-        assert len(result.examples) <= 4
+        assert len(result.corpus_results) <= 4
     
     def test_constraint_feasibility_validation(self, knowledge_retriever):
         """Test constraint feasibility validation"""
@@ -175,25 +175,25 @@ class TestConstraintsCorpusIntegration:
             poet_style="المتنبي"
         )
         
-        result = knowledge_retriever.retrieve_examples(
+        result = knowledge_retriever.search(
             constraints,
-            max_examples=5,
+            max_results=5,
             strategy="best_match"
         )
         
         # Should have some results due to fallback logic
-        assert len(result.examples) > 0
+        assert len(result.corpus_results) > 0
         assert result.retrieval_strategy in ["best_match_or", "best_match_and"]
     
     def test_empty_constraints_handling(self, knowledge_retriever):
         """Test handling of empty/minimal constraints"""
         empty_constraints = UserConstraints()
         
-        result = knowledge_retriever.retrieve_examples(empty_constraints, max_examples=3)
+        result = knowledge_retriever.search(empty_constraints, max_results=3)
         
         # Should still return some examples (random sampling)
-        assert len(result.examples) > 0
-        assert isinstance(result, RetrievalResult)
+        assert len(result.corpus_results) > 0
+        assert isinstance(result, CorpusRetrievalResult)
     
     def test_line_count_constraint_mapping(self, knowledge_retriever):
         """Test line count constraint mapping to verse count search"""
@@ -206,10 +206,10 @@ class TestConstraintsCorpusIntegration:
         assert search_criteria.min_verses == 1
         assert search_criteria.max_verses == 3
         
-        result = knowledge_retriever.retrieve_examples(constraints, max_examples=3)
+        result = knowledge_retriever.search(constraints, max_results=3)
         
         # Should find poems with approximately 2 verses
-        for example in result.examples:
+        for example in result.corpus_results:
             verse_count = example.get_verse_count()
             assert 1 <= verse_count <= 3
     
@@ -220,22 +220,22 @@ class TestConstraintsCorpusIntegration:
             theme="غزل"
         )
         
-        exact_result = knowledge_retriever.retrieve_examples(
-            constraints, max_examples=3, strategy="exact_match"
+        exact_result = knowledge_retriever.search(
+            constraints, max_results=3, strategy="exact_match"
         )
         
-        diverse_result = knowledge_retriever.retrieve_examples(
-            constraints, max_examples=3, strategy="diverse"
+        diverse_result = knowledge_retriever.search(
+            constraints, max_results=3, strategy="diverse"
         )
         
-        best_result = knowledge_retriever.retrieve_examples(
-            constraints, max_examples=3, strategy="best_match"
+        best_result = knowledge_retriever.search(
+            constraints, max_results=3, strategy="best_match"
         )
         
         # All should return some results
-        assert len(exact_result.examples) >= 0
-        assert len(diverse_result.examples) >= 0
-        assert len(best_result.examples) >= 0
+        assert len(exact_result.corpus_results) >= 0
+        assert len(diverse_result.corpus_results) >= 0
+        assert len(best_result.corpus_results) >= 0
         
         # Strategies should be recorded correctly
         assert exact_result.retrieval_strategy == "exact_match"

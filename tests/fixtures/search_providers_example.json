@@ -1,0 +1,9 @@
+{
+    "serper": {
+        "name": "serper",
+        "engine": "google",
+        "language": "ar",
+        "api_key": "sk-",
+        "location": "United States"
+    }
+}

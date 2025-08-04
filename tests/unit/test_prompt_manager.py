@@ -74,7 +74,7 @@ class TestPromptManager:
     def test_list_templates(self, prompt_manager):
         """Test listing all available templates"""
         templates = prompt_manager.list_templates()
-        assert len(templates) == 5
+        assert len(templates) == 7
         expected_templates = [
             'unified_extraction',
             'verse_generation', 'imagery_creation',

@@ -1,0 +1,74 @@
+name: result_evaluator
+description: "Evaluate web search results for poetry enrichment relevance and quality"
+template: |
+  أنت خبير في الشعر العربي وتقييم نتائج البحث. مهمتك هي تقييم نتائج البحث على الويب لتحديد مدى فائدتها في إثراء عملية توليد الشعر.
+  
+  قم بتقييم كل نتيجة بحث بناءً على:
+  1. **الملاءمة للموضوع**: هل تتعلق بالشعر العربي والقيود المطلوبة؟
+  2. **جودة المعلومات**: هل المعلومات دقيقة ومفيدة؟
+  3. **قابلية التطبيق**: هل يمكن استخدام المعلومات في توليد الشعر؟
+  4. **مصدر موثوق**: هل المصدر موثوق ومتخصص في الشعر العربي؟
+  
+  الطلب الأصلي للمستخدم:
+  {original_prompt}
+  
+  القيود المستنتجة:
+  - البحر: {meter}
+  - القافية: {qafiya}
+  - عدد الأبيات: {line_count}
+  - الموضوع: {theme}
+  - النبرة: {tone}
+  - الصور الشعرية: {imagery}
+  - الكلمات المفتاحية: {keywords}
+  - الأقسام: {sections}
+  - المستوى اللغوي: {register}
+  - العصر: {era}
+  - أسلوب الشاعر: {poet_style}
+  
+  نتائج البحث المراد تقييمها:
+  {search_results}
+  
+  قم بتقييم كل نتيجة وحدد:
+  - مدى ملاءمتها للقيود المطلوبة
+  - جودة المعلومات المقدمة
+  - الفائدة في توليد الشعر
+  - ما إذا كانت تستحق المتابعة أم لا
+  
+  أجب بالتنسيق التالي بدقة:
+  ```json
+  {{
+    "evaluated_results": [
+      {{
+        "result_index": 0,
+        "relevance_score": 1-10,
+        "quality_score": 1-10,
+        "usefulness_score": 1-10,
+        "is_worth_following": true/false,
+        "key_insights": ["قائمة", "بالرؤى", "المهمة"],
+        "recommendation": "توصية حول كيفية استخدام هذه النتيجة"
+      }}
+    ],
+    "overall_assessment": "تقييم عام لجميع النتائج",
+    "gaps_identified": ["الفجوات", "المعلوماتية", "المحددة"],
+    "followup_needed": true/false
+  }}
+  ```
+category: search
+parameters:
+  - original_prompt
+  - meter
+  - qafiya
+  - line_count
+  - theme
+  - tone
+  - imagery
+  - keywords
+  - sections
+  - register
+  - era
+  - poet_style
+  - search_results
+metadata:
+  version: "1.0"
+  language: "arabic"
+  complexity: "medium" 

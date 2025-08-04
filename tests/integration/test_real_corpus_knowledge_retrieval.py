@@ -7,10 +7,10 @@ from poet.models.constraints import UserConstraints
 
 @pytest.mark.integration
 @pytest.mark.real_data
-class TestRealKnowledgeRetrieval:
+class TestRealCorpusKnowledgeRetrieval:
     """Integration tests for knowledge retrieval using real ashaar dataset with real LLM"""
     
-    def test_knowledge_retrieval_example_1(self, real_knowledge_retriever, constraint_parser_parametrized, llm_type, test_data):
+    def test_corpus_knowledge_retrieval_example_1(self, real_corpus_knowledge_retriever, constraint_parser_parametrized, llm_type, test_data):
         """Test knowledge retrieval for example 1 (غزل poem) - parse constraints with real/mock LLM"""
         example = test_data[0]
         user_prompt = example["prompt"]["text"]
@@ -27,14 +27,14 @@ class TestRealKnowledgeRetrieval:
         constraints = constraint_parser_parametrized.parse_constraints(user_prompt)
         
         # Test retrieval
-        result = real_knowledge_retriever.retrieve_examples(
+        result = real_corpus_knowledge_retriever.search(
             constraints, 
-            max_examples=5,
+            max_results=5,
             strategy="best_match"
         )
         
         # Basic assertions
-        assert len(result.examples) >= 0, "Should handle بحر الكامل + غزل search"
+        assert len(result.corpus_results) >= 0, "Should handle بحر الكامل + غزل search"
         assert result.retrieval_strategy in ["best_match_or"]
         
         # Print parsed constraints and results
@@ -44,9 +44,9 @@ class TestRealKnowledgeRetrieval:
         print(f"  Theme: {constraints.theme}")
         print(f"  Line count: {constraints.line_count}")
         print(f"  Tone: {constraints.tone}")
-        print(f"Found {len(result.examples)} poems matching parsed constraints")
+        print(f"Found {len(result.corpus_results)} poems matching parsed constraints")
         
-        for i, poem in enumerate(result.examples[:3]):
+        for i, poem in enumerate(result.corpus_results[:3]):
             print(f"\nResult {i+1}:")
             print(f"  Meter: {poem.meter}")
             print(f"  Theme: {poem.theme}")
@@ -61,7 +61,7 @@ class TestRealKnowledgeRetrieval:
             assert constraints.line_count == expected_constraints["line_count"]
         
         # Validate constraint statistics
-        stats = real_knowledge_retriever.get_constraint_statistics(constraints)
+        stats = real_corpus_knowledge_retriever.get_constraint_statistics(constraints)
         print(f"\nConstraint statistics:")
         print(f"  Meter matches: {stats.get('meter_matches', 0)}")
         print(f"  Theme matches: {stats.get('theme_matches', 0)}")
@@ -71,7 +71,7 @@ class TestRealKnowledgeRetrieval:
         assert stats["exact_matches"] >= 0
         assert stats["partial_matches"] >= stats["exact_matches"]
     
-    def test_knowledge_retrieval_example_2(self, real_knowledge_retriever, constraint_parser_parametrized, llm_type, test_data):
+    def test_corpus_knowledge_retrieval_example_2(self, real_corpus_knowledge_retriever, constraint_parser_parametrized, llm_type, test_data):
         """Test knowledge retrieval for example 2 (هجاء poem) - parse constraints with real/mock LLM"""
         example = test_data[1]
         user_prompt = example["prompt"]["text"]
@@ -88,14 +88,14 @@ class TestRealKnowledgeRetrieval:
         constraints = constraint_parser_parametrized.parse_constraints(user_prompt)
         
         # Test retrieval
-        result = real_knowledge_retriever.retrieve_examples(
+        result = real_corpus_knowledge_retriever.search(
             constraints,
-            max_examples=5,
+            max_results=5,
             strategy="best_match"
         )
         
         # Basic assertions
-        assert len(result.examples) >= 0, "Should handle بحر الطويل + هجاء search"
+        assert len(result.corpus_results) >= 0, "Should handle بحر الطويل + هجاء search"
         assert result.retrieval_strategy in ["best_match_or"]
         
         # Print parsed constraints and results
@@ -105,9 +105,9 @@ class TestRealKnowledgeRetrieval:
         print(f"  Theme: {constraints.theme}")
         print(f"  Line count: {constraints.line_count}")
         print(f"  Tone: {constraints.tone}")
-        print(f"Found {len(result.examples)} poems matching parsed constraints")
+        print(f"Found {len(result.corpus_results)} poems matching parsed constraints")
         
-        for i, poem in enumerate(result.examples[:3]):
+        for i, poem in enumerate(result.corpus_results[:3]):
             print(f"\nResult {i+1}:")
             print(f"  Meter: {poem.meter}")
             print(f"  Theme: {poem.theme}")
@@ -122,7 +122,7 @@ class TestRealKnowledgeRetrieval:
             assert constraints.line_count == expected_constraints["line_count"]
         
         # Test feasibility validation
-        validation = real_knowledge_retriever.validate_constraints_feasibility(constraints)
+        validation = real_corpus_knowledge_retriever.validate_constraints_feasibility(constraints)
         print(f"\nFeasibility validation:")
         print(f"  Feasible: {validation['feasible']}")
         print(f"  Issues: {validation['issues']}")
@@ -133,8 +133,8 @@ class TestRealKnowledgeRetrieval:
         assert isinstance(validation["issues"], list)
         
         # Test alternative suggestions if constraints are challenging
-        if not validation["feasible"] or len(result.examples) == 0:
-            suggestions = real_knowledge_retriever.suggest_alternatives(constraints)
+        if not validation["feasible"] or len(result.corpus_results) == 0:
+            suggestions = real_corpus_knowledge_retriever.suggest_alternatives(constraints)
             print(f"\nAlternative suggestions:")
             print(f"  Meters: {suggestions['meters'][:3]}")
             print(f"  Themes: {suggestions['themes'][:3]}")

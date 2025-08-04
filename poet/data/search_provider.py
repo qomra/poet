@@ -7,6 +7,8 @@ from dataclasses import dataclass
 import time
 import json
 import requests
+import os
+from pathlib import Path
 
 @dataclass
 class SearchResult:
@@ -189,6 +191,61 @@ class BaseSearchProvider(ABC):
         
         return results
 
+class MockSearchProvider(BaseSearchProvider):
+    """Mock search provider for testing"""
+    
+    def __init__(self, config: Dict[str, Any] = None):
+        super().__init__(config or {})
+        self.responses = []
+        self.call_count = 0
+        self.logger = logging.getLogger(__name__)
+    
+    def add_response(self, results: List[SearchResult]):
+        """Add a response to be returned on next search call"""
+        self.responses.append(results)
+    
+    def reset(self):
+        """Reset the mock provider state"""
+        self.responses = []
+        self.call_count = 0
+    
+    def _make_request(self, query: str, max_results: int = 10, **kwargs) -> Optional[Dict[str, Any]]:
+        """Mock request - returns None to trigger default response"""
+        return None
+    
+    def is_available(self) -> bool:
+        """Mock provider is always available"""
+        return True
+    
+    def search(self, query: str, max_results: int = 10, **kwargs) -> SearchResponse:
+        """Return mock search results"""
+        self.call_count += 1
+        self.logger.info(f"Mock search called with query: {query}, max_results: {max_results}")
+        
+        start_time = time.time()
+        
+        if self.responses:
+            mock_results = self.responses.pop(0)
+        else:
+            # Default mock response if no responses are set
+            mock_results = [
+                SearchResult(
+                    title=f"Mock Result for: {query}",
+                    url="https://example.com/mock",
+                    snippet=f"This is a mock search result for the query: {query}",
+                    source="mock"
+                )
+            ]
+        
+        return SearchResponse(
+            results=mock_results[:max_results],
+            total_results=len(mock_results),
+            search_time=time.time() - start_time,
+            query=query,
+            provider="MockSearchProvider",
+            metadata={"mock": True, "call_count": self.call_count}
+        )
+
 class SerperSearchProvider(BaseSearchProvider):
     """
     Serper (SerpAPI) search provider implementation.
@@ -284,6 +341,26 @@ class SerperSearchProvider(BaseSearchProvider):
             self.logger.error(f"Failed to parse SerpAPI response: {e}")
             return None
 
+
+def _load_search_provider_config() -> Optional[Dict[str, Any]]:
+    """Load LLM configuration from fixtures."""
+    config_files = ["search_providers.json"]
+    
+    # Look in tests/fixtures directory
+    base_path = Path(__file__).parent.parent.parent / "tests" / "fixtures"
+    
+    for config_file in config_files:
+        config_path = base_path / config_file
+        if config_path.exists():
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, IOError):
+                continue
+    
+    return None
+
+
 class SearchProviderFactory:
     """
     Factory class for creating search provider instances.
@@ -295,7 +372,7 @@ class SearchProviderFactory:
         Create a search provider instance.
         
         Args:
-            provider_type: Type of provider ('serper', 'google', etc.)
+            provider_type: Type of provider ('serper', 'mock', etc.)
             config: Provider-specific configuration
             
         Returns:
@@ -306,6 +383,8 @@ class SearchProviderFactory:
         """
         if provider_type.lower() == 'serper':
             return SerperSearchProvider(config)
+        elif provider_type.lower() == 'mock':
+            return MockSearchProvider(config)
         else:
             raise ValueError(f"Unsupported search provider type: {provider_type}")
     
@@ -326,3 +405,30 @@ class SearchProviderFactory:
             **kwargs
         }
         return SerperSearchProvider(config)
+    
+    @staticmethod
+    def create_provider_from_env():
+        """
+        Get real Search provider instance from environment variable and configuration.
+        
+        Returns:
+            BaseSearchProvider instance if configured, None otherwise
+            
+        Environment Variables:
+            TEST_REAL_SEARCH: Must be set to enable real LLM loading
+            REAL_SEARCH_PROVIDER: Specify which provider to use (default: openai)
+        """
+        if not os.getenv("TEST_REAL_SEARCH"):
+            return None
+        
+        provider = os.getenv("REAL_SEARCH_PROVIDER", "serper").lower()
+        
+        config_data = _load_search_provider_config()
+        if not config_data or provider not in config_data:
+            print(f"DEBUG: No config data or provider not found, returning None")
+            return None
+        
+        provider_config = config_data[provider]
+        
+        provider = SearchProviderFactory.create_provider(provider,provider_config)
+        return provider

@@ -1,4 +1,5 @@
 # tests/conftest.py
+import os
 import pytest
 import sys
 import json
@@ -12,6 +13,7 @@ def pytest_configure(config):
     """Configure pytest markers."""
     config.addinivalue_line("markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')")
     config.addinivalue_line("markers", "integration: marks tests as integration tests")
+    config.addinivalue_line("markers", "real_data: marks tests as using real data")
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
@@ -32,6 +34,12 @@ def mock_llm():
     """Mock LLM provider using MockLLM"""
     config = LLMConfig(model_name="test-model")
     return MockLLM(config)
+
+@pytest.fixture
+def mock_search_provider():
+    """Mock search provider using MockSearchProvider"""
+    from poet.data.search_provider import MockSearchProvider
+    return MockSearchProvider()
 
 @pytest.fixture
 def test_data():
@@ -186,19 +194,53 @@ def real_corpus_manager():
     return CorpusManager(local_knowledge_path=kb_path)
 
 @pytest.fixture(scope="session")
-def real_knowledge_retriever(real_corpus_manager):
-    """Create KnowledgeRetriever with real corpus"""
-    from poet.analysis.knowledge_retriever import KnowledgeRetriever
-    
-    return KnowledgeRetriever(real_corpus_manager)
+def real_search_provider():
+    from poet.data.search_provider import SearchProviderFactory
+    return SearchProviderFactory.create_provider_from_env()
 
-# LLM parametrization fixtures
+
+@pytest.fixture(scope="session")
+def real_corpus_knowledge_retriever(real_corpus_manager):
+    """Create CorpusKnowledgeRetriever with real corpus"""
+    from poet.analysis.knowledge_retriever import CorpusKnowledgeRetriever
+    
+    return CorpusKnowledgeRetriever(real_corpus_manager)
+
+@pytest.fixture(scope="session")
+def real_web_knowledge_retriever(real_search_provider, real_llm):
+    """Create WebKnowledgeRetriever with real search provider and LLM"""
+    from poet.analysis.knowledge_retriever import WebKnowledgeRetriever
+    
+    if real_llm is None:
+        pytest.skip("Real LLM not available for web search")
+    
+    if real_search_provider is None:
+        pytest.skip("Real search provider not available")
+    
+    # Create WebKnowledgeRetriever with the real search provider
+    retriever = WebKnowledgeRetriever(
+        llm_provider=real_llm,
+        search_provider_type="mock",  # We'll replace this with the real provider
+        search_provider_config={}
+    )
+    
+    # Replace the mock search provider with the real one
+    retriever.search_provider = real_search_provider
+    
+    return retriever
+
+# LLM and Search Provider parametrization fixtures
 @pytest.fixture(params=["mock", "real"])
 def llm_type(request):
     """Parametrize tests to run with both mock and real LLMs"""
     return request.param
 
-@pytest.fixture
+@pytest.fixture(params=["mock", "real"])
+def search_provider_type(request):
+    """Parametrize tests to run with both mock and real search providers"""
+    return request.param
+
+@pytest.fixture(scope="session")
 def real_llm():
     """Real LLM instance if available, otherwise None"""
     from poet.llm.llm_factory import get_real_llm_from_env
@@ -217,3 +259,57 @@ def constraint_parser_parametrized(llm_type, mock_llm, real_llm, prompt_manager)
         return ConstraintParser(real_llm, prompt_manager)
     else:
         raise ValueError(f"Unknown llm_type: {llm_type}")
+
+@pytest.fixture
+def web_knowledge_retriever_parametrized(llm_type, search_provider_type, mock_llm, real_llm, mock_search_provider, real_search_provider, prompt_manager):
+    """WebKnowledgeRetriever instance - mock or real based on parameters"""
+    from poet.analysis.knowledge_retriever import WebKnowledgeRetriever
+    
+    # Select LLM
+    if llm_type == "mock":
+        llm = mock_llm
+    elif llm_type == "real":
+        if real_llm is None:
+            pytest.skip("Real LLM not available")
+        llm = real_llm
+    else:
+        raise ValueError(f"Unknown llm_type: {llm_type}")
+    
+    # Select search provider
+    if search_provider_type == "mock":
+        search_provider = mock_search_provider
+    elif search_provider_type == "real":
+        if real_search_provider is None:
+            pytest.skip("Real search provider not available")
+        search_provider = real_search_provider
+    else:
+        raise ValueError(f"Unknown search_provider_type: {search_provider_type}")
+    
+    # Create retriever with mock provider type (we'll replace it)
+    retriever = WebKnowledgeRetriever(
+        llm_provider=llm,
+        search_provider_type="mock",
+        search_provider_config={}
+    )
+    
+    # Replace with the actual provider
+    retriever.search_provider = search_provider
+    
+    return retriever
+
+@pytest.fixture
+def web_knowledge_retriever_mock_both(mock_llm, mock_search_provider, prompt_manager):
+    """WebKnowledgeRetriever instance with both mock LLM and mock search provider"""
+    from poet.analysis.knowledge_retriever import WebKnowledgeRetriever
+    
+    # Create retriever with mock provider type (we'll replace it)
+    retriever = WebKnowledgeRetriever(
+        llm_provider=mock_llm,
+        search_provider_type="mock",
+        search_provider_config={}
+    )
+    
+    # Replace with the mock search provider
+    retriever.search_provider = mock_search_provider
+    
+    return retriever

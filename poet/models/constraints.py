@@ -11,8 +11,7 @@ class UserConstraints:
     This class encapsulates all the constraints a user might specify
     when requesting a poem, including prosodic, thematic, and stylistic
     requirements.
-    """
-    
+    """    
     # Prosodic constraints
     meter: Optional[str] = None
     qafiya: Optional[str] = None
@@ -38,7 +37,7 @@ class UserConstraints:
     # LLM extraction metadata (not part of __post_init__ processing)
     llm_suggestions: Optional[str] = field(default=None, init=False)
     llm_reasoning: Optional[str] = field(default=None, init=False)
-    original_prompt: Optional[str] = field(default=None, init=False)
+    original_prompt: Optional[str] = field(default=None)
     
     def __post_init__(self):
         """Basic validation after initialization"""
@@ -56,9 +55,7 @@ class UserConstraints:
     def has_ambiguities(self) -> bool:
         """Check if constraints have ambiguities"""
         return len(self.ambiguities) > 0
-    
 
-    
     def to_dict(self) -> Dict[str, Any]:
         """Convert constraints to dictionary"""
         return {
