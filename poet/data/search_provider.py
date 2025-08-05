@@ -246,16 +246,16 @@ class MockSearchProvider(BaseSearchProvider):
             metadata={"mock": True, "call_count": self.call_count}
         )
 
-class SerperSearchProvider(BaseSearchProvider):
+class SerpSearchProvider(BaseSearchProvider):
     """
-    Serper (SerpAPI) search provider implementation.
+    Serp (SerpAPI) search provider implementation.
     
     Uses SerpAPI to perform web searches with various search engines.
     """
     
     def __init__(self, config: Dict[str, Any]):
         """
-        Initialize Serper search provider.
+        Initialize Serp search provider.
         
         Args:
             config: Configuration dictionary with:
@@ -275,7 +275,7 @@ class SerperSearchProvider(BaseSearchProvider):
             raise ValueError("SerpAPI API key is required")
     
     def validate_config(self) -> bool:
-        """Validate Serper configuration"""
+        """Validate Serp configuration"""
         if not self.api_key:
             self.logger.error("SerpAPI API key is missing")
             return False
@@ -286,7 +286,7 @@ class SerperSearchProvider(BaseSearchProvider):
         return True
     
     def is_available(self) -> bool:
-        """Check if Serper is available"""
+        """Check if Serp is available"""
         if not self.validate_config():
             return False
         
@@ -295,7 +295,7 @@ class SerperSearchProvider(BaseSearchProvider):
             test_response = self._make_request("test", max_results=1)
             return test_response is not None
         except Exception as e:
-            self.logger.error(f"Serper availability check failed: {e}")
+            self.logger.error(f"Serp availability check failed: {e}")
             return False
     
     def _make_request(self, query: str, max_results: int = 10, **kwargs) -> Optional[Dict[str, Any]]:
@@ -372,7 +372,7 @@ class SearchProviderFactory:
         Create a search provider instance.
         
         Args:
-            provider_type: Type of provider ('serper', 'mock', etc.)
+            provider_type: Type of provider ('serp', 'mock', etc.)
             config: Provider-specific configuration
             
         Returns:
@@ -381,30 +381,30 @@ class SearchProviderFactory:
         Raises:
             ValueError: If provider type is not supported
         """
-        if provider_type.lower() == 'serper':
-            return SerperSearchProvider(config)
+        if provider_type.lower() == 'serp':
+            return SerpSearchProvider(config)
         elif provider_type.lower() == 'mock':
             return MockSearchProvider(config)
         else:
             raise ValueError(f"Unsupported search provider type: {provider_type}")
     
     @staticmethod
-    def create_serper_provider(api_key: str, **kwargs) -> SerperSearchProvider:
+    def create_serp_provider(api_key: str, **kwargs) -> SerpSearchProvider:
         """
-        Convenience method to create Serper provider.
+        Convenience method to create Serp provider.
         
         Args:
             api_key: SerpAPI API key
             **kwargs: Additional configuration options
             
         Returns:
-            Configured SerperSearchProvider instance
+            Configured SerpSearchProvider instance
         """
         config = {
             'api_key': api_key,
             **kwargs
         }
-        return SerperSearchProvider(config)
+        return SerpSearchProvider(config)
     
     @staticmethod
     def create_provider_from_env():
@@ -421,7 +421,7 @@ class SearchProviderFactory:
         if not os.getenv("TEST_REAL_SEARCH"):
             return None
         
-        provider = os.getenv("REAL_SEARCH_PROVIDER", "serper").lower()
+        provider = os.getenv("REAL_SEARCH_PROVIDER", "serp").lower()
         
         config_data = _load_search_provider_config()
         if not config_data or provider not in config_data:

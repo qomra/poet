@@ -8,7 +8,7 @@ from poet.data.search_provider import (
     SearchResult, 
     SearchResponse, 
     BaseSearchProvider, 
-    SerperSearchProvider, 
+    SerpSearchProvider, 
     SearchProviderFactory
 )
 
@@ -207,11 +207,11 @@ class TestBaseSearchProvider:
         assert len(malformed_results) == 0
 
 
-class TestSerperSearchProvider:
-    """Test SerperSearchProvider class"""
+class TestSerpSearchProvider:
+    """Test SerpSearchProvider class"""
     
     def test_serper_initialization(self):
-        """Test SerperSearchProvider initialization"""
+        """Test SerpSearchProvider initialization"""
         config = {
             "api_key": "sk-test-key",
             "engine": "google",
@@ -219,7 +219,7 @@ class TestSerperSearchProvider:
             "language": "en"
         }
         
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         assert provider.api_key == "sk-test-key"
         assert provider.engine == "google"
@@ -228,16 +228,16 @@ class TestSerperSearchProvider:
         assert provider.base_url == "https://serpapi.com/search"
     
     def test_serper_initialization_missing_api_key(self):
-        """Test SerperSearchProvider initialization without API key"""
+        """Test SerpSearchProvider initialization without API key"""
         config = {"engine": "google"}
         
         with pytest.raises(ValueError, match="SerpAPI API key is required"):
-            SerperSearchProvider(config)
+            SerpSearchProvider(config)
     
     def test_serper_validate_config_success(self):
         """Test successful config validation"""
         config = {"api_key": "sk-valid-key"}
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         assert provider.validate_config() is True
     
@@ -245,12 +245,12 @@ class TestSerperSearchProvider:
         """Test config validation with missing API key"""
         # This should raise ValueError during initialization, not during validate_config
         with pytest.raises(ValueError, match="SerpAPI API key is required"):
-            SerperSearchProvider({})
+            SerpSearchProvider({})
     
     def test_serper_validate_config_invalid_format(self):
         """Test config validation with invalid API key format"""
         config = {"api_key": "invalid-key"}
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         # Should still return True but log warning
         assert provider.validate_config() is True
@@ -273,7 +273,7 @@ class TestSerperSearchProvider:
         mock_get.return_value = mock_response
         
         config = {"api_key": "sk-test-key"}
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         result = provider._make_request("test query", max_results=5)
         
@@ -306,7 +306,7 @@ class TestSerperSearchProvider:
             "location": "Saudi Arabia",
             "language": "ar"
         }
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         provider._make_request(
             "test query",
@@ -335,7 +335,7 @@ class TestSerperSearchProvider:
         mock_get.return_value = mock_response
         
         config = {"api_key": "sk-test-key"}
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         # Should handle HTTP error gracefully and return None
         result = provider._make_request("test query")
@@ -350,7 +350,7 @@ class TestSerperSearchProvider:
         mock_get.return_value = mock_response
         
         config = {"api_key": "sk-test-key"}
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         result = provider._make_request("test query")
         assert result is None
@@ -364,7 +364,7 @@ class TestSerperSearchProvider:
         mock_get.return_value = mock_response
         
         config = {"api_key": "sk-test-key"}
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         assert provider.is_available() is True
     
@@ -374,7 +374,7 @@ class TestSerperSearchProvider:
         mock_get.side_effect = Exception("Connection error")
         
         config = {"api_key": "sk-test-key"}
-        provider = SerperSearchProvider(config)
+        provider = SerpSearchProvider(config)
         
         assert provider.is_available() is False
     
@@ -382,20 +382,20 @@ class TestSerperSearchProvider:
         """Test availability check with invalid config"""
         # This should raise ValueError during initialization, not during is_available
         with pytest.raises(ValueError, match="SerpAPI API key is required"):
-            SerperSearchProvider({})
+            SerpSearchProvider({})
 
 
 class TestSearchProviderFactory:
     """Test SearchProviderFactory class"""
     
     def test_create_serper_provider(self):
-        """Test creating Serper provider"""
+        """Test creating Serp provider"""
         provider = SearchProviderFactory.create_provider(
             "serper",
             {"api_key": "sk-test-key"}
         )
         
-        assert isinstance(provider, SerperSearchProvider)
+        assert isinstance(provider, SerpSearchProvider)
         assert provider.api_key == "sk-test-key"
     
     def test_create_unsupported_provider(self):
@@ -404,14 +404,14 @@ class TestSearchProviderFactory:
             SearchProviderFactory.create_provider("unsupported", {})
     
     def test_create_serper_provider_convenience(self):
-        """Test convenience method for creating Serper provider"""
+        """Test convenience method for creating Serp provider"""
         provider = SearchProviderFactory.create_serper_provider(
             "sk-test-key",
             engine="bing",
             location="Saudi Arabia"
         )
         
-        assert isinstance(provider, SerperSearchProvider)
+        assert isinstance(provider, SerpSearchProvider)
         assert provider.api_key == "sk-test-key"
         assert provider.engine == "bing"
         assert provider.location == "Saudi Arabia"
@@ -427,15 +427,15 @@ class TestSearchProviderIntegration:
     
     @pytest.fixture
     def serper_config(self):
-        """Get Serper configuration from environment"""
+        """Get Serp configuration from environment"""
         api_key = os.getenv("SERPAPI_API_KEY")
         if not api_key:
             pytest.skip("SERPAPI_API_KEY environment variable not set")
         return {"api_key": api_key}
     
     def test_serper_real_search(self, serper_config):
-        """Test real Serper search"""
-        provider = SerperSearchProvider(serper_config)
+        """Test real Serp search"""
+        provider = SerpSearchProvider(serper_config)
         
         # Test availability
         assert provider.is_available() is True
@@ -447,7 +447,7 @@ class TestSearchProviderIntegration:
         assert len(response.results) > 0
         assert response.search_time > 0
         assert response.query == "Python programming"
-        assert response.provider == "SerperSearchProvider"
+        assert response.provider == "SerpSearchProvider"
         
         # Check result structure
         for result in response.results:
@@ -457,8 +457,8 @@ class TestSearchProviderIntegration:
             assert result.snippet
     
     def test_serper_arabic_search(self, serper_config):
-        """Test Serper search with Arabic query"""
-        provider = SerperSearchProvider(serper_config)
+        """Test Serp search with Arabic query"""
+        provider = SerpSearchProvider(serper_config)
         
         response = provider.search(
             "الشعر العربي",
@@ -472,8 +472,8 @@ class TestSearchProviderIntegration:
         assert response.search_time > 0
     
     def test_serper_search_with_parameters(self, serper_config):
-        """Test Serper search with various parameters"""
-        provider = SerperSearchProvider(serper_config)
+        """Test Serp search with various parameters"""
+        provider = SerpSearchProvider(serper_config)
         
         response = provider.search(
             "machine learning",
@@ -490,8 +490,8 @@ class TestSearchProviderIntegration:
         assert response.search_time > 0
     
     def test_serper_error_handling(self, serper_config):
-        """Test Serper error handling with invalid query"""
-        provider = SerperSearchProvider(serper_config)
+        """Test Serp error handling with invalid query"""
+        provider = SerpSearchProvider(serper_config)
         
         # Test with very long query that might cause issues
         long_query = "x" * 1000

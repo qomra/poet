@@ -1,6 +1,6 @@
 {
-    "serper": {
-        "name": "serper",
+    "serp": {
+        "name": "serp",
         "engine": "google",
         "language": "ar",
         "api_key": "sk-",

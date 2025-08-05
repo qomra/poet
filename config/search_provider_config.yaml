@@ -6,7 +6,7 @@
 # Default search provider
 default_provider: "serper"
 
-# Serper (SerpAPI) Configuration
+# Serp (SerpAPI) Configuration
 serper:
   enabled: true
   api_key: "${SERPER_API_KEY}"  # Set via environment variable
