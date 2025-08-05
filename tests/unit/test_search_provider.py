@@ -391,7 +391,7 @@ class TestSearchProviderFactory:
     def test_create_serper_provider(self):
         """Test creating Serp provider"""
         provider = SearchProviderFactory.create_provider(
-            "serper",
+            "serp",
             {"api_key": "sk-test-key"}
         )
         
@@ -405,7 +405,7 @@ class TestSearchProviderFactory:
     
     def test_create_serper_provider_convenience(self):
         """Test convenience method for creating Serp provider"""
-        provider = SearchProviderFactory.create_serper_provider(
+        provider = SearchProviderFactory.create_serp_provider(
             "sk-test-key",
             engine="bing",
             location="Saudi Arabia"

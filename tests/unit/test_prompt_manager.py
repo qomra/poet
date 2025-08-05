@@ -58,7 +58,7 @@ class TestPromptManager:
     def test_get_templates_by_category_generation(self, prompt_manager):
         """Test getting generation templates"""
         templates = prompt_manager.get_templates_by_category(PromptCategory.GENERATION)
-        assert len(templates) == 2
+        assert len(templates) == 3
         template_names = [t.name for t in templates]
         assert 'verse_generation' in template_names
         assert 'imagery_creation' in template_names
@@ -66,7 +66,7 @@ class TestPromptManager:
     def test_get_templates_by_category_evaluation(self, prompt_manager):
         """Test getting evaluation templates"""
         templates = prompt_manager.get_templates_by_category(PromptCategory.EVALUATION)
-        assert len(templates) == 2
+        assert len(templates) == 3
         template_names = [t.name for t in templates]
         assert 'prosody_check' in template_names
         assert 'semantic_evaluation' in template_names
@@ -74,7 +74,7 @@ class TestPromptManager:
     def test_list_templates(self, prompt_manager):
         """Test listing all available templates"""
         templates = prompt_manager.list_templates()
-        assert len(templates) == 7
+        assert len(templates) == 9
         expected_templates = [
             'unified_extraction',
             'verse_generation', 'imagery_creation',
