@@ -4,7 +4,7 @@ import os
 import pytest
 import json
 from unittest.mock import patch
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.data.search_provider import SearchResult, SearchResponse
 from poet.analysis.constraint_parser import ConstraintParser
 from poet.analysis.knowledge_retriever import WebKnowledgeRetriever

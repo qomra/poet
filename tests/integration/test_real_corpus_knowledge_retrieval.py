@@ -2,7 +2,7 @@
 
 import pytest
 
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 
 
 @pytest.mark.integration

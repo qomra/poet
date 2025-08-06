@@ -15,7 +15,7 @@ class QafiyaType(Enum):
 
 
 @dataclass
-class UserConstraints:
+class Constraints:
     """
     Represents user requirements and constraints for poem generation.
     
@@ -25,6 +25,7 @@ class UserConstraints:
     """    
     # Prosodic constraints
     meter: Optional[str] = None
+    meeter_tafeelat: Optional[str] = None
     qafiya: Optional[str] = None
     qafiya_harakah: Optional[str] = None  # مفتوح، مكسور، مضموم، ساكن
     qafiya_type: Optional[QafiyaType] = None
@@ -91,7 +92,7 @@ class UserConstraints:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'UserConstraints':
+    def from_dict(cls, data: Dict[str, Any]) -> 'Constraints':
         """Create constraints from dictionary"""
         # Handle qafiya_type enum conversion
         qafiya_type = None

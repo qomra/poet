@@ -3,7 +3,7 @@
 import json
 import logging
 from typing import Optional, Dict, Any
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.prompts.prompt_manager import PromptManager
 from poet.llm.base_llm import BaseLLM
 
@@ -18,7 +18,7 @@ class ConstraintParser:
     Extracts and parses poetry constraints from natural language user input.
     
     Uses LLM-powered analysis to understand user requirements and convert them
-    into structured UserConstraints objects. Handles ambiguities and provides
+    into structured Constraints objects. Handles ambiguities and provides
     clarification requests when needed.
     """
     
@@ -27,7 +27,7 @@ class ConstraintParser:
         self.prompt_manager = prompt_manager or PromptManager()
         self.logger = logging.getLogger(__name__)
     
-    def parse_constraints(self, user_prompt: str) -> UserConstraints:
+    def parse_constraints(self, user_prompt: str) -> Constraints:
         """
         Parse constraints from user input using LLM analysis.
         
@@ -35,7 +35,7 @@ class ConstraintParser:
             user_prompt: Natural language description of poetry requirements
             
         Returns:
-            UserConstraints object with extracted constraints
+            Constraints object with extracted constraints
             
         Raises:
             ConstraintParsingError: If parsing fails or response is invalid
@@ -53,7 +53,7 @@ class ConstraintParser:
             # Parse the structured response
             constraints_data = self._parse_llm_response(response)
             
-            # Create UserConstraints object
+            # Create Constraints object
             constraints = self._create_constraints(constraints_data, user_prompt)
             
             # Handle ambiguities and clarifications
@@ -130,19 +130,19 @@ class ConstraintParser:
             if data[field] is not None and not isinstance(data[field], list):
                 raise ValueError(f"Field '{field}' must be a list or null")
     
-    def _create_constraints(self, data: Dict[str, Any], original_prompt: str) -> UserConstraints:
+    def _create_constraints(self, data: Dict[str, Any], original_prompt: str) -> Constraints:
         """
-        Create UserConstraints object from parsed data.
+        Create Constraints object from parsed data.
         
         Args:
             data: Parsed constraints data
             original_prompt: Original user prompt for reference
             
         Returns:
-            UserConstraints object
+            Constraints object
         """
         # Convert null values to None and handle type conversions
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter=data.get('meter') if data.get('meter') != 'null' else None,
             qafiya=data.get('qafiya') if data.get('qafiya') != 'null' else None,
             line_count=data.get('line_count') if data.get('line_count') != 'null' else None,
@@ -164,12 +164,12 @@ class ConstraintParser:
         
         return constraints
     
-    def _handle_ambiguities(self, constraints: UserConstraints, data: Dict[str, Any]):
+    def _handle_ambiguities(self, constraints: Constraints, data: Dict[str, Any]):
         """
         Handle ambiguities and provide clarification guidance.
         
         Args:
-            constraints: UserConstraints object with ambiguities
+            constraints: Constraints object with ambiguities
             data: Original parsed data with suggestions
         """
         if data.get('suggestions'):
@@ -182,12 +182,12 @@ class ConstraintParser:
         if constraints.ambiguities:
             self.logger.info(f"Constraints parsed with ambiguities: {constraints.ambiguities}")
     
-    def get_clarification_prompt(self, constraints: UserConstraints) -> Optional[str]:
+    def get_clarification_prompt(self, constraints: Constraints) -> Optional[str]:
         """
         Generate a clarification prompt for ambiguous constraints.
         
         Args:
-            constraints: UserConstraints with ambiguities
+            constraints: Constraints with ambiguities
             
         Returns:
             Clarification prompt in Arabic, or None if no clarification needed
@@ -212,7 +212,7 @@ class ConstraintParser:
         
         return prompt
     
-    def refine_constraints(self, constraints: UserConstraints, user_clarification: str) -> UserConstraints:
+    def refine_constraints(self, constraints: Constraints, user_clarification: str) -> Constraints:
         """
         Refine constraints based on user clarification.
         
@@ -221,7 +221,7 @@ class ConstraintParser:
             user_clarification: User's clarification response
             
         Returns:
-            Refined UserConstraints object
+            Refined Constraints object
         """
         # Create a combined prompt with original and clarification
         combined_prompt = f"""
@@ -233,12 +233,12 @@ class ConstraintParser:
         # Re-parse with the combined prompt
         return self.parse_constraints(combined_prompt.strip())
     
-    def validate_constraints(self, constraints: UserConstraints) -> bool:
+    def validate_constraints(self, constraints: Constraints) -> bool:
         """
         Validate extracted constraints for completeness and compatibility.
         
         Args:
-            constraints: UserConstraints to validate
+            constraints: Constraints to validate
             
         Returns:
             True if constraints are valid
@@ -246,6 +246,6 @@ class ConstraintParser:
         Raises:
             ConstraintParsingError: If validation fails
         """
-        # Basic validation is now done in UserConstraints.__post_init__
+        # Basic validation is now done in Constraints.__post_init__
         # Just return True since constraints are validated on creation
         return True

@@ -4,7 +4,7 @@ from enum import Enum
 
 from poet.models.poem import LLMPoem
 from poet.models.quality import QualityAssessment
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.line_count import LineCountValidationResult
 from poet.models.prosody import ProsodyValidationResult
 from poet.models.qafiya import QafiyaValidationResult
@@ -41,7 +41,7 @@ class PoemEvaluator:
         self.prosody_validator = ProsodyValidator()
         self.qafiya_validator = QafiyaValidator(llm)
     
-    def evaluate_poem(self, poem: LLMPoem, constraints: UserConstraints, 
+    def evaluate_poem(self, poem: LLMPoem, constraints: Constraints, 
                      evaluations: List[EvaluationType]) -> LLMPoem:
         """
         Evaluate poem using specified validators and update poem quality.

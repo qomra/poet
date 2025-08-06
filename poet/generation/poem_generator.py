@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any, List
 import logging
 import json
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
@@ -24,12 +24,12 @@ class BasePoemGenerator(ABC):
         self.logger = logging.getLogger(self.__class__.__name__)
     
     @abstractmethod
-    def generate_poem(self, constraints: UserConstraints) -> LLMPoem:
+    def generate_poem(self, constraints: Constraints) -> LLMPoem:
         """
         Generate a poem based on the given constraints.
         
         Args:
-            constraints: UserConstraints object specifying poem requirements
+            constraints: Constraints object specifying poem requirements
             
         Returns:
             LLMPoem object containing the generated poem
@@ -40,12 +40,12 @@ class BasePoemGenerator(ABC):
         pass
     
     @abstractmethod
-    def can_handle_constraints(self, constraints: UserConstraints) -> bool:
+    def can_handle_constraints(self, constraints: Constraints) -> bool:
         """
         Check if this generator can handle the given constraints.
         
         Args:
-            constraints: UserConstraints to check
+            constraints: Constraints to check
             
         Returns:
             True if this generator can handle the constraints, False otherwise
@@ -64,12 +64,12 @@ class SimplePoemGenerator(BasePoemGenerator):
     def __init__(self, llm_provider: BaseLLM, prompt_manager: Optional[PromptManager] = None):
         super().__init__(llm_provider, prompt_manager)
     
-    def generate_poem(self, constraints: UserConstraints) -> LLMPoem:
+    def generate_poem(self, constraints: Constraints) -> LLMPoem:
         """
         Generate a simple poem based on the given constraints.
         
         Args:
-            constraints: UserConstraints object specifying poem requirements
+            constraints: Constraints object specifying poem requirements
             
         Returns:
             LLMPoem object containing the generated poem
@@ -111,7 +111,7 @@ class SimplePoemGenerator(BasePoemGenerator):
             self.logger.error(f"Failed to generate poem: {e}")
             raise GenerationError(f"Poem generation failed: {e}")
     
-    def can_handle_constraints(self, constraints: UserConstraints) -> bool:
+    def can_handle_constraints(self, constraints: Constraints) -> bool:
         """
         Check if this generator can handle the given constraints.
         

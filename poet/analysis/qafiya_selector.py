@@ -3,7 +3,7 @@
 import json
 import logging
 from typing import Optional, Dict, Any
-from poet.models.constraints import UserConstraints, QafiyaType
+from poet.models.constraints import Constraints, QafiyaType
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
 
@@ -26,7 +26,7 @@ class QafiyaSelector:
         self.prompt_manager = prompt_manager or PromptManager()
         self.logger = logging.getLogger(__name__)
     
-    def select_qafiya(self, constraints: UserConstraints, original_prompt: str) -> UserConstraints:
+    def select_qafiya(self, constraints: Constraints, original_prompt: str) -> Constraints:
         """
         Select and enrich qafiya specification for the given constraints.
         
@@ -35,7 +35,7 @@ class QafiyaSelector:
             original_prompt: Original user prompt text
             
         Returns:
-            Enhanced UserConstraints with complete qafiya specification
+            Enhanced Constraints with complete qafiya specification
             
         Raises:
             QafiyaSelectionError: If qafiya selection fails
@@ -62,7 +62,7 @@ class QafiyaSelector:
             self.logger.error(f"Failed to select qafiya: {e}")
             raise QafiyaSelectionError(f"Qafiya selection failed: {e}")
     
-    def _is_qafiya_complete(self, constraints: UserConstraints) -> bool:
+    def _is_qafiya_complete(self, constraints: Constraints) -> bool:
         """Check if qafiya specification is complete"""
         return (
             constraints.qafiya is not None and
@@ -71,7 +71,7 @@ class QafiyaSelector:
             constraints.qafiya_pattern is not None
         )
     
-    def _get_missing_qafiya_components(self, constraints: UserConstraints) -> list:
+    def _get_missing_qafiya_components(self, constraints: Constraints) -> list:
         """Get list of missing qafiya components"""
         missing = []
         if not constraints.qafiya:
@@ -84,12 +84,12 @@ class QafiyaSelector:
             missing.append('qafiya_pattern')
         return missing
     
-    def _validate_existing_qafiya(self, constraints: UserConstraints) -> UserConstraints:
+    def _validate_existing_qafiya(self, constraints: Constraints) -> Constraints:
         """Validate existing qafiya specification"""
         # For now, just return as-is. Could add validation logic here later
         return constraints
     
-    def _fill_missing_qafiya_components(self, constraints: UserConstraints, original_prompt: str, missing_components: list) -> Dict[str, Any]:
+    def _fill_missing_qafiya_components(self, constraints: Constraints, original_prompt: str, missing_components: list) -> Dict[str, Any]:
         """Fill missing qafiya components using LLM"""
         try:
             # Format the qafiya completion prompt
@@ -129,7 +129,7 @@ class QafiyaSelector:
             self.logger.error(f"Failed to fill missing qafiya components: {e}")
             raise QafiyaSelectionError(f"Failed to fill missing qafiya components: {e}")
     
-    def _select_qafiya_with_llm(self, constraints: UserConstraints, original_prompt: str) -> Dict[str, Any]:
+    def _select_qafiya_with_llm(self, constraints: Constraints, original_prompt: str) -> Dict[str, Any]:
         """Use LLM to select appropriate qafiya"""
         
         # Format the qafiya selection prompt
@@ -193,11 +193,11 @@ class QafiyaSelector:
         if data['qafiya_type'] not in valid_types:
             raise ValueError(f"Invalid qafiya_type: {data['qafiya_type']}. Must be one of: {valid_types}")
     
-    def _enhance_constraints(self, constraints: UserConstraints, qafiya_spec: Dict[str, Any]) -> UserConstraints:
+    def _enhance_constraints(self, constraints: Constraints, qafiya_spec: Dict[str, Any]) -> Constraints:
         """Enhance constraints with selected qafiya specification"""
         
         # Create new constraints with enhanced qafiya
-        enhanced_constraints = UserConstraints(
+        enhanced_constraints = Constraints(
             meter=constraints.meter,
             qafiya=qafiya_spec['qafiya_letter'],
             qafiya_harakah=qafiya_spec['qafiya_harakah'],

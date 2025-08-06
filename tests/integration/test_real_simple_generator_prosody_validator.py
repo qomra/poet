@@ -6,7 +6,7 @@ import json
 from unittest.mock import patch
 from poet.generation.poem_generator import SimplePoemGenerator
 from poet.evaluation.prosody_validator import ProsodyValidator
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.prompts.prompt_manager import PromptManager
 from poet.llm.base_llm import MockLLM, LLMConfig
@@ -132,7 +132,7 @@ class TestRealSimpleGeneratorProsodyValidator:
             mock_llm.reset()
         
         # Create constraints from example
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter=expected_constraints["meter"],
             qafiya=expected_constraints["qafiya"],
             line_count=expected_constraints["line_count"],
@@ -178,7 +178,7 @@ class TestRealSimpleGeneratorProsodyValidator:
         assert validation_result.prosody_validation is not None
         assert validation_result.prosody_validation.bahr_used == constraints.meter
         assert validation_result.prosody_validation.total_baits == len(poem.verses) // 2
-        assert validation_result.quality is not None
+        # Note: Quality assessment is now handled by PoemEvaluator, not ProsodyValidator
         
         print(f"Prosody validation results:")
         print(f"  Bahr used: {validation_result.prosody_validation.bahr_used}")
@@ -188,14 +188,8 @@ class TestRealSimpleGeneratorProsodyValidator:
         print(f"  Overall valid: {validation_result.prosody_validation.overall_valid}")
         print(f"  Validation summary: {validation_result.prosody_validation.validation_summary}")
         
-        # Print quality assessment
-        print(f"Quality assessment:")
-        print(f"  Overall score: {validation_result.quality.overall_score}")
-        print(f"  Is acceptable: {validation_result.quality.is_acceptable}")
-        if validation_result.quality.prosody_issues:
-            print(f"  Prosody issues: {validation_result.quality.prosody_issues}")
-        if validation_result.quality.recommendations:
-            print(f"  Recommendations: {validation_result.quality.recommendations}")
+        # Note: Quality assessment would be done by PoemEvaluator
+        print(f"Quality assessment: (handled by PoemEvaluator)")
         
         # For mock LLM, validate against expected constraints
         if llm_type == "mock":
@@ -269,7 +263,7 @@ class TestRealSimpleGeneratorProsodyValidator:
             mock_llm.reset()
         
         # Create constraints from example
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter=expected_constraints["meter"],
             qafiya=expected_constraints["qafiya"],
             line_count=expected_constraints["line_count"],
@@ -315,7 +309,7 @@ class TestRealSimpleGeneratorProsodyValidator:
         assert validation_result.prosody_validation is not None
         assert validation_result.prosody_validation.bahr_used == constraints.meter
         assert validation_result.prosody_validation.total_baits == len(poem.verses) // 2
-        assert validation_result.quality is not None
+        # Note: Quality assessment is now handled by PoemEvaluator, not ProsodyValidator
         
         print(f"Prosody validation results:")
         print(f"  Bahr used: {validation_result.prosody_validation.bahr_used}")
@@ -325,14 +319,8 @@ class TestRealSimpleGeneratorProsodyValidator:
         print(f"  Overall valid: {validation_result.prosody_validation.overall_valid}")
         print(f"  Validation summary: {validation_result.prosody_validation.validation_summary}")
         
-        # Print quality assessment
-        print(f"Quality assessment:")
-        print(f"  Overall score: {validation_result.quality.overall_score}")
-        print(f"  Is acceptable: {validation_result.quality.is_acceptable}")
-        if validation_result.quality.prosody_issues:
-            print(f"  Prosody issues: {validation_result.quality.prosody_issues}")
-        if validation_result.quality.recommendations:
-            print(f"  Recommendations: {validation_result.quality.recommendations}")
+        # Note: Quality assessment would be done by PoemEvaluator
+        print(f"Quality assessment: (handled by PoemEvaluator)")
         
         # For mock LLM, validate against expected constraints
         if llm_type == "mock":
@@ -347,7 +335,8 @@ class TestRealSimpleGeneratorProsodyValidator:
             print(f"  Poem follows theme: {constraints.theme}")
             print(f"  Poem follows qafiya: {constraints.qafiya}")
             print(f"  Prosody compliance: {validation_result.prosody_validation.overall_valid}")
-            print(f"  Quality score: {validation_result.quality.overall_score}")
+            # Note: Quality score would be available from PoemEvaluator
+            print(f"  Quality score: (available from PoemEvaluator)")
             
             # Provide insights on generation quality
             if validation_result.prosody_validation.overall_valid:
@@ -355,9 +344,5 @@ class TestRealSimpleGeneratorProsodyValidator:
             else:
                 print(f"  [WARNING] Generated poem has prosody issues with {constraints.meter} meter")
             
-            if validation_result.quality.overall_score > 0.8:
-                print(f"  [SUCCESS] High quality poem generated")
-            elif validation_result.quality.overall_score > 0.6:
-                print(f"  [WARNING] Moderate quality poem generated")
-            else:
-                print(f"  [ERROR] Low quality poem generated")
+            # Note: Quality assessment would be done by PoemEvaluator
+            print(f"  [INFO] Quality assessment would be done by PoemEvaluator")

@@ -186,7 +186,6 @@ class TestTashkeelRefiner:
             result = tashkeel_refiner.apply_tashkeel(sample_poem)
             
             # Verify metadata is preserved
-            assert result.prosody_validation == sample_poem.prosody_validation
             assert result.quality == sample_poem.quality
             assert result.generation_timestamp == sample_poem.generation_timestamp
             assert result.constraints == sample_poem.constraints

@@ -2,7 +2,7 @@ import pytest
 import json
 from unittest.mock import Mock, MagicMock
 from poet.analysis.constraint_parser import ConstraintParser, ConstraintParsingError
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.prompts.prompt_manager import PromptManager
 from poet.llm.base_llm import BaseLLM, MockLLM, LLMConfig
 from poet.llm.llm_factory import get_real_llm_from_env
@@ -176,7 +176,7 @@ class TestConstraintParser:
     
     def test_get_clarification_prompt_no_ambiguities(self, constraint_parser):
         """Test clarification prompt when no ambiguities exist"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             ambiguities=[]
@@ -187,7 +187,7 @@ class TestConstraintParser:
     
     def test_get_clarification_prompt_with_ambiguities(self, constraint_parser):
         """Test clarification prompt generation with ambiguities"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             ambiguities=[
@@ -207,7 +207,7 @@ class TestConstraintParser:
     
     def test_refine_constraints(self, constraint_parser, mock_llm):
         """Test constraint refinement with user clarification"""
-        original_constraints = UserConstraints(
+        original_constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             ambiguities=["النبرة غير واضحة"]
@@ -256,7 +256,7 @@ class TestConstraintParser:
     
     def test_validate_constraints(self, constraint_parser):
         """Test constraint validation"""
-        valid_constraints = UserConstraints(
+        valid_constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             line_count=4
@@ -267,7 +267,7 @@ class TestConstraintParser:
         
         # Test invalid constraints - should raise ValueError during construction
         with pytest.raises(ValueError, match="Line count must be positive"):
-            UserConstraints(
+            Constraints(
                 meter="بحر الكامل",
                 theme="غزل",
                 line_count=-1  # Invalid line count

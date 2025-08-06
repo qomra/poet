@@ -9,7 +9,7 @@ from poet.generation.poem_generator import SimplePoemGenerator
 from poet.refinement.tashkeel_refiner import TashkeelRefiner
 from poet.analysis.constraint_parser import ConstraintParser
 from poet.analysis.qafiya_selector import QafiyaSelector
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.prompts.prompt_manager import PromptManager
 from poet.llm.base_llm import MockLLM, LLMConfig
@@ -210,7 +210,7 @@ class TestRealSimpleGenerationValidation:
             mock_llm.reset()
         
         # Create constraints from example
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter=expected_constraints["meter"],
             qafiya=expected_constraints["qafiya"],
             line_count=expected_constraints["line_count"],
@@ -229,7 +229,7 @@ class TestRealSimpleGenerationValidation:
         poem = poem_generator.generate_poem(enriched_constraints)
         
         # Verify constraint parsing and qafiya selection
-        assert isinstance(enriched_constraints, UserConstraints)
+        assert isinstance(enriched_constraints, Constraints)
         
         # Verify enriched constraints have complete qafiya specifications
         assert enriched_constraints.qafiya is not None
@@ -453,7 +453,7 @@ class TestRealSimpleGenerationValidation:
             mock_llm.reset()
         
         # Create constraints from example
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter=expected_constraints["meter"],
             qafiya=expected_constraints["qafiya"],
             line_count=expected_constraints["line_count"],
@@ -465,7 +465,7 @@ class TestRealSimpleGenerationValidation:
         print(f"User Prompt: {user_prompt}")
         print(f"Constraints: {constraints}")
         
-        # Step 1: Select qafiya (directly with UserConstraints)
+        # Step 1: Select qafiya (directly with Constraints)
         print(f"\nStep 1: Selecting qafiya...")
         enriched_constraints = qafiya_selector.select_qafiya(constraints, user_prompt)
         print(f"Enriched constraints: {enriched_constraints}")
@@ -477,7 +477,7 @@ class TestRealSimpleGenerationValidation:
         
         # Verify qafiya selection and poem generation
         assert enriched_constraints is not None
-        assert isinstance(enriched_constraints, UserConstraints)
+        assert isinstance(enriched_constraints, Constraints)
         assert enriched_constraints.qafiya is not None
         assert enriched_constraints.qafiya_harakah is not None
         assert enriched_constraints.qafiya_type is not None

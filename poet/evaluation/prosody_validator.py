@@ -3,10 +3,10 @@ from typing import Dict, List, Optional, Any
 from poet.models.poem import LLMPoem
 from poet.models.prosody import ProsodyValidationResult, BaitValidationResult
 from poet.prompts.prompt_manager import PromptManager
-from poet.evaluation.bohour.arudi_style import get_arudi_style
+from poet.utils.bohour.arudi_style import get_arudi_style
 
 # Import bohour classes
-from poet.evaluation.bohour.bahr import (
+from poet.utils.bohour.bahr import (
     Taweel, Madeed, Baseet, Wafer, Kamel, Hazaj, Rajaz, Ramal,
     Saree, Munsareh, Khafeef, Mudhare, Muqtadheb, Mujtath,
     Mutakareb, Mutadarak

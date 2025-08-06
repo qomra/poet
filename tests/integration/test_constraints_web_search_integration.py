@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.analysis.knowledge_retriever import WebKnowledgeRetriever, WebRetrievalResult
 from poet.data.search_provider import SearchResult, SearchResponse
 
@@ -35,7 +35,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_basic_constraint_to_web_search_retrieval(self, web_retriever, mock_llm, mock_search_provider):
         """Test basic constraint parsing to web search retrieval"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             qafiya="ق",
@@ -138,7 +138,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_multi_round_web_search(self, web_retriever, mock_llm, mock_search_provider):
         """Test multi-round web search with follow-up queries"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الطويل",
             theme="هجاء"
         )
@@ -237,7 +237,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_web_search_with_empty_constraints(self, web_retriever, mock_llm, mock_search_provider):
         """Test web search with minimal constraints"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             theme="غزل"
         )
         constraints.original_prompt = "اكتب قصيدة غزل"
@@ -301,7 +301,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_web_search_low_quality_filtering(self, web_retriever, mock_llm, mock_search_provider):
         """Test filtering of low-quality search results"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الوافر"
         )
         constraints.original_prompt = "اكتب قصيدة على بحر الوافر"
@@ -366,7 +366,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_web_search_error_handling(self, web_retriever, mock_llm):
         """Test graceful handling of LLM errors"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             theme="غزل"
         )
         constraints.original_prompt = "اكتب قصيدة غزل"
@@ -383,7 +383,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_web_search_invalid_json_handling(self, web_retriever, mock_llm, mock_search_provider):
         """Test handling of invalid JSON responses from LLM"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             theme="غزل"
         )
         constraints.original_prompt = "اكتب قصيدة غزل"
@@ -399,7 +399,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_web_search_metadata_tracking(self, web_retriever, mock_llm, mock_search_provider):
         """Test that search metadata is properly tracked"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل"
         )
@@ -495,7 +495,7 @@ class TestConstraintsWebSearchIntegration:
     
     def test_web_search_with_poet_style_constraint(self, web_retriever, mock_llm, mock_search_provider):
         """Test web search with poet style constraint"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             poet_style="المتنبي"
         )

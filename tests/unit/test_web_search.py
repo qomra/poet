@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from poet.analysis.knowledge_retriever import WebKnowledgeRetriever, WebRetrievalResult
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.search import SearchQuery, EvaluatedResult, ResultEvaluationResult
 from poet.data.search_provider import SearchResult, SearchResponse
 
@@ -38,8 +38,8 @@ class TestWebSearchIntegration:
     
     @pytest.fixture
     def sample_constraints(self):
-        """Sample UserConstraints for testing"""
-        user_constraints = UserConstraints(
+        """Sample Constraints for testing"""
+        user_constraints = Constraints(
             meter="بحر الكامل",
             theme="قصيدة غزل",
             qafiya="ق",
@@ -422,7 +422,7 @@ class TestWebSearchIntegration:
         """Test web search with minimal constraints"""
         
         # Create constraints with minimal information
-        constraints = UserConstraints(
+        constraints = Constraints(
             theme="غزل",
             original_prompt="اكتب قصيدة غزل"
         )

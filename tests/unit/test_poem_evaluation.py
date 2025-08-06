@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from poet.evaluation.poem_evaluation import PoemEvaluator, EvaluationType
 from poet.models.poem import LLMPoem
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
 from poet.llm.base_llm import MockLLM, LLMConfig
 
@@ -38,7 +38,7 @@ class TestPoemEvaluator:
     @pytest.fixture
     def sample_constraints(self):
         """Create sample constraints"""
-        return UserConstraints(
+        return Constraints(
             meter="طويل",
             qafiya="ل",
             line_count=2,
@@ -124,12 +124,12 @@ class TestPoemEvaluator:
     
     def test_evaluate_poem_with_qafiya(self, poem_evaluator, sample_poem, sample_constraints, mock_llm):
         """Test evaluation with qafiya validation"""
-        # Set up mock qafiya response
+        # Set up mock qafiya response for individual bait validation
         mock_llm.responses = ['''
         ```json
         {
-            "misaligned_lines": [],
-            "issues": []
+            "is_valid": true,
+            "issue": null
         }
         ```
         ''']
@@ -149,14 +149,14 @@ class TestPoemEvaluator:
     
     def test_evaluate_poem_complete_workflow(self, poem_evaluator, sample_poem, sample_constraints, mock_llm):
         """Test complete evaluation workflow"""
-        # Set up mock response for qafiya
+        # Set up mock response for qafiya (individual bait validation)
         mock_llm.responses = [
-            # Qafiya response
+            # Qafiya response for single bait
             '''
             ```json
             {
-                "misaligned_lines": [],
-                "issues": []
+                "is_valid": true,
+                "issue": null
             }
             ```
             '''
@@ -178,7 +178,7 @@ class TestPoemEvaluator:
     def test_evaluate_poem_with_errors(self, poem_evaluator, sample_poem, sample_constraints):
         """Test evaluation with validation errors"""
         # Create constraints with unknown meter to trigger prosody error
-        bad_constraints = UserConstraints(
+        bad_constraints = Constraints(
             meter="unknown_meter",
             qafiya="ل",
             line_count=2,

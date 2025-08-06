@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from poet.analysis.qafiya_selector import QafiyaSelector, QafiyaSelectionError
-from poet.models.constraints import UserConstraints, QafiyaType
+from poet.models.constraints import Constraints, QafiyaType
 from poet.llm.base_llm import MockLLM, LLMConfig
 
 
@@ -24,7 +24,7 @@ class TestQafiyaSelector:
     @pytest.fixture
     def basic_constraints(self):
         """Create basic user constraints"""
-        return UserConstraints(
+        return Constraints(
             meter="بحر الطويل",
             theme="غزل",
             tone="حزينة",
@@ -33,7 +33,7 @@ class TestQafiyaSelector:
     
     def test_is_qafiya_complete_with_complete_spec(self, qafiya_selector):
         """Test that complete qafiya specification is detected"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             qafiya="ع",
             qafiya_harakah="مكسور",
             qafiya_type=QafiyaType.MUTAWATIR,
@@ -48,28 +48,28 @@ class TestQafiyaSelector:
     
     def test_is_qafiya_complete_with_partial_spec(self, qafiya_selector):
         """Test that partial qafiya specification is detected as incomplete"""
-        constraints = UserConstraints(qafiya="ع")  # Only letter specified
+        constraints = Constraints(qafiya="ع")  # Only letter specified
         assert qafiya_selector._is_qafiya_complete(constraints) is False
     
     def test_get_missing_qafiya_components(self, qafiya_selector):
         """Test identification of missing qafiya components"""
         # No qafiya specified
-        constraints = UserConstraints()
+        constraints = Constraints()
         missing = qafiya_selector._get_missing_qafiya_components(constraints)
         assert set(missing) == {'qafiya_letter', 'qafiya_harakah', 'qafiya_type', 'qafiya_pattern'}
         
         # Only letter specified
-        constraints = UserConstraints(qafiya="ع")
+        constraints = Constraints(qafiya="ع")
         missing = qafiya_selector._get_missing_qafiya_components(constraints)
         assert set(missing) == {'qafiya_harakah', 'qafiya_type', 'qafiya_pattern'}
         
         # Letter and harakah specified
-        constraints = UserConstraints(qafiya="ع", qafiya_harakah="مكسور")
+        constraints = Constraints(qafiya="ع", qafiya_harakah="مكسور")
         missing = qafiya_selector._get_missing_qafiya_components(constraints)
         assert set(missing) == {'qafiya_type', 'qafiya_pattern'}
         
         # Complete specification
-        constraints = UserConstraints(
+        constraints = Constraints(
             qafiya="ع",
             qafiya_harakah="مكسور",
             qafiya_type=QafiyaType.MUTAWATIR,
@@ -80,7 +80,7 @@ class TestQafiyaSelector:
     
     def test_select_qafiya_with_complete_spec(self, qafiya_selector):
         """Test that complete qafiya specification is returned as-is"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             qafiya="ع",
             qafiya_harakah="مكسور",
             qafiya_type=QafiyaType.MUTAWATIR,
@@ -121,7 +121,7 @@ class TestQafiyaSelector:
     def test_select_qafiya_with_partial_spec_letter_only(self, qafiya_selector, mock_llm):
         """Test qafiya selection with only letter specified"""
         # User specified only the letter
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الطويل",
             theme="غزل",
             qafiya="ع"  # Only letter specified
@@ -153,7 +153,7 @@ class TestQafiyaSelector:
     def test_select_qafiya_with_partial_spec_letter_and_harakah(self, qafiya_selector, mock_llm):
         """Test qafiya selection with letter and harakah specified"""
         # User specified letter and harakah
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الطويل",
             theme="هجاء",
             qafiya="ق",
@@ -272,7 +272,7 @@ class TestQafiyaSelector:
     
     def test_fill_missing_qafiya_components_preserves_existing(self, qafiya_selector, mock_llm):
         """Test that existing qafiya components are preserved when filling missing ones"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الطويل",
             theme="غزل",
             qafiya="ع",
@@ -307,7 +307,7 @@ class TestQafiyaSelector:
     
     def test_qafiya_selector_error_handling(self, qafiya_selector, mock_llm):
         """Test error handling in qafiya selector"""
-        constraints = UserConstraints(theme="غزل")
+        constraints = Constraints(theme="غزل")
         
         # Mock LLM to raise an exception
         mock_llm.generate = Mock(side_effect=Exception("LLM error"))

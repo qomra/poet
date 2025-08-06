@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 from dataclasses import dataclass, field
 
 from poet.llm.base_llm import BaseLLM
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.search import SearchQuery, QueryGenerationResult, EvaluatedResult, ResultEvaluationResult
 from poet.data.search_provider import SearchProviderFactory, SearchResult
 from poet.data.corpus_manager import CorpusManager, PoemRecord, SearchCriteria
@@ -38,7 +38,7 @@ class KnowledgeRetriever:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
     
-    def search(self, constraints: UserConstraints, 
+    def search(self, constraints: Constraints, 
                          max_results: int = 5,
                          strategy: str = "best_match") -> RetrievalResult:
         """
@@ -57,7 +57,7 @@ class WebKnowledgeRetriever(KnowledgeRetriever):
         self.prompt_manager = PromptManager()
         self.logger = logging.getLogger(__name__)
     
-    def search(self, constraints: UserConstraints, 
+    def search(self, constraints: Constraints, 
                          max_queries_per_round: int = 5,
                          max_rounds: int = 1) -> WebRetrievalResult:
         """
@@ -137,7 +137,7 @@ class WebKnowledgeRetriever(KnowledgeRetriever):
             metadata=search_metadata
         )
     
-    def _generate_search_queries(self, constraints: UserConstraints, max_queries: int) -> List[SearchQuery]:
+    def _generate_search_queries(self, constraints: Constraints, max_queries: int) -> List[SearchQuery]:
         """Generate search queries using LLM"""
         try:
             # Format the query generation prompt
@@ -178,7 +178,7 @@ class WebKnowledgeRetriever(KnowledgeRetriever):
             self.logger.error(f"Failed to generate search queries: {e}")
             return []
     
-    def _evaluate_search_results(self, constraints: UserConstraints, search_results: List[SearchResult]) -> ResultEvaluationResult:
+    def _evaluate_search_results(self, constraints: Constraints, search_results: List[SearchResult]) -> ResultEvaluationResult:
         """Evaluate search results using LLM"""
         try:
             # Format search results for evaluation
@@ -271,7 +271,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
     """
     Retrieves relevant examples and knowledge from the corpus based on user constraints.
     
-    Bridges the gap between user requirements (UserConstraints) and corpus search
+    Bridges the gap between user requirements (Constraints) and corpus search
     (CorpusManager) for the analysis layer in the poetry generation pipeline.
     """
     
@@ -279,7 +279,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
         super().__init__()
         self.corpus_manager = corpus_manager
     
-    def search(self, constraints: UserConstraints, 
+    def search(self, constraints: Constraints, 
                          max_results: int = 5,
                          strategy: str = "best_match") -> CorpusRetrievalResult:
         """
@@ -302,7 +302,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
         else:  # best_match (default)
             return self._best_match_retrieval(constraints, max_results)
     
-    def _best_match_retrieval(self, constraints: UserConstraints, max_examples: int) -> CorpusRetrievalResult:
+    def _best_match_retrieval(self, constraints: Constraints, max_examples: int) -> CorpusRetrievalResult:
         """Best match strategy - use OR mode for broader matching"""
 
         # Use OR mode for broader matching
@@ -317,7 +317,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
             metadata={"match_type": "or_mode"}
         )
     
-    def _exact_match_retrieval(self, constraints: UserConstraints, max_examples: int) -> CorpusRetrievalResult:
+    def _exact_match_retrieval(self, constraints: Constraints, max_examples: int) -> CorpusRetrievalResult:
         """Exact match strategy - only return poems matching all criteria"""
         
         search_criteria = self._constraints_to_search_criteria(constraints, mode="AND")
@@ -331,7 +331,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
             metadata={"strict_matching": True}
         )
     
-    def _diverse_retrieval(self, constraints: UserConstraints, max_examples: int) -> CorpusRetrievalResult:
+    def _diverse_retrieval(self, constraints: Constraints, max_examples: int) -> CorpusRetrievalResult:
         """Diverse strategy - get varied examples covering different aspects"""
         
         all_examples = []
@@ -376,8 +376,8 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
             metadata=metadata
         )
     
-    def _constraints_to_search_criteria(self, constraints: UserConstraints, mode: str = "AND") -> SearchCriteria:
-        """Convert UserConstraints to SearchCriteria"""
+    def _constraints_to_search_criteria(self, constraints: Constraints, mode: str = "AND") -> SearchCriteria:
+        """Convert Constraints to SearchCriteria"""
         
         return SearchCriteria(
             meter=constraints.meter,
@@ -392,7 +392,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
             search_mode=mode
         )
     
-    def validate_constraints_feasibility(self, constraints: UserConstraints) -> Dict[str, Any]:
+    def validate_constraints_feasibility(self, constraints: Constraints) -> Dict[str, Any]:
         """
         Check if constraints are feasible given the available corpus.
         
@@ -457,7 +457,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
         
         return validation
     
-    def get_constraint_statistics(self, constraints: UserConstraints) -> Dict[str, Any]:
+    def get_constraint_statistics(self, constraints: Constraints) -> Dict[str, Any]:
         """
         Get statistics about how well constraints match the corpus.
         
@@ -504,7 +504,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
         
         return stats
     
-    def suggest_alternatives(self, constraints: UserConstraints) -> Dict[str, List[str]]:
+    def suggest_alternatives(self, constraints: Constraints) -> Dict[str, List[str]]:
         """
         Suggest alternative constraints that might yield better results.
         

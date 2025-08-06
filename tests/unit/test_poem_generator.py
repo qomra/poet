@@ -3,7 +3,7 @@ import os
 import json
 from unittest.mock import Mock, patch
 from poet.generation.poem_generator import SimplePoemGenerator, BasePoemGenerator, GenerationError
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.llm.base_llm import MockLLM, LLMConfig
 
@@ -15,10 +15,10 @@ class TestBasePoemGenerator:
         """Test BasePoemGenerator initialization"""
         # Create a concrete implementation for testing
         class TestGenerator(BasePoemGenerator):
-            def generate_poem(self, constraints: UserConstraints) -> LLMPoem:
+            def generate_poem(self, constraints: Constraints) -> LLMPoem:
                 return LLMPoem(verses=["test"], llm_provider="test", model_name="test")
             
-            def can_handle_constraints(self, constraints: UserConstraints) -> bool:
+            def can_handle_constraints(self, constraints: Constraints) -> bool:
                 return True
         
         generator = TestGenerator(mock_llm, prompt_manager)
@@ -43,8 +43,8 @@ class TestSimplePoemGenerator:
     
     @pytest.fixture
     def basic_constraints(self):
-        """Basic UserConstraints for testing"""
-        return UserConstraints(
+        """Basic Constraints for testing"""
+        return Constraints(
             meter="طويل",
             qafiya="ل",
             line_count=4
@@ -52,8 +52,8 @@ class TestSimplePoemGenerator:
     
     @pytest.fixture
     def complex_constraints(self):
-        """Complex UserConstraints with all fields"""
-        return UserConstraints(
+        """Complex Constraints with all fields"""
+        return Constraints(
             meter="كامل",
             qafiya="م",
             line_count=6,
@@ -306,7 +306,7 @@ class TestSimplePoemGeneratorWithRealLLM:
         """Test poem generation with real LLM"""
         generator = SimplePoemGenerator(real_llm, prompt_manager)
         
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="طويل",
             qafiya="ل",
             line_count=4
@@ -340,7 +340,7 @@ class TestSimplePoemGeneratorWithRealLLM:
         """Test poem generation with complex constraints using real LLM"""
         generator = SimplePoemGenerator(real_llm, prompt_manager)
         
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="كامل",
             qafiya="م",
             line_count=6,
@@ -385,7 +385,7 @@ class TestSimplePoemGeneratorEdgeCases:
     
     def test_generate_poem_empty_constraints(self, simple_generator):
         """Test poem generation with empty constraints"""
-        constraints = UserConstraints()
+        constraints = Constraints()
         
         # Mock LLM response
         mock_response = '''
@@ -407,7 +407,7 @@ class TestSimplePoemGeneratorEdgeCases:
     
     def test_generate_poem_large_line_count(self, simple_generator, mock_llm):
         """Test poem generation with large line count"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="طويل",
             qafiya="ل",
             line_count=20
@@ -431,7 +431,7 @@ class TestSimplePoemGeneratorEdgeCases:
     
     def test_generate_poem_single_verse(self, simple_generator, mock_llm):
         """Test poem generation with single verse"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="طويل",
             qafiya="ل",
             line_count=1
@@ -460,7 +460,7 @@ class TestSimplePoemGeneratorIntegration:
         """Test complete generation workflow"""
         generator = SimplePoemGenerator(mock_llm, prompt_manager)
         
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="طويل",
             qafiya="ل",
             line_count=4,
@@ -507,7 +507,7 @@ class TestSimplePoemGeneratorIntegration:
         
         generator = SimplePoemGenerator(mock_llm, custom_prompt_manager)
         
-        constraints = UserConstraints(meter="طويل", qafiya="ل", line_count=4)
+        constraints = Constraints(meter="طويل", qafiya="ل", line_count=4)
         
         # Mock LLM response
         with patch.object(mock_llm, 'generate', return_value='''
@@ -524,6 +524,7 @@ class TestSimplePoemGeneratorIntegration:
                 'simple_poem_generation',
                 meter="طويل",
                 qafiya="ل",
-                line_count=4
+                line_count=4,
+                verse_count=8
             )
             mock_llm.generate.assert_called_once_with("custom prompt")

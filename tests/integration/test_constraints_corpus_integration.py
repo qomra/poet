@@ -1,7 +1,7 @@
 # tests/integration/test_constraints_corpus_integration.py
 
 import pytest
-from poet.models.constraints import UserConstraints
+from poet.models.constraints import Constraints
 from poet.analysis.knowledge_retriever import CorpusKnowledgeRetriever, CorpusRetrievalResult
 from poet.data.corpus_manager import PoemRecord
 
@@ -16,7 +16,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_basic_constraint_to_corpus_retrieval(self, knowledge_retriever):
         """Test basic constraint parsing to corpus retrieval"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             qafiya="ق",
@@ -36,7 +36,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_exact_match_strategy(self, knowledge_retriever):
         """Test exact match retrieval strategy"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             qafiya="ق"
@@ -58,7 +58,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_diverse_strategy(self, knowledge_retriever):
         """Test diverse retrieval strategy"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             qafiya="ق",
@@ -79,7 +79,7 @@ class TestConstraintsCorpusIntegration:
     def test_constraint_feasibility_validation(self, knowledge_retriever):
         """Test constraint feasibility validation"""
         # Valid constraints
-        valid_constraints = UserConstraints(
+        valid_constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل"
         )
@@ -89,7 +89,7 @@ class TestConstraintsCorpusIntegration:
         assert len(validation["issues"]) == 0
         
         # Invalid constraints
-        invalid_constraints = UserConstraints(
+        invalid_constraints = Constraints(
             meter="بحر غير موجود",
             theme="موضوع غير موجود"
         )
@@ -101,7 +101,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_constraint_statistics(self, knowledge_retriever):
         """Test constraint statistics generation"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             poet_style="ابن المعتز"
@@ -122,7 +122,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_alternative_suggestions(self, knowledge_retriever):
         """Test alternative constraint suggestions"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر نادر",
             theme="موضوع نادر"
         )
@@ -138,8 +138,8 @@ class TestConstraintsCorpusIntegration:
         assert isinstance(suggestions["poets"], list)
     
     def test_constraints_to_search_criteria_conversion(self, knowledge_retriever):
-        """Test conversion from UserConstraints to SearchCriteria"""
-        constraints = UserConstraints(
+        """Test conversion from Constraints to SearchCriteria"""
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل",
             line_count=3,
@@ -169,7 +169,7 @@ class TestConstraintsCorpusIntegration:
     def test_best_match_fallback_logic(self, knowledge_retriever):
         """Test best match strategy fallback from AND to OR"""
         # Create constraints that likely won't have many exact matches
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الطويل",
             theme="مدح",
             poet_style="المتنبي"
@@ -187,7 +187,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_empty_constraints_handling(self, knowledge_retriever):
         """Test handling of empty/minimal constraints"""
-        empty_constraints = UserConstraints()
+        empty_constraints = Constraints()
         
         result = knowledge_retriever.search(empty_constraints, max_results=3)
         
@@ -197,7 +197,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_line_count_constraint_mapping(self, knowledge_retriever):
         """Test line count constraint mapping to verse count search"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             line_count=2
         )
         
@@ -215,7 +215,7 @@ class TestConstraintsCorpusIntegration:
     
     def test_multiple_retrieval_strategies_consistency(self, knowledge_retriever):
         """Test that different strategies return reasonable results for same constraints"""
-        constraints = UserConstraints(
+        constraints = Constraints(
             meter="بحر الكامل",
             theme="غزل"
         )

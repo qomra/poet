@@ -36,7 +36,7 @@ This plan provides a progressive, testable implementation strategy where each co
 **Priority**: Critical
 
 ### Deliverables
-- `UserConstraints` class parsing prompt requirements
+- `Constraints` class parsing prompt requirements
 - `Poem` class representing Arabic poems
 - `GenerationContext` state management
 - `ProsodyModel` for metrical data

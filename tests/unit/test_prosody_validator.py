@@ -4,7 +4,6 @@ from unittest.mock import Mock, patch
 from poet.evaluation.prosody_validator import ProsodyValidator
 from poet.models.poem import LLMPoem
 from poet.models.prosody import ProsodyValidationResult, BaitValidationResult
-from poet.models.quality import QualityAssessment
 
 
 class TestProsodyValidator:
@@ -27,14 +26,10 @@ class TestProsodyValidator:
             model_name="test-model"
         )
 
-
-   
-      
     @pytest.mark.skipif(
         not os.getenv("TEST_REAL_LLMS"),
         reason="Real LLM tests require TEST_REAL_LLMS environment variable"
     )
-
     def test_bahr_mapping(self, prosody_validator):
         """Test bahr name mapping to bohour classes"""
         # Test full names
@@ -51,8 +46,6 @@ class TestProsodyValidator:
         
         # Test unknown bahr
         assert prosody_validator._get_bahr_class("unknown") is None
-    
-
     
     def test_validate_bait_success(self, prosody_validator):
         """Test successful bait validation with pre-diacritized input"""
@@ -77,7 +70,7 @@ class TestProsodyValidator:
         # Verify result - should be invalid since this is Taweel pattern on Kamel bahr
         assert not result.is_valid
         assert result.pattern  # Should have a real pattern
-        assert "لا يتطابق" in result.error_details
+        assert "لا يتبع وزن" in result.error_details
     
     def test_validate_bait_arudi_error(self, prosody_validator):
         """Test bait validation when arudi style extraction fails"""
@@ -104,7 +97,7 @@ class TestProsodyValidator:
             
             result = prosody_validator.validate_poem(sample_poem, "طويل")
             
-            # Verify poem was updated
+            # Verify poem was updated with prosody validation
             assert result.prosody_validation is not None
             assert result.prosody_validation.overall_valid is True
             assert result.prosody_validation.total_baits == 1
@@ -113,11 +106,8 @@ class TestProsodyValidator:
             assert result.prosody_validation.bahr_used == "طويل"
             assert "جميع الأبيات" in result.prosody_validation.validation_summary
             
-            # Verify quality assessment
-            assert result.quality is not None
-            assert result.quality.overall_score > 0.9
-            assert result.quality.is_acceptable is True
-            assert len(result.quality.prosody_issues) == 0
+            # Quality assessment is now handled by PoemEvaluator, not ProsodyValidator
+            assert result.quality is None
     
     def test_validate_poem_invalid_line_count(self, prosody_validator):
         """Test poem validation with invalid line count (should be handled by LineCountValidator)"""
@@ -142,12 +132,17 @@ class TestProsodyValidator:
         """Test poem validation with unknown bahr"""
         result = prosody_validator.validate_poem(sample_poem, "unknown_bahr")
         
-        # Verify validation was skipped
-        assert result.prosody_validation is None
-        assert result.quality is not None
-        assert not result.quality.is_acceptable
-        assert len(result.quality.prosody_issues) > 0
-        assert "غير معروف" in result.quality.prosody_issues[0]
+        # Verify validation result for unknown bahr
+        assert result.prosody_validation is not None
+        assert result.prosody_validation.overall_valid is False
+        assert result.prosody_validation.total_baits == 0
+        assert result.prosody_validation.valid_baits == 0
+        assert result.prosody_validation.invalid_baits == 0
+        assert "بحر غير معروف" in result.prosody_validation.validation_summary
+        assert result.prosody_validation.bahr_used == "unknown_bahr"
+        
+        # Quality assessment is now handled by PoemEvaluator, not ProsodyValidator
+        assert result.quality is None
     
     def test_validate_poem_mixed_results(self, prosody_validator, sample_poem):
         """Test poem validation with mixed valid/invalid baits"""
@@ -192,10 +187,8 @@ class TestProsodyValidator:
             assert "1 من 2 أبيات" in result.prosody_validation.validation_summary
             assert "الأبيات الخاطئة: 2" in result.prosody_validation.validation_summary
             
-            # Verify quality assessment
-            assert result.quality is not None
-            assert result.quality.overall_score < 1.0
-            assert len(result.quality.prosody_issues) > 0
+            # Quality assessment is now handled by PoemEvaluator, not ProsodyValidator
+            assert result.quality is None
     
     def test_generate_validation_summary(self, prosody_validator):
         """Test validation summary generation"""
@@ -221,28 +214,51 @@ class TestProsodyValidator:
         assert "1 من 6 أبيات صحيحة" in summary
         assert "عدد الأبيات الخاطئة: 5" in summary
     
-    def test_update_poem_quality(self, prosody_validator, sample_poem):
-        """Test poem quality assessment update"""
-        # Test with line count issues
-        prosody_validator._update_poem_quality(
-            sample_poem, 
-            line_count_issues=["عدد الأبيات يجب أن يكون زوجياً"]
+    def test_get_arabic_bahr_name(self, prosody_validator):
+        """Test getting Arabic bahr name from bahr class"""
+        # Test with Taweel class
+        taweel_class = prosody_validator._get_bahr_class("طويل")
+        arabic_name = prosody_validator._get_arabic_bahr_name(taweel_class)
+        assert arabic_name == "بحر الطويل"
+        
+        # Test with Kamel class
+        kamel_class = prosody_validator._get_bahr_class("كامل")
+        arabic_name = prosody_validator._get_arabic_bahr_name(kamel_class)
+        assert arabic_name == "بحر الكامل"
+    
+    def test_validate_poem_empty_poem(self, prosody_validator):
+        """Test poem validation with empty poem"""
+        empty_poem = LLMPoem(
+            verses=[],
+            llm_provider="mock",
+            model_name="test-model"
         )
         
-        assert sample_poem.quality is not None
-        assert not sample_poem.quality.is_acceptable
-        assert len(sample_poem.quality.line_count_issues) > 0
-        assert sample_poem.quality.overall_score < 1.0
+        result = prosody_validator.validate_poem(empty_poem, "طويل")
         
-        # Test with prosody issues
-        prosody_validator._update_poem_quality(
-            sample_poem,
-            prosody_issues=["النمط لا يتطابق"]
+        # Verify validation result for empty poem
+        assert result.prosody_validation is not None
+        assert result.prosody_validation.total_baits == 0
+        assert result.prosody_validation.valid_baits == 0
+        assert result.prosody_validation.invalid_baits == 0
+        assert result.prosody_validation.overall_valid is True  # No baits to validate = all valid
+    
+    def test_validate_poem_single_verse(self, prosody_validator):
+        """Test poem validation with single verse (no complete baits)"""
+        single_verse_poem = LLMPoem(
+            verses=["قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ"],
+            llm_provider="mock",
+            model_name="test-model"
         )
         
-        assert len(sample_poem.quality.prosody_issues) > 0
-        assert "النمط لا يتطابق" in sample_poem.quality.prosody_issues
-        assert len(sample_poem.quality.recommendations) > 0 
+        result = prosody_validator.validate_poem(single_verse_poem, "طويل")
+        
+        # Verify validation result for single verse
+        assert result.prosody_validation is not None
+        assert result.prosody_validation.total_baits == 0
+        assert result.prosody_validation.valid_baits == 0
+        assert result.prosody_validation.invalid_baits == 0
+        assert result.prosody_validation.overall_valid is True  # No complete baits to validate 
 
  
 

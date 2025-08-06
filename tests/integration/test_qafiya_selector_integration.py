@@ -6,7 +6,7 @@ import json
 from unittest.mock import Mock, patch
 from poet.analysis.qafiya_selector import QafiyaSelector, QafiyaSelectionError
 from poet.analysis.constraint_parser import ConstraintParser
-from poet.models.constraints import UserConstraints, QafiyaType
+from poet.models.constraints import Constraints, QafiyaType
 from poet.llm.base_llm import MockLLM, LLMConfig
 from poet.prompts.prompt_manager import PromptManager
 
