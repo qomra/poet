@@ -2,6 +2,17 @@
 
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
+from enum import Enum
+
+
+class QafiyaType(Enum):
+    """Types of Arabic qafiya (rhyme) patterns"""
+    MUTAWATIR = "متواتر"  # One vowel between two consonants
+    MUTARAKIB = "متراكب"  # Three vowels between two consonants
+    MUTADAARIK = "متدارك"  # Two vowels between two consonants
+    MUTAKAASIS = "متكاوس"  # Four vowels between two consonants
+    MUTARADIF = "مترادف"   # Two consonants together
+
 
 @dataclass
 class UserConstraints:
@@ -15,6 +26,9 @@ class UserConstraints:
     # Prosodic constraints
     meter: Optional[str] = None
     qafiya: Optional[str] = None
+    qafiya_harakah: Optional[str] = None  # مفتوح، مكسور، مضموم، ساكن
+    qafiya_type: Optional[QafiyaType] = None
+    qafiya_pattern: Optional[str] = None  # Exact pattern like "عُ", "قَ", etc.
     line_count: Optional[int] = None
     
     # Thematic constraints  
@@ -60,7 +74,10 @@ class UserConstraints:
         """Convert constraints to dictionary"""
         return {
             "meter": self.meter,
-            "qafiya": self.qafiya, 
+            "qafiya": self.qafiya,
+            "qafiya_harakah": self.qafiya_harakah,
+            "qafiya_type": self.qafiya_type.value if self.qafiya_type else None,
+            "qafiya_pattern": self.qafiya_pattern,
             "line_count": self.line_count,
             "theme": self.theme,
             "tone": self.tone,
@@ -76,9 +93,24 @@ class UserConstraints:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'UserConstraints':
         """Create constraints from dictionary"""
+        # Handle qafiya_type enum conversion
+        qafiya_type = None
+        if data.get("qafiya_type"):
+            try:
+                qafiya_type = QafiyaType(data["qafiya_type"])
+            except ValueError:
+                # If the value doesn't match any enum, try to find by name
+                for qtype in QafiyaType:
+                    if qtype.value == data["qafiya_type"]:
+                        qafiya_type = qtype
+                        break
+        
         return cls(
             meter=data.get("meter"),
             qafiya=data.get("qafiya"),
+            qafiya_harakah=data.get("qafiya_harakah"),
+            qafiya_type=qafiya_type,
+            qafiya_pattern=data.get("qafiya_pattern"),
             line_count=data.get("line_count"),
             theme=data.get("theme"),
             tone=data.get("tone"),
@@ -101,7 +133,12 @@ class UserConstraints:
         if self.meter:
             parts.append(f"البحر: {self.meter}")
         if self.qafiya:
-            parts.append(f"القافية: {self.qafiya}")
+            qafiya_info = f"القافية: {self.qafiya}"
+            if self.qafiya_harakah:
+                qafiya_info += f" ({self.qafiya_harakah})"
+            if self.qafiya_pattern:
+                qafiya_info += f" [{self.qafiya_pattern}]"
+            parts.append(qafiya_info)
         if self.line_count:
             parts.append(f"الأبيات: {self.line_count}")
         if self.theme:

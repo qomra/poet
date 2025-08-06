@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from .quality import QualityAssessment
-from .prosody import ProsodyValidationResult
 
 
 @dataclass
@@ -16,8 +15,7 @@ class LLMPoem:
     constraints: Optional[Dict[str, Any]] = None
     generation_timestamp: Optional[datetime] = None
     
-    # Validation results
-    prosody_validation: Optional[ProsodyValidationResult] = None
+    # Quality assessment
     quality: Optional[QualityAssessment] = None
     
     def __post_init__(self):
@@ -47,6 +45,5 @@ class LLMPoem:
             "model_name": self.model_name,
             "constraints": self.constraints,
             "generation_timestamp": self.generation_timestamp.isoformat() if self.generation_timestamp else None,
-            "prosody_validation": self.prosody_validation.to_dict() if self.prosody_validation else None,
             "quality": self.quality.to_dict() if self.quality else None
         } 

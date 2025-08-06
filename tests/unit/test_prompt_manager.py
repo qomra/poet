@@ -66,19 +66,21 @@ class TestPromptManager:
     def test_get_templates_by_category_evaluation(self, prompt_manager):
         """Test getting evaluation templates"""
         templates = prompt_manager.get_templates_by_category(PromptCategory.EVALUATION)
-        assert len(templates) == 3
+        assert len(templates) == 4  # prosody_check, semantic_evaluation, qafiya_validation, tashkeel
         template_names = [t.name for t in templates]
         assert 'prosody_check' in template_names
         assert 'semantic_evaluation' in template_names
+        assert 'qafiya_validation' in template_names
+        assert 'tashkeel' in template_names
     
     def test_list_templates(self, prompt_manager):
         """Test listing all available templates"""
         templates = prompt_manager.list_templates()
-        assert len(templates) == 9
+        assert len(templates) == 10  # Updated count to include qafiya_validation
         expected_templates = [
             'unified_extraction',
             'verse_generation', 'imagery_creation',
-            'prosody_check', 'semantic_evaluation'
+            'prosody_check', 'semantic_evaluation', 'qafiya_validation', 'tashkeel'
         ]
         for template in expected_templates:
             assert template in templates
