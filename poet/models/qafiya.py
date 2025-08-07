@@ -42,9 +42,10 @@ class QafiyaValidationResult:
         """Initialize issues from bait_results if not provided"""
         if self.issues is None:
             self.issues = []
-            for bait_result in self.bait_results:
-                if not bait_result.is_valid and bait_result.error_details:
-                    self.issues.append(bait_result.error_details)
+            if self.bait_results:
+                for bait_result in self.bait_results:
+                    if not bait_result.is_valid and bait_result.error_details:
+                        self.issues.append(bait_result.error_details)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization"""

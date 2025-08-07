@@ -1,33 +1,32 @@
-name: verse_generation
-description: "Generate Arabic poetry verses based on specified constraints and context, with support for refinement"
+name: line_count_refinement
+description: "Add or remove verses to match the required line count while maintaining poem quality"
 template: |
-  أنت شاعر عربي مبدع ومحلل عروضي متمكن. مهمتك كتابة أو إصلاح أبيات شعرية باللغة العربية وفقاً للمعايير المحددة.
+  أنت شاعر عربي متمكن من العروض والقوافي. مهمتك إضافة أو إزالة أبيات من قصيدة موجودة لتطابق العدد المطلوب.
   
-  **السياق والمعايير الأساسية:**
+  **السياق الحالي:**
   - البحر الشعري: {meter}
   - القافية: {qafiya}
   - نمط القافية: {qafiya_pattern}
   - الموضوع: {theme}
   - النبرة: {tone}
   
-  **السياق الحالي:**
-  {context}
-  
-  **الأبيات الموجودة (إن وجدت):**
+  **الأبيات الموجودة:**
   {existing_verses}
   
   **المطلوب:**
-  - إضافة {verses_to_add} بيت جديد (إن وجد)
-  - إصلاح البيت الموجود مع الحفاظ على المعنى (إن كان مطلوباً)
-  - المشكلة المحددة: {context}
-  - إصلاح القافية لتكون: {qafiya_pattern} (إن كان مطلوباً)
+  - إضافة {verses_to_add} بيت جديد لتكملة القصيدة (إن كان مطلوباً)
+  - يجب أن تكون الأبيات الجديدة متناسقة مع الأبيات الموجودة
+  - يجب أن تتبع نفس البحر والقافية والموضوع
+  - إزالة {verses_to_remove} بيت من القصيدة (إن كان مطلوباً)
+  - احتفظ بأفضل الأبيات من حيث المعنى والجودة
   
   **متطلبات صارمة:**
   1. الالتزام التام بالبحر الشعري المحدد
   2. الالتزام بالقافية المطلوبة
-  3. الحفاظ على المعنى والسياق الأصلي
+  3. الحفاظ على تناسق الموضوع والنبرة
   4. استخدام لغة عربية فصيحة
   5. تطبيق التشكيل العربي الصحيح
+  6. الحفاظ على السياق والمعنى العام للقصيدة
   
   **نمط الإجابة المطلوب:**
   أجب بالتنسيق التالي بدقة:
@@ -39,7 +38,7 @@ template: |
       "البيت الثاني - الصدر",
       "البيت الثاني - العجز"
     ],
-    "explanation": "شرح موجز للتعديلات والإصلاحات"
+    "explanation": "شرح موجز للأبيات المضافة أو المزالة"
   }}
   ```
   
@@ -58,13 +57,11 @@ parameters:
   - qafiya_pattern
   - theme
   - tone
-  - context
   - existing_verses
   - verses_to_add
-  - fix_mode
-  - qafiya_fix
+  - verses_to_remove
 metadata:
-  version: "2.0"
+  version: "1.0"
   language: "arabic"
-  complexity: "high"
-  supports_refinement: true 
+  complexity: "medium"
+  purpose: "line_count_adjustment" 
