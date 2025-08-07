@@ -50,9 +50,7 @@ class TestRealRefinerSingleIteration:
         
         # Create refiners
         refiners = [
-            #TashkeelRefiner(real_llm, prompt_manager),
-            #LineCountRefiner(real_llm, prompt_manager),
-            #ProsodyRefiner(real_llm, prompt_manager),
+            ProsodyRefiner(real_llm, prompt_manager),
             QafiyaRefiner(real_llm, prompt_manager),
             
         ]
@@ -65,24 +63,18 @@ class TestRealRefinerSingleIteration:
         evaluation = poem_evaluator.evaluate_poem(
             poem,
             constraints,
-            [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA, EvaluationType.TASHKEEL]
+            [EvaluationType.PROSODY, EvaluationType.QAFIYA]
         )
         print(f"Evaluation results:")
         print(f"  Overall quality score: {evaluation.quality.overall_score}")
         print(f"  Is acceptable: {evaluation.quality.is_acceptable}")
         print(f"  Prosody validation: {evaluation.quality.prosody_validation.overall_valid}")
         print(f"  Qafiya validation: {evaluation.quality.qafiya_validation.overall_valid}")
-        print(f"  Tashkeel validation: {evaluation.quality.tashkeel_validation.overall_valid}")
-        print(f"  Line count validation: {evaluation.quality.line_count_validation.is_valid}")
 
         if evaluation.quality.prosody_issues:
             print(f"  Prosody issues: {evaluation.quality.prosody_issues}")
         if evaluation.quality.qafiya_issues:
             print(f"  Qafiya issues: {evaluation.quality.qafiya_issues}")
-        if evaluation.quality.tashkeel_issues:
-            print(f"  Tashkeel issues: {evaluation.quality.tashkeel_issues}")
-        if evaluation.quality.line_count_issues:
-            print(f"  Line count issues: {evaluation.quality.line_count_issues}")
 
     @pytest.mark.asyncio
     async def test_single_iteration_example_1(self, real_llm, prompt_manager, test_data):
@@ -102,7 +94,6 @@ class TestRealRefinerSingleIteration:
         constraints = Constraints(
             meter=expected_constraints["meter"],
             qafiya=expected_constraints["qafiya"],
-            line_count=expected_constraints["line_count"],
             theme=expected_constraints["theme"],
             tone=expected_constraints["tone"]
         )
@@ -149,16 +140,12 @@ class TestRealRefinerSingleIteration:
             print(f"    {i}. {verse}")
         
         
-        # run evaluation
-        print(f"\nStep 4: Running evaluation...")
-        self.run_evaluation_and_print_results(initial_poem, poem_evaluator, enriched_constraints)
-        
         # Step 4: Run single iteration of refinement
         print(f"\nStep 4: Running single iteration of refinement...")
         refined_poem, refinement_history = await refiner_chain.refine(
             initial_poem,
             enriched_constraints,
-            target_quality=0.9
+            target_quality=1
         )
 
         # step 5: run last evaluation

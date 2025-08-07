@@ -44,16 +44,24 @@ class QafiyaRefiner(BaseRefiner):
                 return poem
             
             self.logger.info(f"Fixing qafiya for {len(wrong_qafiya_bait)} verses")
+            def create_entire_poem(poem_verses: list[str]) -> str:
+                poem_str = ""
+                for i in range(0, len(poem_verses), 2):
+                    poem_str += poem_verses[i] + "\n" + poem_verses[i+1] + "\n"
+                return poem_str
+            
             
             # Fix each verse with wrong qafiya
             fixed_verses = poem.verses.copy()
-            print(f"before fixing qafiya: {fixed_verses}")
             for bait_index, issue in wrong_qafiya_bait:
                 bait = "#".join(poem.verses[bait_index*2:bait_index*2+2])
+                entire_poem = create_entire_poem(fixed_verses)
+            
                 fixed_bait = await self._fix_single_verse_qafiya(
                     bait, 
                     constraints, 
-                    issue
+                    issue,
+                    entire_poem
                 )
                 if len(fixed_bait) == 2:
                     fixed_verses[bait_index*2] = fixed_bait[0]
@@ -61,8 +69,6 @@ class QafiyaRefiner(BaseRefiner):
                 else:
                     # use original verse
                     self.logger.warning(f"Bait {bait_index} is not yet qafiya fixed. Using original verses.")
-            print(f"wrong_qafiya_bait: {wrong_qafiya_bait}")
-            print(f"Fixed verses: {fixed_verses}")
             # Create new poem
             return LLMPoem(
                 verses=fixed_verses,
@@ -91,7 +97,7 @@ class QafiyaRefiner(BaseRefiner):
         
         return wrong_qafiya_bait
     
-    async def _fix_single_verse_qafiya(self, verse: str, constraints: Constraints, issue: str) -> str:
+    async def _fix_single_verse_qafiya(self, verse: str, constraints: Constraints, issue: str, entire_poem: str) -> str:
         """Fix a single verse's qafiya"""
         # Format prompt for fixing verse qafiya
 
@@ -106,11 +112,9 @@ class QafiyaRefiner(BaseRefiner):
             theme=constraints.theme or "غير محدد",
             tone=constraints.tone or "غير محدد",
             existing_verses=verse,
-            context=f"{issue}"
-            )   
-
-        print(f"Formatted prompt: {formatted_prompt}")
-        
+            context=f"{issue}",
+            entire_poem=entire_poem
+            )           
 
         # Generate fixed verse
         response = self.llm.generate(formatted_prompt)

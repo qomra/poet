@@ -314,11 +314,30 @@ class ProsodyEvaluator:
             try:
                 # Extract JSON from the response (handle cases where LLM adds extra text)
                 response_text = response_text.strip()
-                if response_text.startswith("```json"):
-                    response_text = response_text[7:]
-                if response_text.endswith("```"):
-                    response_text = response_text[:-3]
-                response_text = response_text.strip()
+                
+                # Try to find JSON in the response
+                json_start = response_text.find('{')
+                json_end = response_text.rfind('}') + 1
+                
+                if json_start != -1 and json_end > json_start:
+                    # Extract just the JSON part
+                    response_text = response_text[json_start:json_end]
+                else:
+                    # Try to extract from markdown code blocks
+                    if response_text.startswith("```json"):
+                        response_text = response_text[7:]
+                    if response_text.endswith("```"):
+                        response_text = response_text[:-3]
+                    response_text = response_text.strip()
+                
+                # If still no JSON found, try to create a fallback response
+                if not response_text.startswith('{'):
+                    logger.warning(f"LLM returned non-JSON response: {response_text[:100]}...")
+                    # Create a fallback response based on the Arabic text
+                    if "صحيح" in response_text or "مطابق" in response_text:
+                        response_text = '{"is_valid": true, "pattern": "", "error_details": null}'
+                    else:
+                        response_text = '{"is_valid": false, "pattern": "", "error_details": "استجابة غير واضحة من الذكاء الاصطناعي"}'
                 
                 response = json.loads(response_text)
                 

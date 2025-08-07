@@ -47,24 +47,16 @@ class ProsodyRefiner(BaseRefiner):
             fixed_verses = poem.verses.copy()
             for bait_index, error_details in broken_bait:
                 bait = "#".join(poem.verses[bait_index*2:bait_index*2+2])
-                fixed_verse = await self._fix_single_verse(
+                fixed_bait = await self._fix_single_verse(
                     bait, 
                     constraints, 
                     error_details
                 )
-                if fixed_verse and fixed_verse != bait:
-                    # Split the fixed bait back into two verses
-                    fixed_verses_split = fixed_verse.split("#")
-                    if len(fixed_verses_split) == 2:
-                        fixed_verses[bait_index*2] = fixed_verses_split[0]
-                        fixed_verses[bait_index*2+1] = fixed_verses_split[1]
-                    else:
-                        # If we can't split properly, use original verses
-                        self.logger.warning(f"Bait {bait_index} could not be properly split. Using original verses.")
+                if len(fixed_bait) == 2:
+                    fixed_verses[bait_index*2] = fixed_bait[0]
+                    fixed_verses[bait_index*2+1] = fixed_bait[1]
                 else:
-                    # use original verse
                     self.logger.warning(f"Bait {bait_index} is not yet prosody fixed. Using original verses.")
-
                     
             # Create new poem
             return LLMPoem(
@@ -111,8 +103,7 @@ class ProsodyRefiner(BaseRefiner):
         response = self.llm.generate(formatted_prompt)
         fixed_verses = self._parse_verses_from_response(response)
         
-        # Return the first fixed verse, or original if parsing failed
-        return fixed_verses[0] if fixed_verses else verse
+        return fixed_verses
     
     def _parse_verses_from_response(self, response: str) -> List[str]:
         """Parse verses from LLM response"""
