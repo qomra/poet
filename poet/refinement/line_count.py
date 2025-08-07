@@ -2,7 +2,7 @@
 
 import logging
 from typing import List, Optional
-from poet.refinement.base_refiner import BaseRefiner
+from poet.refinement.base import BaseRefiner
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
@@ -22,7 +22,7 @@ class LineCountRefiner(BaseRefiner):
     def name(self) -> str:
         return "line_count_refiner"
     
-    def should_refine(self, evaluation: QualityAssessment) -> bool:
+    def should_refine(self,evaluation: QualityAssessment) -> bool:
         """Check if line count needs fixing"""
         if not evaluation.line_count_validation:
             return False

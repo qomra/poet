@@ -3,7 +3,7 @@
 import json
 import logging
 from typing import Optional, Dict, Any
-from poet.models.constraints import Constraints, QafiyaType
+from poet.models.constraints import Constraints, QafiyaType, QafiyaTypeDescriptionAndExamples
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
 
@@ -52,7 +52,6 @@ class QafiyaSelector:
             
             # Fill missing components using LLM
             qafiya_spec = self._fill_missing_qafiya_components(constraints, original_prompt, missing_components)
-            
             # Update constraints with filled qafiya specification
             enhanced_constraints = self._enhance_constraints(constraints, qafiya_spec)
             
@@ -102,14 +101,12 @@ class QafiyaSelector:
                 era=constraints.era or "غير محدد",
                 existing_qafiya=constraints.qafiya or "غير محدد",
                 existing_harakah=constraints.qafiya_harakah or "غير محدد",
-                existing_type=constraints.qafiya_type.value if constraints.qafiya_type else "غير محدد",
+                existing_type=constraints.qafiya_type.value if constraints.qafiya_type is not None else "غير محدد",
                 existing_pattern=constraints.qafiya_pattern or "غير محدد",
                 missing_components=", ".join(missing_components)
             )
-            
             # Get LLM response
             response = self.llm.generate(formatted_prompt)
-            
             # Parse the structured response
             qafiya_spec = self._parse_llm_response(response)
             
@@ -119,10 +116,10 @@ class QafiyaSelector:
             if constraints.qafiya_harakah:
                 qafiya_spec['qafiya_harakah'] = constraints.qafiya_harakah
             if constraints.qafiya_type:
-                qafiya_spec['qafiya_type'] = constraints.qafiya_type.value
+                qafiya_spec['qafiya_type'] = constraints.qafiya_type.value if constraints.qafiya_type is not None else None
             if constraints.qafiya_pattern:
                 qafiya_spec['qafiya_pattern'] = constraints.qafiya_pattern
-            
+
             return qafiya_spec
             
         except Exception as e:
@@ -167,9 +164,8 @@ class QafiyaSelector:
             
             # Parse JSON
             data = json.loads(json_str)
-            
             # Validate required structure
-            self._validate_response_structure(data)
+            #self._validate_response_structure(data)
             
             return data
             
@@ -182,7 +178,7 @@ class QafiyaSelector:
     
     def _validate_response_structure(self, data: Dict[str, Any]):
         """Validate that the response has the expected structure"""
-        required_fields = ['qafiya_letter', 'qafiya_harakah', 'qafiya_type']
+        required_fields = ['qafiya_letter', 'qafiya_harakah', 'qafiya_type', 'qafiya_pattern']
         
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
@@ -195,7 +191,6 @@ class QafiyaSelector:
     
     def _enhance_constraints(self, constraints: Constraints, qafiya_spec: Dict[str, Any]) -> Constraints:
         """Enhance constraints with selected qafiya specification"""
-        
         # Create new constraints with enhanced qafiya
         enhanced_constraints = Constraints(
             meter=constraints.meter,

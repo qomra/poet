@@ -4,9 +4,9 @@ import os
 import pytest
 import json
 from unittest.mock import patch
-from poet.evaluation.poem_evaluation import PoemEvaluator, EvaluationType
+from poet.evaluation.poem import PoemEvaluator, EvaluationType
 from poet.generation.poem_generator import SimplePoemGenerator
-from poet.refinement.tashkeel_refiner import TashkeelRefiner
+from poet.refinement.tashkeel import TashkeelRefiner
 from poet.analysis.constraint_parser import ConstraintParser
 from poet.analysis.qafiya_selector import QafiyaSelector
 from poet.models.constraints import Constraints
@@ -89,7 +89,8 @@ class TestRealSimpleGenerationValidation:
         return constraint_parser, qafiya_selector, poem_generator, tashkeel_refiner, poem_evaluator
     
     @pytest.mark.parametrize("llm_type", ["mock", "real"])
-    def test_complete_workflow_example_1(self, llm_type, mock_llm, real_llm, prompt_manager, test_data):
+    @pytest.mark.asyncio
+    async def test_complete_workflow_example_1(self, llm_type, mock_llm, real_llm, prompt_manager, test_data):
         """Test complete workflow for example 1 (غزل poem) - generate and evaluate with real/mock LLM"""
         # Check if test should be skipped
         should_skip, reason = self._should_skip_test(llm_type)
@@ -262,7 +263,7 @@ class TestRealSimpleGenerationValidation:
         
         # Step 3: Apply tashkeel (diacritics)
         print(f"\nStep 4: Applying tashkeel...")
-        poem_with_tashkeel = tashkeel_refiner.apply_tashkeel(poem)
+        poem_with_tashkeel = await tashkeel_refiner.refine(poem,constraints, None)
         print(f"Applied tashkeel to {len(poem_with_tashkeel.verses)} verses")
         
         # Step 4: Evaluate poem using PoemEvaluator
@@ -271,7 +272,7 @@ class TestRealSimpleGenerationValidation:
         evaluated_poem = poem_evaluator.evaluate_poem(
             poem_with_tashkeel, 
             enriched_constraints, 
-            [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA]
+            [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA, EvaluationType.TASHKEEL]
         )
         
         # Verify evaluation results
@@ -299,10 +300,21 @@ class TestRealSimpleGenerationValidation:
         else:
             print(f"    Qafiya validation failed due to mock response issues")
         
+        print(f"  Tashkeel validation:")
+        if evaluated_poem.quality.tashkeel_validation is not None:
+            print(f"    Overall valid: {evaluated_poem.quality.tashkeel_validation.overall_valid}")
+            print(f"    Total baits: {evaluated_poem.quality.tashkeel_validation.total_baits}")
+            print(f"    Valid baits: {evaluated_poem.quality.tashkeel_validation.valid_baits}")
+            print(f"    Invalid baits: {evaluated_poem.quality.tashkeel_validation.invalid_baits}")
+        else:
+            print(f"    Tashkeel validation failed due to mock response issues")
+        
         if evaluated_poem.quality.prosody_issues:
             print(f"  Prosody issues: {evaluated_poem.quality.prosody_issues}")
         if evaluated_poem.quality.qafiya_issues:
             print(f"  Qafiya issues: {evaluated_poem.quality.qafiya_issues}")
+        if evaluated_poem.quality.tashkeel_issues:
+            print(f"  Tashkeel issues: {evaluated_poem.quality.tashkeel_issues}")
         if evaluated_poem.quality.line_count_issues:
             print(f"  Line count issues: {evaluated_poem.quality.line_count_issues}")
         if evaluated_poem.quality.recommendations:
@@ -313,9 +325,11 @@ class TestRealSimpleGenerationValidation:
             assert enriched_constraints.meter == expected_constraints["meter"]
             assert enriched_constraints.theme == expected_constraints["theme"]
             assert enriched_constraints.line_count == expected_constraints["line_count"]
+            assert evaluated_poem.quality.tashkeel_validation is not None
     
     @pytest.mark.parametrize("llm_type", ["mock", "real"])
-    def test_complete_workflow_example_2(self, llm_type, mock_llm, real_llm, prompt_manager, test_data):
+    @pytest.mark.asyncio
+    async def test_complete_workflow_example_2(self, llm_type, mock_llm, real_llm, prompt_manager, test_data):
         """Test complete workflow for example 2 (هجاء poem) - generate and evaluate with real/mock LLM"""
         # Check if test should be skipped
         should_skip, reason = self._should_skip_test(llm_type)
@@ -506,7 +520,7 @@ class TestRealSimpleGenerationValidation:
         
         # Step 3: Apply tashkeel (diacritics)
         print(f"\nStep 3: Applying tashkeel...")
-        poem_with_tashkeel = tashkeel_refiner.apply_tashkeel(poem)
+        poem_with_tashkeel = await tashkeel_refiner.refine(poem,constraints, None)
         print(f"Applied tashkeel to {len(poem_with_tashkeel.verses)} verses")
         
         # Step 4: Evaluate poem using PoemEvaluator
@@ -515,7 +529,7 @@ class TestRealSimpleGenerationValidation:
         evaluated_poem = poem_evaluator.evaluate_poem(
             poem_with_tashkeel, 
             enriched_constraints, 
-            [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA]
+            [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA, EvaluationType.TASHKEEL]
         )
         
         # Verify evaluation results
@@ -543,10 +557,21 @@ class TestRealSimpleGenerationValidation:
         else:
             print(f"    Qafiya validation failed due to mock response issues")
         
+        print(f"  Tashkeel validation:")
+        if evaluated_poem.quality.tashkeel_validation is not None:
+            print(f"    Overall valid: {evaluated_poem.quality.tashkeel_validation.overall_valid}")
+            print(f"    Total baits: {evaluated_poem.quality.tashkeel_validation.total_baits}")
+            print(f"    Valid baits: {evaluated_poem.quality.tashkeel_validation.valid_baits}")
+            print(f"    Invalid baits: {evaluated_poem.quality.tashkeel_validation.invalid_baits}")
+        else:
+            print(f"    Tashkeel validation failed due to mock response issues")
+        
         if evaluated_poem.quality.prosody_issues:
             print(f"  Prosody issues: {evaluated_poem.quality.prosody_issues}")
         if evaluated_poem.quality.qafiya_issues:
             print(f"  Qafiya issues: {evaluated_poem.quality.qafiya_issues}")
+        if evaluated_poem.quality.tashkeel_issues:
+            print(f"  Tashkeel issues: {evaluated_poem.quality.tashkeel_issues}")
         if evaluated_poem.quality.line_count_issues:
             print(f"  Line count issues: {evaluated_poem.quality.line_count_issues}")
         if evaluated_poem.quality.recommendations:
@@ -557,6 +582,7 @@ class TestRealSimpleGenerationValidation:
             assert enriched_constraints.meter == expected_constraints["meter"]
             assert enriched_constraints.theme == expected_constraints["theme"]
             assert enriched_constraints.line_count == expected_constraints["line_count"]
+            assert evaluated_poem.quality.tashkeel_validation is not None
         
         # Additional analysis for real LLM tests
         if llm_type == "real":
@@ -566,6 +592,7 @@ class TestRealSimpleGenerationValidation:
             print(f"  Poem follows qafiya: {enriched_constraints.qafiya}")
             print(f"  Prosody compliance: {evaluated_poem.quality.prosody_validation.overall_valid}")
             print(f"  Qafiya compliance: {evaluated_poem.quality.qafiya_validation.overall_valid}")
+            print(f"  Tashkeel compliance: {evaluated_poem.quality.tashkeel_validation.overall_valid}")
             print(f"  Line count compliance: {evaluated_poem.quality.line_count_validation.is_valid}")
             print(f"  Quality score: {evaluated_poem.quality.overall_score}")
             
@@ -579,6 +606,11 @@ class TestRealSimpleGenerationValidation:
                 print(f"  [SUCCESS] Generated poem successfully follows qafiya {enriched_constraints.qafiya}")
             else:
                 print(f"  [WARNING] Generated poem has qafiya issues with {enriched_constraints.qafiya}")
+            
+            if evaluated_poem.quality.tashkeel_validation.overall_valid:
+                print(f"  [SUCCESS] Generated poem has correct diacritics")
+            else:
+                print(f"  [WARNING] Generated poem has diacritic issues")
             
             if evaluated_poem.quality.overall_score > 0.8:
                 print(f"  [SUCCESS] High quality poem generated")

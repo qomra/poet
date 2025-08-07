@@ -2,19 +2,19 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from poet.evaluation.qafiya_evaluator import QafiyaValidator, QafiyaValidationError
+from poet.evaluation.qafiya import QafiyaEvaluator, QafiyaValidationError
 from poet.models.qafiya import QafiyaValidationResult, QafiyaBaitResult
 from poet.models.poem import LLMPoem
 from poet.llm.base_llm import LLMConfig
 
 
-class TestQafiyaValidator:
+class TestQafiyaEvaluator:
     
     def setup_method(self):
         """Set up test fixtures"""
         self.mock_llm = Mock()
         self.mock_llm.config = LLMConfig(model_name="test-model")
-        self.validator = QafiyaValidator(self.mock_llm)
+        self.validator = QafiyaEvaluator(self.mock_llm)
         
         # Sample poem with valid qafiya (2 baits)
         self.valid_poem = LLMPoem(
@@ -42,7 +42,7 @@ class TestQafiyaValidator:
             model_name="test-model"
         )
     
-    def test_validate_qafiya_valid_poem(self):
+    def test_evaluate_qafiya_valid_poem(self):
         """Test qafiya validation with a valid poem - each bait evaluated individually"""
         # Mock LLM responses for each bait (2 baits, both valid)
         mock_responses = [
@@ -54,12 +54,13 @@ class TestQafiyaValidator:
         with patch('poet.prompts.prompt_manager.PromptManager.format_prompt') as mock_format_prompt:
             mock_format_prompt.return_value = "test qafiya validation prompt"
             
-            result = self.validator.validate_qafiya(
+            result = self.validator.evaluate_qafiya(
                 self.valid_poem, 
                 expected_qafiya="ل",
                 qafiya_harakah="مكسور",
                 qafiya_type="متواتر",
-                qafiya_pattern="لِ"
+                qafiya_pattern="لِ",
+                qafiya_type_description_and_examples="متواتر: متحرك واحد بين ساكنين"
             )
             
             # Verify LLM was called twice (once for each bait)
@@ -84,7 +85,7 @@ class TestQafiyaValidator:
                 assert bait_result.is_valid is True
                 assert bait_result.error_details is None
     
-    def test_validate_qafiya_invalid_poem(self):
+    def test_evaluate_qafiya_invalid_poem(self):
         """Test qafiya validation with an invalid poem - each bait evaluated individually"""
         # Mock LLM responses for each bait (3 baits, last one invalid)
         mock_responses = [
@@ -97,12 +98,13 @@ class TestQafiyaValidator:
         with patch('poet.prompts.prompt_manager.PromptManager.format_prompt') as mock_format_prompt:
             mock_format_prompt.return_value = "test qafiya validation prompt"
             
-            result = self.validator.validate_qafiya(
+            result = self.validator.evaluate_qafiya(
                 self.invalid_poem, 
                 expected_qafiya="ل",
                 qafiya_harakah="مكسور",
                 qafiya_type="متواتر",
-                qafiya_pattern="لِ"
+                qafiya_pattern="لِ",
+                qafiya_type_description_and_examples="متواتر: متحرك واحد بين ساكنين"
             )
             
             # Verify LLM was called three times (once for each bait)
@@ -125,7 +127,7 @@ class TestQafiyaValidator:
             assert result.bait_results[2].is_valid is False  # Bait 3
             assert result.bait_results[2].error_details == "البيت الثالث لا يتبع نفس القافية"
     
-    def test_validate_qafiya_invalid_line_count(self):
+    def test_evaluate_qafiya_invalid_line_count(self):
         """Test qafiya validation with invalid line count (odd number of lines)"""
         invalid_poem = LLMPoem(
             verses=[
@@ -137,7 +139,7 @@ class TestQafiyaValidator:
             model_name="test-model"
         )
         
-        result = self.validator.validate_qafiya(invalid_poem, expected_qafiya="ل")
+        result = self.validator.evaluate_qafiya(invalid_poem, expected_qafiya="ل")
         
         # Should return invalid result for odd number of lines
         assert isinstance(result, QafiyaValidationResult)
@@ -147,7 +149,7 @@ class TestQafiyaValidator:
         assert result.validation_summary == "لا توجد أبيات للتحقق من القافية"
         assert result.overall_valid is False
     
-    def test_validate_qafiya_empty_poem(self):
+    def test_evaluate_qafiya_empty_poem(self):
         """Test qafiya validation with empty poem"""
         empty_poem = LLMPoem(
             verses=[],
@@ -155,7 +157,7 @@ class TestQafiyaValidator:
             model_name="test-model"
         )
         
-        result = self.validator.validate_qafiya(empty_poem, expected_qafiya="ل")
+        result = self.validator.evaluate_qafiya(empty_poem, expected_qafiya="ل")
         
         assert result.overall_valid is False
         assert result.validation_summary == "لا توجد أبيات للتحقق من القافية"
@@ -297,31 +299,31 @@ class TestQafiyaValidator:
         assert result_dict['bait_results'][0]['is_valid'] is True
         assert result_dict['bait_results'][0]['error_details'] is None
     
-    def test_validate_qafiya_llm_error_handling(self):
+    def test_evaluate_qafiya_llm_error_handling(self):
         """Test qafiya validation when LLM fails"""
         # Mock LLM to raise exception
         self.mock_llm.generate.side_effect = Exception("LLM API error")
         
         with pytest.raises(QafiyaValidationError, match="Qafiya validation failed"):
-            self.validator.validate_qafiya(self.valid_poem, expected_qafiya="ل")
+            self.validator.evaluate_qafiya(self.valid_poem, expected_qafiya="ل")
     
-    def test_validate_qafiya_with_prompt_manager_injection(self):
+    def test_evaluate_qafiya_with_prompt_manager_injection(self):
         """Test qafiya validation with custom prompt manager"""
         mock_prompt_manager = Mock()
         mock_prompt_manager.format_prompt.return_value = "custom prompt"
         
-        validator = QafiyaValidator(self.mock_llm, mock_prompt_manager)
+        validator = QafiyaEvaluator(self.mock_llm, mock_prompt_manager)
         
         # Mock LLM response
         self.mock_llm.generate.return_value = '{"is_valid": true, "issue": null}'
         
-        result = validator.validate_qafiya(self.valid_poem, expected_qafiya="ل")
+        result = validator.evaluate_qafiya(self.valid_poem, expected_qafiya="ل")
         
         # Verify custom prompt manager was used
         mock_prompt_manager.format_prompt.assert_called()
         assert result.overall_valid is True
     
-    def test_validate_qafiya_partial_specifications(self):
+    def test_evaluate_qafiya_partial_specifications(self):
         """Test qafiya validation with partial specifications"""
         # Mock LLM response
         self.mock_llm.generate.return_value = '{"is_valid": true, "issue": null}'
@@ -330,7 +332,7 @@ class TestQafiyaValidator:
             mock_format_prompt.return_value = "test prompt"
             
             # Test with only expected_qafiya
-            result = self.validator.validate_qafiya(self.valid_poem, expected_qafiya="ل")
+            result = self.validator.evaluate_qafiya(self.valid_poem, expected_qafiya="ل")
             
             assert result.expected_qafiya == "ل"
             assert result.qafiya_harakah is None
@@ -338,7 +340,7 @@ class TestQafiyaValidator:
             assert result.qafiya_pattern is None
             
             # Test with only qafiya_pattern
-            result2 = self.validator.validate_qafiya(
+            result2 = self.validator.evaluate_qafiya(
                 self.valid_poem, 
                 qafiya_pattern="لِ"
             )
@@ -346,7 +348,7 @@ class TestQafiyaValidator:
             assert result2.expected_qafiya is None
             assert result2.qafiya_pattern == "لِ"
     
-    def test_validate_qafiya_single_bait_poem(self):
+    def test_evaluate_qafiya_single_bait_poem(self):
         """Test qafiya validation with a single bait poem"""
         single_bait_poem = LLMPoem(
             verses=[
@@ -363,7 +365,7 @@ class TestQafiyaValidator:
         with patch('poet.prompts.prompt_manager.PromptManager.format_prompt') as mock_format_prompt:
             mock_format_prompt.return_value = "test prompt"
             
-            result = self.validator.validate_qafiya(single_bait_poem, expected_qafiya="ل")
+            result = self.validator.evaluate_qafiya(single_bait_poem, expected_qafiya="ل")
             
             # Verify LLM was called once
             assert self.mock_llm.generate.call_count == 1

@@ -22,7 +22,7 @@ class LLMPoem:
         if self.generation_timestamp is None:
             self.generation_timestamp = datetime.now()
     
-    def validate_line_count(self) -> bool:
+    def evaluate_line_count(self) -> bool:
         """Validate that poem has correct number of lines (even number)"""
         return len(self.verses) % 2 == 0 and len(self.verses) > 0
     
@@ -33,7 +33,7 @@ class LLMPoem:
     
     def get_baits(self) -> List[tuple]:
         """Get poem as list of baits (verse pairs)"""
-        if not self.validate_line_count():
+        if not self.evaluate_line_count():
             return []
         return [(self.verses[i], self.verses[i+1]) for i in range(0, len(self.verses), 2)]
     

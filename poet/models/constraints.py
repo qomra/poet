@@ -13,6 +13,19 @@ class QafiyaType(Enum):
     MUTAKAASIS = "متكاوس"  # Four vowels between two consonants
     MUTARADIF = "مترادف"   # Two consonants together
 
+class QafiyaTypeDescriptionAndExamples(Enum):
+    """
+    Detailed descriptions and examples of Arabic qafiya types.
+
+    Each member contains a single string describing the qafiya pattern, where '/'
+    represents a vowel (haraka) and 'o' represents a cessation (sukun).
+    """
+    MUTAKAASIS = "////o - Mutakaathis (المُتَكاثِس): A succession of four voweled letters followed by a sukun. This is the most complex and rarest type, suggesting a 'piling up' of vowels. Examples: الزَمانُ صَدَعَكَ, الإلَهُ فَجَبَرَ"
+    MUTARAKIB = "///o - Mutarakib (المُتراكِب): A succession of three voweled letters followed by a sukun. Its name means 'compounded,' and it creates a flowing, consecutive rhythm. Examples: سَمَرُ, فَتَنُ, نَظَمُ, هَزَلُ"
+    MUTADAARIK = "//o - Mutadaarik (المُتدارِك): A succession of two voweled letters followed by a sukun. Meaning 'the one that follows,' it's a very common and balanced qafiya type. Examples: مُنْتَهِي, مٌقْتَفِي, نَاظِمِ, رَاسِمُ"
+    MUTAWATIR = "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ"
+    MUTARADIF = "oo - Mutaradif (المُترادِف): Two consecutive sukuns at the end of the verse. This pattern creates an abrupt stop and often occurs when a long vowel precedes the final consonant. Examples: دِينْ, عَيْنْ, حينْ, أَيْنْ"
+
 
 @dataclass
 class Constraints:
@@ -29,6 +42,7 @@ class Constraints:
     qafiya: Optional[str] = None
     qafiya_harakah: Optional[str] = None  # مفتوح، مكسور، مضموم، ساكن
     qafiya_type: Optional[QafiyaType] = None
+    qafiya_type_description_and_examples: Optional[str] = field(default=None, init=False) # infered not passed by user
     qafiya_pattern: Optional[str] = None  # Exact pattern like "عُ", "قَ", etc.
     line_count: Optional[int] = None
     
@@ -63,6 +77,11 @@ class Constraints:
             if value:
                 setattr(self, field_name, value.strip())
         
+        # infer qafiya_type_examples from qafiya_type
+        if self.qafiya_type:
+            # convert qafiya_type to QafiyaTypeDescriptionAndExamples enum
+            self.qafiya_type_description_and_examples = QafiyaTypeDescriptionAndExamples[self.qafiya_type.name].value
+            
         # Basic validation
         if self.line_count is not None and self.line_count <= 0:
             raise ValueError("Line count must be positive")
@@ -77,7 +96,7 @@ class Constraints:
             "meter": self.meter,
             "qafiya": self.qafiya,
             "qafiya_harakah": self.qafiya_harakah,
-            "qafiya_type": self.qafiya_type.value if self.qafiya_type else None,
+            "qafiya_type": self.qafiya_type.value if self.qafiya_type is not None else None,
             "qafiya_pattern": self.qafiya_pattern,
             "line_count": self.line_count,
             "theme": self.theme,
@@ -133,12 +152,18 @@ class Constraints:
         parts = []
         if self.meter:
             parts.append(f"البحر: {self.meter}")
+        if self.meeter_tafeelat:
+            parts.append(f"تفعيلات البحر: {self.meeter_tafeelat}")
         if self.qafiya:
             qafiya_info = f"القافية: {self.qafiya}"
             if self.qafiya_harakah:
                 qafiya_info += f" ({self.qafiya_harakah})"
             if self.qafiya_pattern:
                 qafiya_info += f" [{self.qafiya_pattern}]"
+            if self.qafiya_type:
+                qafiya_info += f" ({self.qafiya_type})"
+            if self.qafiya_type_description_and_examples:
+                qafiya_info += f" ({self.qafiya_type_description_and_examples})"
             parts.append(qafiya_info)
         if self.line_count:
             parts.append(f"الأبيات: {self.line_count}")

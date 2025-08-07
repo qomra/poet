@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from poet.evaluation.poem_evaluation import PoemEvaluator, EvaluationType
+from poet.evaluation.poem import PoemEvaluator, EvaluationType
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
@@ -247,4 +247,128 @@ class TestPoemEvaluator:
         """Test EvaluationType enum values"""
         assert EvaluationType.LINE_COUNT.value == "line_count"
         assert EvaluationType.PROSODY.value == "prosody"
-        assert EvaluationType.QAFIYA.value == "qafiya" 
+        assert EvaluationType.QAFIYA.value == "qafiya"
+        assert EvaluationType.TASHKEEL.value == "tashkeel"
+    
+    def test_evaluate_poem_with_tashkeel_only(self, poem_evaluator, sample_poem, sample_constraints):
+        """Test evaluation with tashkeel validation only"""
+        result = poem_evaluator.evaluate_poem(
+            sample_poem, 
+            sample_constraints, 
+            [EvaluationType.TASHKEEL]
+        )
+        
+        assert result == sample_poem
+        assert result.quality is not None
+        # Should have tashkeel validation results
+        assert result.quality.tashkeel_validation is not None
+        assert result.quality.tashkeel_issues == []
+        assert result.quality.overall_score == 1.0
+    
+    def test_evaluate_poem_with_tashkeel_issues(self, poem_evaluator, sample_poem, sample_constraints):
+        """Test evaluation with tashkeel validation issues"""
+        # Create a poem with tashkeel issues (missing diacritics)
+        poem_with_tashkeel_issues = LLMPoem(
+            verses=[
+                "قفا نبك من ذكرى حبيب ومنزل",  # Missing diacritics
+                "بسقط اللوى بين الدخول فحومل",
+                "فتوضح فالمقراة لم يعف رسمها",
+                "لما نسجتها من جنوب وشمأل"
+            ],
+            llm_provider="mock",
+            model_name="test-model"
+        )
+        
+        result = poem_evaluator.evaluate_poem(
+            poem_with_tashkeel_issues, 
+            sample_constraints, 
+            [EvaluationType.TASHKEEL]
+        )
+        
+        assert result.quality is not None
+        assert result.quality.tashkeel_validation is not None
+        # Should have tashkeel issues
+        assert len(result.quality.tashkeel_issues) > 0
+        assert result.quality.overall_score < 1.0
+    
+    def test_evaluate_poem_complete_workflow_with_tashkeel(self, poem_evaluator, sample_poem, sample_constraints, mock_llm):
+        """Test complete evaluation workflow including tashkeel"""
+        # Set up mock response for qafiya (individual bait validation)
+        mock_llm.responses = [
+            # Qafiya response for single bait
+            '''
+            ```json
+            {
+                "is_valid": true,
+                "issue": null
+            }
+            ```
+            '''
+        ]
+        mock_llm.reset()
+        
+        result = poem_evaluator.evaluate_poem(
+            sample_poem, 
+            sample_constraints, 
+            [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA, EvaluationType.TASHKEEL]
+        )
+        
+        assert result == sample_poem
+        assert result.quality is not None
+        # Should have all validation results
+        assert result.prosody_validation is not None
+        assert result.prosody_validation.bahr_used == "طويل"
+        assert result.quality.tashkeel_validation is not None
+        assert result.quality.tashkeel_issues == []
+    
+    def test_evaluate_poem_quality_calculation_with_tashkeel(self, poem_evaluator, sample_constraints):
+        """Test quality score calculation with tashkeel issues"""
+        # Create poem with tashkeel issues
+        poem_with_issues = LLMPoem(
+            verses=[
+                "قفا نبك من ذكرى حبيب ومنزل",  # Missing diacritics
+                "بسقط اللوى بين الدخول فحومل",
+                "فتوضح فالمقراة لم يعف رسمها",
+                "لما نسجتها من جنوب وشمأل"
+            ],
+            llm_provider="mock",
+            model_name="test-model"
+        )
+        
+        result = poem_evaluator.evaluate_poem(
+            poem_with_issues, 
+            sample_constraints, 
+            [EvaluationType.TASHKEEL]
+        )
+        
+        assert result.quality is not None
+        assert len(result.quality.tashkeel_issues) > 0
+        assert result.quality.overall_score < 1.0
+        assert "راجع التشكيل في الأبيات" in result.quality.recommendations
+    
+    def test_evaluate_poem_multiple_issues_including_tashkeel(self, poem_evaluator, sample_constraints):
+        """Test evaluation with multiple issues including tashkeel"""
+        # Create poem with multiple issues
+        problematic_poem = LLMPoem(
+            verses=[
+                "قفا نبك من ذكرى حبيب ومنزل",  # Missing diacritics
+                "بسقط اللوى بين الدخول فحومل",
+                "فتوضح فالمقراة لم يعف رسمها"  # Odd number of verses
+            ],
+            llm_provider="mock",
+            model_name="test-model"
+        )
+        
+        result = poem_evaluator.evaluate_poem(
+            problematic_poem, 
+            sample_constraints, 
+            [EvaluationType.LINE_COUNT, EvaluationType.TASHKEEL]
+        )
+        
+        assert result.quality is not None
+        assert len(result.quality.line_count_issues) > 0
+        assert len(result.quality.tashkeel_issues) > 0
+        assert result.quality.overall_score < 1.0
+        assert result.quality.is_acceptable is False
+        assert "تأكد من أن عدد الأبيات زوجي" in result.quality.recommendations
+        assert "راجع التشكيل في الأبيات" in result.quality.recommendations 

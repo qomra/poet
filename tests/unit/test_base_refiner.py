@@ -1,8 +1,8 @@
-# tests/unit/test_base_refiner.py
+# tests/unit/test_base.py
 
 import pytest
 from unittest.mock import Mock, AsyncMock
-from poet.refinement.base_refiner import BaseRefiner, RefinementStep
+from poet.refinement.base import BaseRefiner, RefinementStep
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
@@ -77,7 +77,7 @@ class TestRefinementStep:
 class TestBaseRefiner:
     """Test BaseRefiner abstract class"""
     
-    def test_base_refiner_interface(self):
+    def test_base_interface(self):
         """Test that BaseRefiner defines required interface"""
         # Should not be able to instantiate abstract class
         with pytest.raises(TypeError):

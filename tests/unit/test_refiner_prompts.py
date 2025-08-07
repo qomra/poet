@@ -67,7 +67,8 @@ class TestRefinerPrompts:
             theme=sample_constraints.theme,
             tone=sample_constraints.tone,
             existing_verses=existing_verse,
-            context=context
+            context=context,
+            meeter_tafeelat="فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ"
         )
         
         # Check that all required parameters are included
@@ -97,7 +98,8 @@ class TestRefinerPrompts:
             theme=sample_constraints.theme,
             tone=sample_constraints.tone,
             existing_verses=existing_verse,
-            context=context
+            context=context,
+            meeter_tafeelat="فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ"
         )
         
         # Check that all required parameters are included
@@ -114,13 +116,13 @@ class TestRefinerPrompts:
         assert "إصلاح القافية" in formatted_prompt
         assert "القافية المطلوبة" in formatted_prompt
     
-    def test_verse_generation_prompt_updated(self, prompt_manager, sample_constraints):
-        """Test updated verse generation prompt with refinement support"""
+    def test_verse_completion_prompt_updated(self, prompt_manager, sample_constraints):
+        """Test updated verse completion prompt with refinement support"""
         existing_verses = "قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ"
         context = "إضافة أبيات جديدة"
         
         formatted_prompt = prompt_manager.format_prompt(
-            'verse_generation',
+            'verse_completion',
             meter=sample_constraints.meter,
             qafiya=sample_constraints.qafiya,
             qafiya_pattern=sample_constraints.qafiya_pattern,
@@ -139,37 +141,38 @@ class TestRefinerPrompts:
         assert sample_constraints.qafiya_pattern in formatted_prompt
         assert sample_constraints.theme in formatted_prompt
         assert sample_constraints.tone in formatted_prompt
-        assert context in formatted_prompt
         assert existing_verses in formatted_prompt
+        assert context in formatted_prompt
+        assert "2" in formatted_prompt  # verses_to_add
         
         # Check that it's a valid prompt
-        assert "شاعر عربي مبدع ومحلل عروضي" in formatted_prompt
-        assert "السياق والمعايير الأساسية" in formatted_prompt
-        assert "متطلبات صارمة" in formatted_prompt
+        assert "أنت شاعر عربي مبدع" in formatted_prompt
+        assert "إضافة" in formatted_prompt
+        assert "بيت جديد" in formatted_prompt
     
     def test_prompt_template_parameters(self, prompt_manager):
         """Test that prompt templates have correct parameters"""
         # Test verse_completion template
         template_info = prompt_manager.get_template_info('verse_completion')
         expected_params = {
-            'meter', 'qafiya', 'qafiya_pattern', 'theme', 'tone', 
+            'meter', 'qafiya', 'qafiya_pattern', 'theme', 'tone',
             'existing_verses', 'verses_to_add'
         }
         assert set(template_info['parameters']) == expected_params
-        
+
         # Test prosody_refinement template
         template_info = prompt_manager.get_template_info('prosody_refinement')
         expected_params = {
-            'meter', 'qafiya', 'qafiya_pattern', 'theme', 'tone', 
-            'existing_verses', 'context'
+            'meter', 'qafiya', 'qafiya_pattern', 'theme', 'tone',
+            'existing_verses', 'context', 'meeter_tafeelat'
         }
         assert set(template_info['parameters']) == expected_params
-        
+
         # Test qafiya_refinement template
         template_info = prompt_manager.get_template_info('qafiya_refinement')
         expected_params = {
-            'meter', 'qafiya', 'qafiya_pattern', 'theme', 'tone', 
-            'existing_verses', 'context'
+            'meter', 'qafiya', 'qafiya_pattern', 'theme', 'tone',
+            'existing_verses', 'context', 'meeter_tafeelat'
         }
         assert set(template_info['parameters']) == expected_params
     
@@ -180,24 +183,23 @@ class TestRefinerPrompts:
         assert template_info['category'] == 'generation'
         assert template_info['metadata']['purpose'] == 'verse_completion'
         assert template_info['metadata']['language'] == 'arabic'
-        
+
         # Test prosody_refinement template
         template_info = prompt_manager.get_template_info('prosody_refinement')
-        assert template_info['category'] == 'generation'
+        assert template_info['category'] == 'refinement'
         assert template_info['metadata']['purpose'] == 'prosody_fix'
         assert template_info['metadata']['language'] == 'arabic'
-        
+
         # Test qafiya_refinement template
         template_info = prompt_manager.get_template_info('qafiya_refinement')
-        assert template_info['category'] == 'generation'
+        assert template_info['category'] == 'refinement'
         assert template_info['metadata']['purpose'] == 'qafiya_fix'
         assert template_info['metadata']['language'] == 'arabic'
     
     def test_prompt_template_validation(self, prompt_manager, sample_constraints):
         """Test that prompt templates validate parameters correctly"""
         # Test valid parameters
-        assert prompt_manager.validate_template(
-            'verse_completion',
+        assert prompt_manager.validate_template('verse_completion',
             meter=sample_constraints.meter,
             qafiya=sample_constraints.qafiya,
             qafiya_pattern=sample_constraints.qafiya_pattern,
@@ -208,8 +210,7 @@ class TestRefinerPrompts:
         )
         
         # Test invalid parameters (missing required)
-        assert not prompt_manager.validate_template(
-            'verse_completion',
+        assert not prompt_manager.validate_template('verse_completion',
             meter=sample_constraints.meter,
             qafiya=sample_constraints.qafiya
             # Missing other required parameters
@@ -218,20 +219,9 @@ class TestRefinerPrompts:
     def test_prompt_template_listing(self, prompt_manager):
         """Test that all refiner templates are available"""
         templates = prompt_manager.list_templates()
-        
+
         # Check that all refiner templates are present
         assert 'verse_completion' in templates
         assert 'prosody_refinement' in templates
         assert 'qafiya_refinement' in templates
-        assert 'verse_generation' in templates
-        
-        # Check that they're in the generation category
-        from poet.prompts.prompt_manager import PromptCategory
-        generation_templates = prompt_manager.get_templates_by_category(
-            PromptCategory.GENERATION
-        )
-        generation_template_names = [t.name for t in generation_templates]
-        
-        assert 'verse_completion' in generation_template_names
-        assert 'prosody_refinement' in generation_template_names
-        assert 'qafiya_refinement' in generation_template_names 
+        assert 'simple_poem_generation' in templates 

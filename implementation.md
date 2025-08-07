@@ -187,7 +187,7 @@ This plan provides a progressive, testable implementation strategy where each co
 **Priority**: High
 
 ### Deliverables
-- `ProsodyValidator` checking meter and rhyme accuracy
+- `ProsodyEvaluator` checking meter and rhyme accuracy
 - `SemanticEvaluator` assessing meaning and coherence  
 - `AestheticCritic` evaluating style and beauty
 - Scoring systems for different quality dimensions

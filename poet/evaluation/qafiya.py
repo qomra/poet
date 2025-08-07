@@ -9,12 +9,13 @@ from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
 
 
+
 class QafiyaValidationError(Exception):
     """Raised when qafiya validation fails"""
     pass
 
 
-class QafiyaValidator:
+class QafiyaEvaluator:
     """
     Validates qafiya (rhyme) consistency in Arabic poetry using LLM analysis.
     
@@ -27,9 +28,9 @@ class QafiyaValidator:
         self.prompt_manager = prompt_manager or PromptManager()
         self.logger = logging.getLogger(__name__)
     
-    def validate_qafiya(self, poem: LLMPoem, expected_qafiya: Optional[str] = None, 
+    def evaluate_qafiya(self, poem: LLMPoem, expected_qafiya: Optional[str] = None, 
                        qafiya_harakah: Optional[str] = None, qafiya_type: Optional[str] = None,
-                       qafiya_pattern: Optional[str] = None) -> QafiyaValidationResult:
+                       qafiya_pattern: Optional[str] = None, qafiya_type_description_and_examples: Optional[str] = None) -> QafiyaValidationResult:
         """
         Validate qafiya consistency across all baits in the poem.
         
@@ -59,16 +60,10 @@ class QafiyaValidator:
                     expected_qafiya=expected_qafiya,
                     qafiya_harakah=qafiya_harakah,
                     qafiya_type=qafiya_type,
-                    qafiya_pattern=qafiya_pattern
-                )
+                    qafiya_pattern=qafiya_pattern,
+                    )
             
             # Format the qafiya validation prompt with complete specifications
-            expected_qafiya_info = f"""القافية المطلوبة:
-- الحرف: {expected_qafiya}
-- الحركة: {qafiya_harakah}
-- النوع: {qafiya_type}
-- النمط: {qafiya_pattern}"""
-            print(f"Expected qafiya info: {expected_qafiya_info}")
             # Evaluate each bait individually against the qafiya specifications
             bait_results = []
             misaligned_lines = []
@@ -83,7 +78,10 @@ class QafiyaValidator:
                 formatted_prompt = self.prompt_manager.format_prompt(
                     'qafiya_validation',
                     verses=bait_formatted,
-                    expected_qafiya=expected_qafiya_info
+                    qafiya=expected_qafiya,
+                    qafiya_pattern=qafiya_pattern,
+                    qafiya_type=qafiya_type,
+                    qafiya_type_description_and_examples=qafiya_type_description_and_examples
                 )
                 
                 # Get LLM response for this single bait

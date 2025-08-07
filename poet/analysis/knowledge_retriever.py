@@ -435,7 +435,7 @@ class CorpusKnowledgeRetriever(KnowledgeRetriever):
         
         # Check qafiya availability
         if constraints.qafiya:
-            if not self.corpus_manager.validate_qafiya_exists(constraints.qafiya):
+            if not self.corpus_manager.evaluate_qafiya_exists(constraints.qafiya):
                 validation["feasible"] = False
                 validation["issues"].append(f"Qafiya '{constraints.qafiya}' not found in corpus")
                 

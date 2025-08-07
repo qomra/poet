@@ -1,7 +1,7 @@
 # tests/unit/test_line_count_validator.py
 
 import pytest
-from poet.evaluation.line_count_validator import LineCountValidator
+from poet.evaluation.line_count import LineCountEvaluator
 from poet.models.line_count import LineCountValidationResult
 from poet.models.poem import LLMPoem
 
@@ -10,9 +10,9 @@ class TestLineCountValidator:
     
     def setup_method(self):
         """Set up test fixtures"""
-        self.validator = LineCountValidator()
+        self.validator = LineCountEvaluator()
     
-    def test_validate_line_count_valid_poem(self):
+    def test_evaluate_line_count_valid_poem(self):
         """Test line count validation with valid poem (even number of lines)"""
         valid_poem = LLMPoem(
             verses=[
@@ -25,7 +25,7 @@ class TestLineCountValidator:
             model_name="test-model"
         )
         
-        result = self.validator.validate_line_count(valid_poem)
+        result = self.validator.evaluate_line_count(valid_poem)
         
         assert isinstance(result, LineCountValidationResult)
         assert result.is_valid is True
@@ -34,7 +34,7 @@ class TestLineCountValidator:
         assert "صحيح" in result.validation_summary
         assert result.error_details is None
     
-    def test_validate_line_count_invalid_poem(self):
+    def test_evaluate_line_count_invalid_poem(self):
         """Test line count validation with invalid poem (odd number of lines)"""
         invalid_poem = LLMPoem(
             verses=[
@@ -46,7 +46,7 @@ class TestLineCountValidator:
             model_name="test-model"
         )
         
-        result = self.validator.validate_line_count(invalid_poem)
+        result = self.validator.evaluate_line_count(invalid_poem)
         
         assert isinstance(result, LineCountValidationResult)
         assert result.is_valid is False
@@ -55,7 +55,7 @@ class TestLineCountValidator:
         assert "يجب أن يكون زوجياً" in result.validation_summary
         assert result.error_details == "عدد الأبيات يجب أن يكون زوجياً"
     
-    def test_validate_line_count_empty_poem(self):
+    def test_evaluate_line_count_empty_poem(self):
         """Test line count validation with empty poem"""
         empty_poem = LLMPoem(
             verses=[],
@@ -63,7 +63,7 @@ class TestLineCountValidator:
             model_name="test-model"
         )
         
-        result = self.validator.validate_line_count(empty_poem)
+        result = self.validator.evaluate_line_count(empty_poem)
         
         assert isinstance(result, LineCountValidationResult)
         assert result.is_valid is True  # 0 is even

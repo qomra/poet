@@ -5,7 +5,7 @@ import pytest
 import json
 from unittest.mock import patch
 from poet.generation.poem_generator import SimplePoemGenerator
-from poet.evaluation.prosody_validator import ProsodyValidator
+from poet.evaluation.prosody import ProsodyEvaluator
 from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.prompts.prompt_manager import PromptManager
@@ -14,8 +14,8 @@ from poet.llm.base_llm import MockLLM, LLMConfig
 
 @pytest.mark.integration
 @pytest.mark.real_data
-class TestRealSimpleGeneratorProsodyValidator:
-    """Integration tests for SimplePoemGenerator and ProsodyValidator with real/mock LLM combinations"""
+class TestRealSimpleGeneratorProsodyEvaluator:
+    """Integration tests for SimplePoemGenerator and ProsodyEvaluator with real/mock LLM combinations"""
     
     @pytest.fixture(scope="class")
     def prompt_manager(self):
@@ -66,7 +66,7 @@ class TestRealSimpleGeneratorProsodyValidator:
         return False, None
     
     def _create_components(self, llm_type, mock_llm, real_llm, prompt_manager):
-        """Create SimplePoemGenerator and ProsodyValidator with appropriate LLM"""
+        """Create SimplePoemGenerator and ProsodyEvaluator with appropriate LLM"""
         if llm_type == "mock":
             llm = mock_llm
         elif llm_type == "real":
@@ -78,7 +78,7 @@ class TestRealSimpleGeneratorProsodyValidator:
         
         # Create both components with the same LLM
         poem_generator = SimplePoemGenerator(llm, prompt_manager)
-        prosody_validator = ProsodyValidator()
+        prosody_validator = ProsodyEvaluator(llm)
         
         return poem_generator, prosody_validator
     
@@ -127,8 +127,35 @@ class TestRealSimpleGeneratorProsodyValidator:
             ```
             '''
             
-            # Set up mock responses
-            mock_llm.responses = [mock_poem_response, mock_tashkeel_response, mock_tashkeel_response]
+            # Mock responses for prosody validation (2 baits)
+            mock_prosody_response_1 = '''
+            ```json
+            {
+                "is_valid": true,
+                "pattern": "فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ#فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ",
+                "error_details": null
+            }
+            ```
+            '''
+            
+            mock_prosody_response_2 = '''
+            ```json
+            {
+                "is_valid": true,
+                "pattern": "فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ#فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ",
+                "error_details": null
+            }
+            ```
+            '''
+            
+            # Set up mock responses: poem generation, tashkeel (2x), prosody validation (2x)
+            mock_llm.responses = [
+                mock_poem_response, 
+                mock_tashkeel_response, 
+                mock_tashkeel_response,
+                mock_prosody_response_1,
+                mock_prosody_response_2
+            ]
             mock_llm.reset()
         
         # Create constraints from example
@@ -178,7 +205,7 @@ class TestRealSimpleGeneratorProsodyValidator:
         assert validation_result.prosody_validation is not None
         assert validation_result.prosody_validation.bahr_used == constraints.meter
         assert validation_result.prosody_validation.total_baits == len(poem.verses) // 2
-        # Note: Quality assessment is now handled by PoemEvaluator, not ProsodyValidator
+        # Note: Quality assessment is now handled by PoemEvaluator, not ProsodyEvaluator
         
         print(f"Prosody validation results:")
         print(f"  Bahr used: {validation_result.prosody_validation.bahr_used}")
@@ -258,8 +285,25 @@ class TestRealSimpleGeneratorProsodyValidator:
             ```
             '''
             
-            # Set up mock responses
-            mock_llm.responses = [mock_poem_response, mock_tashkeel_response, mock_tashkeel_response]
+            # Mock responses for prosody validation (6 baits)
+            mock_prosody_responses = []
+            for i in range(6):
+                mock_prosody_responses.append(f'''
+                ```json
+                {{
+                    "is_valid": true,
+                    "pattern": "فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ#فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ",
+                    "error_details": null
+                }}
+                ```
+                ''')
+            
+            # Set up mock responses: poem generation, tashkeel (2x), prosody validation (6x)
+            mock_llm.responses = [
+                mock_poem_response, 
+                mock_tashkeel_response, 
+                mock_tashkeel_response
+            ] + mock_prosody_responses
             mock_llm.reset()
         
         # Create constraints from example
@@ -309,7 +353,7 @@ class TestRealSimpleGeneratorProsodyValidator:
         assert validation_result.prosody_validation is not None
         assert validation_result.prosody_validation.bahr_used == constraints.meter
         assert validation_result.prosody_validation.total_baits == len(poem.verses) // 2
-        # Note: Quality assessment is now handled by PoemEvaluator, not ProsodyValidator
+        # Note: Quality assessment is now handled by PoemEvaluator, not ProsodyEvaluator
         
         print(f"Prosody validation results:")
         print(f"  Bahr used: {validation_result.prosody_validation.bahr_used}")

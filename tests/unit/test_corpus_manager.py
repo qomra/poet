@@ -436,11 +436,11 @@ class TestCorpusManager:
         assert corpus_manager.validate_theme_exists('مدح')
         assert not corpus_manager.validate_theme_exists('رثاء')  # Not in test data
     
-    def test_validate_qafiya_exists(self, corpus_manager):
+    def test_evaluate_qafiya_exists(self, corpus_manager):
         """Test qafiya validation"""
-        assert corpus_manager.validate_qafiya_exists('ق')
-        assert corpus_manager.validate_qafiya_exists('ع')
-        assert not corpus_manager.validate_qafiya_exists('ز')  # Not in test data
+        assert corpus_manager.evaluate_qafiya_exists('ق')
+        assert corpus_manager.evaluate_qafiya_exists('ع')
+        assert not corpus_manager.evaluate_qafiya_exists('ز')  # Not in test data
     
     def test_get_meter_variations(self, corpus_manager):
         """Test getting meter variations"""

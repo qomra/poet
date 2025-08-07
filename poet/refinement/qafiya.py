@@ -1,8 +1,8 @@
-# poet/refinement/prosody_refiner.py
+# poet/refinement/qafiya_refiner.py
 
 import logging
 from typing import List, Optional
-from poet.refinement.base_refiner import BaseRefiner
+from poet.refinement.base import BaseRefiner
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
@@ -10,48 +10,59 @@ from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
 
 
-class ProsodyRefiner(BaseRefiner):
-    """Fixes meter violations in verses"""
+class QafiyaRefiner(BaseRefiner):
+    """Fixes rhyme scheme violations"""
     
     def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None):
         self.llm = llm
         self.prompt_manager = prompt_manager or PromptManager()
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.setLevel(logging.INFO)
     
     @property
     def name(self) -> str:
-        return "prosody_refiner"
+        return "qafiya_refiner"
     
-    def should_refine(self, evaluation: QualityAssessment) -> bool:
-        """Check if prosody needs fixing"""
-        if not evaluation.prosody_validation:
+    def should_refine(self,evaluation: QualityAssessment) -> bool:
+        """Check if qafiya needs fixing"""
+        if not evaluation.qafiya_validation:
             return False
-        return not evaluation.prosody_validation.overall_valid
+        return not evaluation.qafiya_validation.overall_valid
     
     async def refine(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
-        """Fix meter violations in verses"""
+        """Fix rhyme scheme violations"""
         try:
-            if not evaluation.prosody_validation:
+            if not evaluation.qafiya_validation:
                 return poem
             
-            # Get broken verses from evaluation
-            broken_verses = self._identify_broken_verses(evaluation.prosody_validation)
+            # Get verses with wrong qafiya from evaluation
+            wrong_qafiya_bait = self._identify_wrong_qafiya_bait(evaluation.qafiya_validation)
             
-            if not broken_verses:
+
+
+            if not wrong_qafiya_bait:
                 return poem
             
-            self.logger.info(f"Fixing prosody for {len(broken_verses)} broken verses")
+            self.logger.info(f"Fixing qafiya for {len(wrong_qafiya_bait)} verses")
             
-            # Fix each broken verse
+            # Fix each verse with wrong qafiya
             fixed_verses = poem.verses.copy()
-            for verse_index, error_details in broken_verses:
-                fixed_verse = await self._fix_single_verse(
-                    poem.verses[verse_index], 
+            print(f"before fixing qafiya: {fixed_verses}")
+            for bait_index, issue in wrong_qafiya_bait:
+                bait = "#".join(poem.verses[bait_index*2:bait_index*2+2])
+                fixed_bait = await self._fix_single_verse_qafiya(
+                    bait, 
                     constraints, 
-                    error_details
+                    issue
                 )
-                fixed_verses[verse_index] = fixed_verse
-            
+                if len(fixed_bait) == 2:
+                    fixed_verses[bait_index*2] = fixed_bait[0]
+                    fixed_verses[bait_index*2+1] = fixed_bait[1]
+                else:
+                    # use original verse
+                    self.logger.warning(f"Bait {bait_index} is not yet qafiya fixed. Using original verses.")
+            print(f"wrong_qafiya_bait: {wrong_qafiya_bait}")
+            print(f"Fixed verses: {fixed_verses}")
             # Create new poem
             return LLMPoem(
                 verses=fixed_verses,
@@ -62,48 +73,51 @@ class ProsodyRefiner(BaseRefiner):
             )
                 
         except Exception as e:
-            self.logger.error(f"Failed to refine prosody: {e}")
+            self.logger.error(f"Failed to refine qafiya: {e}")
             return poem  # Return original poem if refinement fails
     
-    def _identify_broken_verses(self, prosody_validation) -> List[tuple]:
-        """Identify verses with meter violations"""
-        broken_verses = []
+    def _identify_wrong_qafiya_bait(self, qafiya_validation) -> List[tuple]:
+        """Identify verses with wrong qafiya"""
+        wrong_qafiya_bait = []
         
-        if not hasattr(prosody_validation, 'bait_results') or prosody_validation.bait_results is None:
-            return broken_verses
+        if not hasattr(qafiya_validation, 'bait_results') or qafiya_validation.bait_results is None:
+            return wrong_qafiya_bait
         
-        for i, bait_result in enumerate(prosody_validation.bait_results):
+        for i, bait_result in enumerate(qafiya_validation.bait_results):
             if not bait_result.is_valid:
-                # Calculate verse indices for this bait
-                bait_index = i
-                first_verse_index = bait_index * 2
-                
-                # Since the new model doesn't have first_verse_valid/second_verse_valid,
-                # we'll assume the first verse in the bait is broken if the bait is invalid
-                broken_verses.append((first_verse_index, bait_result.error_details))
+                # Get expected qafiya from constraints or use empty string
+                issue = bait_result.error_details
+                wrong_qafiya_bait.append((i, issue))
         
-        return broken_verses
+        return wrong_qafiya_bait
     
-    async def _fix_single_verse(self, verse: str, constraints: Constraints, error_details: str) -> str:
-        """Fix a single verse's meter"""
-        # Format prompt for fixing verse
+    async def _fix_single_verse_qafiya(self, verse: str, constraints: Constraints, issue: str) -> str:
+        """Fix a single verse's qafiya"""
+        # Format prompt for fixing verse qafiya
+
         formatted_prompt = self.prompt_manager.format_prompt(
-            'prosody_refinement',
+            'qafiya_refinement_v2',
             meter=constraints.meter or "غير محدد",
+            meeter_tafeelat=constraints.meeter_tafeelat or "غير محدد",
             qafiya=constraints.qafiya or "غير محدد",
             qafiya_pattern=constraints.qafiya_pattern or "",
+            qafiya_type=constraints.qafiya_type.value if constraints.qafiya_type is not None else "غير محدد",
+            qafiya_type_description_and_examples=constraints.qafiya_type_description_and_examples if constraints.qafiya_type_description_and_examples is not None else "غير محدد",
             theme=constraints.theme or "غير محدد",
             tone=constraints.tone or "غير محدد",
             existing_verses=verse,
-            context=f"إصلاح الوزن العروضي للبيت. المشكلة: {error_details}"
-        )
+            context=f"{issue}"
+            )   
+
+        print(f"Formatted prompt: {formatted_prompt}")
         
+
         # Generate fixed verse
         response = self.llm.generate(formatted_prompt)
         fixed_verses = self._parse_verses_from_response(response)
         
         # Return the first fixed verse, or original if parsing failed
-        return fixed_verses[0] if fixed_verses else verse
+        return fixed_verses
     
     def _parse_verses_from_response(self, response: str) -> List[str]:
         """Parse verses from LLM response"""

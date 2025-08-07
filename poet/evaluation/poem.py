@@ -8,9 +8,11 @@ from poet.models.constraints import Constraints
 from poet.models.line_count import LineCountValidationResult
 from poet.models.prosody import ProsodyValidationResult
 from poet.models.qafiya import QafiyaValidationResult
-from poet.evaluation.line_count_validator import LineCountValidator
-from poet.evaluation.prosody_validator import ProsodyValidator
-from poet.evaluation.qafiya_evaluator import QafiyaValidator
+from poet.models.tashkeel import TashkeelValidationResult
+from poet.evaluation.line_count import LineCountEvaluator
+from poet.evaluation.prosody import ProsodyEvaluator
+from poet.evaluation.qafiya import QafiyaEvaluator
+from poet.evaluation.tashkeel import TashkeelEvaluator
 from poet.llm.base_llm import BaseLLM
 
 logger = logging.getLogger(__name__)
@@ -21,6 +23,7 @@ class EvaluationType(Enum):
     LINE_COUNT = "line_count"
     PROSODY = "prosody"
     QAFIYA = "qafiya"
+    TASHKEEL = "tashkeel"
 
 
 class PoemEvaluator:
@@ -37,9 +40,10 @@ class PoemEvaluator:
             llm: LLM instance for validators that need it
         """
         self.llm = llm
-        self.line_count_validator = LineCountValidator()
-        self.prosody_validator = ProsodyValidator()
-        self.qafiya_validator = QafiyaValidator(llm)
+        self.line_count_validator = LineCountEvaluator()
+        self.prosody_validator = ProsodyEvaluator(llm)
+        self.qafiya_validator = QafiyaEvaluator(llm)
+        self.tashkeel_validator = TashkeelEvaluator(llm)
     
     def evaluate_poem(self, poem: LLMPoem, constraints: Constraints, 
                      evaluations: List[EvaluationType]) -> LLMPoem:
@@ -60,16 +64,16 @@ class PoemEvaluator:
         line_count_issues = []
         prosody_issues = []
         qafiya_issues = []
-        
+        tashkeel_issues = []
         # Store detailed validation results
         line_count_validation = None
         prosody_validation = None
         qafiya_validation = None
-        
+        tashkeel_validation = None
         # Step 1: Line count validation (if requested)
         if EvaluationType.LINE_COUNT in evaluations:
             logger.info("Performing line count validation")
-            line_count_result = self.line_count_validator.validate_line_count(poem)
+            line_count_result = self.line_count_validator.evaluate_line_count(poem)
             # Store detailed validation result
             line_count_validation = line_count_result
             if not line_count_result.is_valid:
@@ -95,12 +99,13 @@ class PoemEvaluator:
         if EvaluationType.QAFIYA in evaluations:
             logger.info("Performing qafiya validation")
             try:
-                qafiya_result = self.qafiya_validator.validate_qafiya(
+                qafiya_result = self.qafiya_validator.evaluate_qafiya(
                     poem, 
                     expected_qafiya=constraints.qafiya,
                     qafiya_harakah=constraints.qafiya_harakah,
-                    qafiya_type=constraints.qafiya_type.value if constraints.qafiya_type else None,
-                    qafiya_pattern=constraints.qafiya_pattern
+                    qafiya_type=constraints.qafiya_type.value if constraints.qafiya_type is not None else None,
+                    qafiya_pattern=constraints.qafiya_pattern,
+                    qafiya_type_description_and_examples=constraints.qafiya_type_description_and_examples
                 )
                 # Store detailed validation result
                 qafiya_validation = qafiya_result
@@ -111,15 +116,35 @@ class PoemEvaluator:
                 logger.error(f"Error in qafiya validation: {e}")
                 qafiya_issues.append(f"خطأ في التحقق من القافية: {str(e)}")
         
+        # Step 4: Tashkeel validation (if requested)
+        if EvaluationType.TASHKEEL in evaluations:
+            logger.info("Performing tashkeel validation")
+            try:
+                tashkeel_result = self.tashkeel_validator.evaluate_tashkeel(poem)
+                # Store detailed validation result
+                tashkeel_validation = tashkeel_result
+                # Extract issues from tashkeel validation result
+                if tashkeel_result.issues:
+                    tashkeel_issues.extend(tashkeel_result.issues)
+                elif tashkeel_result.bait_results:
+                    for bait_result in tashkeel_result.bait_results:
+                        if not bait_result.is_valid and bait_result.error_details:
+                            tashkeel_issues.append(bait_result.error_details)
+            except Exception as e:
+                logger.error(f"Error in tashkeel validation: {e}")
+                tashkeel_issues.append(f"خطأ في التحقق من التشكيل: {str(e)}")
+        
         # Step 4: Consolidate quality assessment
         self._update_poem_quality(
             poem, 
             line_count_issues=line_count_issues,
             prosody_issues=prosody_issues,
             qafiya_issues=qafiya_issues,
+            tashkeel_issues=tashkeel_issues,
             line_count_validation=line_count_validation,
             prosody_validation=prosody_validation,
-            qafiya_validation=qafiya_validation
+            qafiya_validation=qafiya_validation,
+            tashkeel_validation=tashkeel_validation
         )
         
         logger.info("Poem evaluation completed")
@@ -129,9 +154,11 @@ class PoemEvaluator:
                            line_count_issues: List[str] = None,
                            prosody_issues: List[str] = None,
                            qafiya_issues: List[str] = None,
+                           tashkeel_issues: List[str] = None,
                            line_count_validation: Optional[LineCountValidationResult] = None,
                            prosody_validation: Optional[ProsodyValidationResult] = None,
-                           qafiya_validation: Optional[QafiyaValidationResult] = None):
+                           qafiya_validation: Optional[QafiyaValidationResult] = None,
+                           tashkeel_validation: Optional[TashkeelValidationResult] = None):
         """
         Update poem quality assessment based on validation results.
         
@@ -145,6 +172,7 @@ class PoemEvaluator:
         all_line_count_issues = line_count_issues or []
         all_prosody_issues = prosody_issues or []
         all_qafiya_issues = qafiya_issues or []
+        all_tashkeel_issues = tashkeel_issues or []
         
         # Calculate overall score
         overall_score = 1.0
@@ -156,6 +184,8 @@ class PoemEvaluator:
             overall_score -= min(0.4, len(all_prosody_issues) * 0.1)
         if all_qafiya_issues:
             overall_score -= min(0.3, len(all_qafiya_issues) * 0.1)
+        if all_tashkeel_issues:
+            overall_score -= min(0.2, len(all_tashkeel_issues) * 0.05)
         
         # Determine if acceptable
         is_acceptable = overall_score >= 0.7 and not all_line_count_issues
@@ -168,16 +198,20 @@ class PoemEvaluator:
             recommendations.append("راجع الأوزان العروضية للأبيات")
         if all_qafiya_issues:
             recommendations.append("راجع القافية في الأبيات")
+        if all_tashkeel_issues:
+            recommendations.append("راجع التشكيل في الأبيات")
         
         # Create quality assessment
         poem.quality = QualityAssessment(
             prosody_issues=all_prosody_issues,
             line_count_issues=all_line_count_issues,
             qafiya_issues=all_qafiya_issues,
+            tashkeel_issues=all_tashkeel_issues,
             overall_score=overall_score,
             is_acceptable=is_acceptable,
             recommendations=recommendations,
             line_count_validation=line_count_validation,
             prosody_validation=prosody_validation,
-            qafiya_validation=qafiya_validation
+            qafiya_validation=qafiya_validation,
+            tashkeel_validation=tashkeel_validation
         ) 

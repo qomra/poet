@@ -2,17 +2,17 @@
 
 import logging
 from typing import List, Tuple, Optional
-from poet.refinement.base_refiner import BaseRefiner, RefinementStep
+from poet.refinement.base import BaseRefiner, RefinementStep
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
-from poet.evaluation.poem_evaluation import PoemEvaluator, EvaluationType
+from poet.evaluation.poem import PoemEvaluator, EvaluationType
 
 
 class RefinerChain:
     """Manages sequential execution of refiners"""
     
-    def __init__(self, refiners: List[BaseRefiner], llm, max_iterations: int = 3):
+    def __init__(self, refiners: List[BaseRefiner], llm, max_iterations: int = 1):
         self.refiners = refiners
         self.max_iterations = max_iterations
         self.evaluator = PoemEvaluator(llm)  # Your existing evaluator
@@ -32,14 +32,14 @@ class RefinerChain:
             self.logger.info(f"Starting refinement iteration {iteration + 1}/{self.max_iterations}")
             
             # Evaluate current poem
-            evaluation = await self.evaluator.evaluate_poem(
+            evaluated_poem = self.evaluator.evaluate_poem(
                 current_poem, 
                 constraints,
-                [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA]
+                [EvaluationType.PROSODY, EvaluationType.QAFIYA]
             )
             
             # Check if quality target met
-            quality_score = self._calculate_quality_score(evaluation)
+            quality_score = self._calculate_quality_score(evaluated_poem.quality)
             self.logger.info(f"Current quality score: {quality_score:.3f}, target: {target_quality}")
             
             if quality_score >= target_quality:
@@ -49,11 +49,11 @@ class RefinerChain:
             # Apply refiners that are needed
             iteration_refinements = []
             for refiner in self.refiners:
-                if refiner.should_refine(evaluation):
+                if refiner.should_refine(evaluated_poem.quality):
                     self.logger.info(f"Applying {refiner.name}")
                     
                     before_poem = current_poem
-                    refined_poem = await refiner.refine(current_poem, constraints, evaluation)
+                    refined_poem = await refiner.refine(current_poem, constraints, evaluated_poem.quality)
                     
                     # Create refinement step
                     refinement_step = RefinementStep(
@@ -79,12 +79,12 @@ class RefinerChain:
         
         # Update quality_after for the last refinement step
         if refinement_history:
-            final_evaluation = await self.evaluator.evaluate_poem(
+            final_evaluation = self.evaluator.evaluate_poem(
                 current_poem,
                 constraints,
-                [EvaluationType.LINE_COUNT, EvaluationType.PROSODY, EvaluationType.QAFIYA]
+                [EvaluationType.PROSODY, EvaluationType.QAFIYA]
             )
-            final_quality = self._calculate_quality_score(final_evaluation)
+            final_quality = self._calculate_quality_score(final_evaluation.quality)
             refinement_history[-1].quality_after = final_quality
         
         self.logger.info(f"Refinement completed. Total steps: {len(refinement_history)}")
@@ -101,10 +101,6 @@ class RefinerChain:
         
         # Otherwise, calculate score based on validation results
         score = 1.0
-        
-        # Deduct for line count issues
-        if evaluation.line_count_validation and not evaluation.line_count_validation.is_valid:
-            score -= 0.3
         
         # Deduct for prosody issues
         if evaluation.prosody_validation and not evaluation.prosody_validation.overall_valid:

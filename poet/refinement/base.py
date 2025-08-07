@@ -1,4 +1,4 @@
-# poet/refinement/base_refiner.py
+# poet/refinement/base.py
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass

@@ -6,15 +6,12 @@ template: |
   **البيت المطلوب تحليله:**
   {verses}
 
-  **القافية المطلوبة:**
-  {expected_qafiya}
+  **القافية:**
+  - **القافية المطلوبة:** {qafiya}
+  - **نمط القافية المطلوب:** {qafiya_pattern}
+  - **نوع القافية المستهدف:** {qafiya_type}
+  - **شرح ونوع القافية (مرجع إلزامي):** {qafiya_type_description_and_examples}
 
-  **أنواع القافية العربية:**
-  - **متواتر**: متحرك واحد بين ساكنين (مثل: جُودِ)
-  - **متراكب**: ثلاثة متحركات بين ساكنين (مثل: فَرَجِ)
-  - **متدارك**: متحركان بين ساكنين (مثل: العنْبَرِ)
-  - **متكاوس**: أربعة متحركات بين ساكنين (مثل: فَجُبِرْ)
-  - **مترادف**: ساكنان متتاليان (مثل: الْجَوَادْ)
 
   **التعليمات:**
   1. ركز على العجز (الجزء الثاني بعد #) فقط
@@ -38,7 +35,10 @@ template: |
 category: evaluation
 parameters:
   - verses
-  - expected_qafiya
+  - qafiya
+  - qafiya_pattern
+  - qafiya_type
+  - qafiya_type_description_and_examples
 metadata:
   version: "3.1"
   language: "arabic"

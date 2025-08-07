@@ -3,7 +3,7 @@
 import pytest
 import json
 from unittest.mock import Mock, AsyncMock, patch
-from poet.refinement.line_count_refiner import LineCountRefiner
+from poet.refinement.line_count import LineCountRefiner
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment

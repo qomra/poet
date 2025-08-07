@@ -5,7 +5,7 @@ from poet.models.poem import LLMPoem
 from poet.models.line_count import LineCountValidationResult
 
 
-class LineCountValidator:
+class LineCountEvaluator:
     """
     Validates that a poem has the correct line count (even number of lines).
     
@@ -16,7 +16,7 @@ class LineCountValidator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
     
-    def validate_line_count(self, poem: LLMPoem) -> LineCountValidationResult:
+    def evaluate_line_count(self, poem: LLMPoem) -> LineCountValidationResult:
         """
         Validate that the poem has an even number of lines.
         

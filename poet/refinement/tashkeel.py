@@ -1,13 +1,16 @@
 # poet/refinement/tashkeel_refiner.py
 
 import logging
+from poet.refinement.base import BaseRefiner
 from typing import List, Optional
 from poet.models.poem import LLMPoem
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
+from poet.models.quality import QualityAssessment
+from poet.models.constraints import Constraints
 
 
-class TashkeelRefiner:
+class TashkeelRefiner(BaseRefiner):
     """
     Applies Arabic diacritics (tashkeel) to poem verses using LLM.
     
@@ -15,12 +18,26 @@ class TashkeelRefiner:
     which are essential for prosody and qafiya validation.
     """
     
-    def __init__(self, llm_provider: BaseLLM, prompt_manager: Optional[PromptManager] = None):
-        self.llm = llm_provider
+    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None):
+        self.llm = llm
         self.prompt_manager = prompt_manager or PromptManager()
         self.logger = logging.getLogger(__name__)
     
-    def apply_tashkeel(self, poem: LLMPoem) -> LLMPoem:
+    @property
+    def name(self) -> str:
+        return "tashkeel_refiner"
+    
+    def should_refine(self, evaluation: QualityAssessment) -> bool:
+        """Check if tashkeel needs fixing"""
+        if not evaluation.tashkeel_validation:
+            return False
+        return not evaluation.tashkeel_validation.overall_valid
+            
+    async def refine(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
+        """Apply diacritics to all verses in the poem"""
+        return await self._apply_tashkeel(poem)
+    
+    async def _apply_tashkeel(self, poem: LLMPoem) -> LLMPoem:
         """
         Apply diacritics to all verses in the poem.
         

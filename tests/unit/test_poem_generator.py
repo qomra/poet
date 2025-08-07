@@ -317,7 +317,7 @@ class TestSimplePoemGeneratorWithRealLLM:
         
         # Verify poem structure
         assert isinstance(poem, LLMPoem)
-        assert len(poem.verses) == 4
+        assert len(poem.verses) == 8
         assert all(isinstance(verse, str) for verse in poem.verses)
         assert all(len(verse.strip()) > 0 for verse in poem.verses)
         assert poem.llm_provider == real_llm.__class__.__name__
@@ -355,7 +355,7 @@ class TestSimplePoemGeneratorWithRealLLM:
         
         # Verify poem structure
         assert isinstance(poem, LLMPoem)
-        assert len(poem.verses) == 6
+        assert len(poem.verses) == 12
         assert all(isinstance(verse, str) for verse in poem.verses)
         assert all(len(verse.strip()) > 0 for verse in poem.verses)
         assert poem.constraints == constraints.to_dict()

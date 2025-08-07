@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 from .base_llm import BaseLLM, LLMConfig, LLMError
 from .openai_adapter import OpenAIAdapter
+from .anthropic_adapter import AnthropicAdapter
 
 def get_real_llm_from_env() -> Optional[BaseLLM]:
     """
@@ -21,7 +22,7 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
     if not os.getenv("TEST_REAL_LLMS"):
         return None
     
-    provider = os.getenv("REAL_LLM_PROVIDER", "openai").lower()
+    provider = os.getenv("REAL_LLM_PROVIDER", "anthropic").lower()
     
     # Load configuration
     config_data = _load_llm_config()
@@ -37,6 +38,8 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
     # Override with environment variable if available
     if provider == "openai" and os.getenv("OPENAI_API_KEY"):
         api_key = os.getenv("OPENAI_API_KEY")
+    elif provider == "anthropic" and os.getenv("ANTHROPIC_API_KEY"):
+        api_key = os.getenv("ANTHROPIC_API_KEY")
     
     if not api_key or api_key == "sk-" or api_key == "your-openai-api-key-here":
         return None
@@ -44,10 +47,10 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
     # Create LLM instance based on provider
     if provider == "openai":
         return _create_openai_llm(provider_config, api_key)
+    elif provider == "anthropic":
+        return _create_anthropic_llm(provider_config, api_key)
     elif provider == "gemini":
         raise NotImplementedError("Gemini adapter not implemented yet")
-    elif provider == "anthropic":
-        raise NotImplementedError("Anthropic adapter not implemented yet")
     else:
         raise LLMError(f"Unknown LLM provider: {provider}")
 
@@ -78,4 +81,15 @@ def _create_openai_llm(config_data: Dict[str, Any], api_key: str) -> OpenAIAdapt
         timeout=30
     )
     
-    return OpenAIAdapter(config) 
+    return OpenAIAdapter(config)
+
+def _create_anthropic_llm(config_data: Dict[str, Any], api_key: str) -> AnthropicAdapter:
+    """Create Anthropic LLM instance from configuration."""
+    config = LLMConfig(
+        model_name=config_data["model"],
+        api_key=api_key,
+        base_url=config_data.get("api_base"),
+        timeout=30
+    )
+    
+    return AnthropicAdapter(config) 

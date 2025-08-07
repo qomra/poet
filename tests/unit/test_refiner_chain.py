@@ -3,11 +3,11 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from poet.refinement.refiner_chain import RefinerChain
-from poet.refinement.base_refiner import BaseRefiner, RefinementStep
+from poet.refinement.base import BaseRefiner, RefinementStep
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
-from poet.evaluation.poem_evaluation import PoemEvaluator, EvaluationType
+from poet.evaluation.poem import PoemEvaluator, EvaluationType
 from poet.llm.base_llm import MockLLM, LLMConfig
 
 
@@ -65,7 +65,7 @@ class TestRefinerChain:
     def mock_evaluator(self):
         """Create mock evaluator"""
         evaluator = Mock(spec=PoemEvaluator)
-        evaluator.evaluate_poem = AsyncMock()
+        evaluator.evaluate_poem = Mock()  # Not async anymore
         return evaluator
     
     @pytest.fixture
@@ -104,14 +104,21 @@ class TestRefinerChain:
         ]
         
         # Mock evaluator to return high quality score
-        mock_evaluator.evaluate_poem.return_value = QualityAssessment(
+        mock_poem = LLMPoem(
+            verses=sample_poem.verses,
+            llm_provider=sample_poem.llm_provider,
+            model_name=sample_poem.model_name
+        )
+        mock_poem.quality = QualityAssessment(
             prosody_issues=[],
             line_count_issues=[],
             qafiya_issues=[],
+            tashkeel_issues=[],
             overall_score=0.9,
             is_acceptable=True,
             recommendations=[]
         )
+        mock_evaluator.evaluate_poem.return_value = mock_poem
         
         chain = RefinerChain(refiners, mock_llm, max_iterations=3)
         chain.evaluator = mock_evaluator
@@ -135,11 +142,16 @@ class TestRefinerChain:
         ]
         
         # Mock evaluator to return improving quality scores
-        mock_evaluator.evaluate_poem.side_effect = [
-            QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], overall_score=0.5, is_acceptable=False, recommendations=[]),  # First evaluation - low quality
-            QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], overall_score=0.9, is_acceptable=True, recommendations=[]),  # Second evaluation - high quality
-            QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], overall_score=0.9, is_acceptable=True, recommendations=[])   # Final evaluation - high quality
-        ]
+        mock_poem1 = LLMPoem(verses=sample_poem.verses, llm_provider=sample_poem.llm_provider, model_name=sample_poem.model_name)
+        mock_poem1.quality = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], tashkeel_issues=[], overall_score=0.5, is_acceptable=False, recommendations=[])
+        
+        mock_poem2 = LLMPoem(verses=sample_poem.verses, llm_provider=sample_poem.llm_provider, model_name=sample_poem.model_name)
+        mock_poem2.quality = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], tashkeel_issues=[], overall_score=0.9, is_acceptable=True, recommendations=[])
+        
+        mock_poem3 = LLMPoem(verses=sample_poem.verses, llm_provider=sample_poem.llm_provider, model_name=sample_poem.model_name)
+        mock_poem3.quality = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], tashkeel_issues=[], overall_score=0.9, is_acceptable=True, recommendations=[])
+        
+        mock_evaluator.evaluate_poem.side_effect = [mock_poem1, mock_poem2, mock_poem3]
         
         chain = RefinerChain(refiners, mock_llm, max_iterations=3)
         chain.evaluator = mock_evaluator
@@ -164,7 +176,9 @@ class TestRefinerChain:
         ]
         
         # Mock evaluator to always return low quality
-        mock_evaluator.evaluate_poem.return_value = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], overall_score=0.3, is_acceptable=False, recommendations=[])
+        mock_poem = LLMPoem(verses=sample_poem.verses, llm_provider=sample_poem.llm_provider, model_name=sample_poem.model_name)
+        mock_poem.quality = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], tashkeel_issues=[], overall_score=0.3, is_acceptable=False, recommendations=[])
+        mock_evaluator.evaluate_poem.return_value = mock_poem
         
         chain = RefinerChain(refiners, mock_llm, max_iterations=2)
         chain.evaluator = mock_evaluator
@@ -189,7 +203,9 @@ class TestRefinerChain:
         ]
         
         # Mock evaluator to return low quality
-        mock_evaluator.evaluate_poem.return_value = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], overall_score=0.3, is_acceptable=False, recommendations=[])
+        mock_poem = LLMPoem(verses=sample_poem.verses, llm_provider=sample_poem.llm_provider, model_name=sample_poem.model_name)
+        mock_poem.quality = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], tashkeel_issues=[], overall_score=0.3, is_acceptable=False, recommendations=[])
+        mock_evaluator.evaluate_poem.return_value = mock_poem
         
         chain = RefinerChain(refiners, mock_llm, max_iterations=3)
         chain.evaluator = mock_evaluator
@@ -209,6 +225,7 @@ class TestRefinerChain:
             prosody_issues=[],
             line_count_issues=[],
             qafiya_issues=[],
+            tashkeel_issues=[],
             overall_score=1.0,
             is_acceptable=True,
             recommendations=[]
@@ -227,6 +244,7 @@ class TestRefinerChain:
             prosody_issues=[],
             line_count_issues=["Wrong line count"],
             qafiya_issues=[],
+            tashkeel_issues=[],
             overall_score=0.7,
             is_acceptable=False,
             recommendations=[],
@@ -259,6 +277,7 @@ class TestRefinerChain:
             prosody_issues=["Broken verse"],
             line_count_issues=[],
             qafiya_issues=[],
+            tashkeel_issues=[],
             overall_score=0.8,
             is_acceptable=False,
             recommendations=[],
@@ -298,6 +317,7 @@ class TestRefinerChain:
             prosody_issues=[],
             line_count_issues=[],
             qafiya_issues=["Wrong qafiya"],
+            tashkeel_issues=[],
             overall_score=0.8,
             is_acceptable=False,
             recommendations=[],
@@ -320,6 +340,45 @@ class TestRefinerChain:
         assert score < 1.0  # Should be penalized
         assert score >= 0.7  # But not too much for one wrong qafiya
     
+    def test_calculate_quality_score_with_tashkeel_issues(self, mock_llm):
+        """Test quality score calculation with tashkeel issues"""
+        chain = RefinerChain([], mock_llm)
+        
+        from poet.models.tashkeel import TashkeelValidationResult, TashkeelBaitResult
+        
+        # Create validation with tashkeel issues
+        bait_result = TashkeelBaitResult(
+            bait_number=0,
+            is_valid=False,
+            error_details="Missing diacritics"
+        )
+        
+        evaluation = QualityAssessment(
+            prosody_issues=[],
+            line_count_issues=[],
+            qafiya_issues=[],
+            tashkeel_issues=["Missing diacritics"],
+            overall_score=0.8,
+            is_acceptable=False,
+            recommendations=[],
+            tashkeel_validation=TashkeelValidationResult(
+                overall_valid=False,
+                total_baits=1,
+                valid_baits=0,
+                invalid_baits=1,
+                bait_results=[bait_result],
+                validation_summary="Missing diacritics"
+            )
+        )
+        
+        # Mock poem for verse count
+        evaluation.poem = Mock()
+        evaluation.poem.verses = ["verse1", "verse2", "verse3", "verse4"]
+        
+        score = chain._calculate_quality_score(evaluation)
+        assert score < 1.0  # Should be penalized
+        assert score >= 0.8  # But not too much for tashkeel issues
+    
     def test_calculate_quality_score_minimum_zero(self, mock_llm):
         """Test quality score calculation returns minimum of 0.0"""
         chain = RefinerChain([], mock_llm)
@@ -333,6 +392,7 @@ class TestRefinerChain:
             prosody_issues=["Many issues"],
             line_count_issues=["Many issues"],
             qafiya_issues=["Many issues"],
+            tashkeel_issues=["Many issues"],
             overall_score=0.1,
             is_acceptable=False,
             recommendations=[],

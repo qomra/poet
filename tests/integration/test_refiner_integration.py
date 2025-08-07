@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import Mock, AsyncMock
 from poet.refinement import (
     BaseRefiner, RefinementStep, LineCountRefiner, 
-    ProsodyRefiner, QafiyaRefiner, RefinerChain
+    ProsodyRefiner, QafiyaRefiner, TashkeelRefiner, RefinerChain
 )
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
@@ -12,6 +12,7 @@ from poet.models.quality import QualityAssessment
 from poet.models.line_count import LineCountValidationResult
 from poet.models.prosody import ProsodyValidationResult, BaitValidationResult
 from poet.models.qafiya import QafiyaValidationResult, QafiyaBaitResult
+from poet.models.tashkeel import TashkeelValidationResult, TashkeelBaitResult
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
 
@@ -58,63 +59,95 @@ class TestRefinerIntegration:
         # Line count issue
         line_count_validation = LineCountValidationResult(
             is_valid=False,
-            expected_count=4,
-            actual_count=3,
+            line_count=3,
+            expected_even=True,
             validation_summary="Wrong line count"
         )
         
         # Prosody issue
         prosody_validation = ProsodyValidationResult(
             overall_valid=False,
+            total_baits=1,
+            valid_baits=0,
+            invalid_baits=1,
             bait_results=[
                 BaitValidationResult(
-                    bait_index=0,
+                    bait_text="بيت أول بيت ثاني",
                     is_valid=False,
-                    first_verse_valid=False,
-                    second_verse_valid=True,
+                    pattern="طويل",
                     error_details="وزن خاطئ في البيت الأول"
                 )
-            ]
+            ],
+            bahr_used="طويل",
+            validation_summary="يوجد أخطاء في الوزن العروضي"
         )
         
         # Qafiya issue
         qafiya_validation = QafiyaValidationResult(
             overall_valid=False,
+            total_baits=1,
+            valid_baits=0,
+            invalid_baits=1,
             bait_results=[
-                BaitQafiyaResult(
-                    bait_index=0,
+                QafiyaBaitResult(
+                    bait_number=0,
                     is_valid=False,
-                    first_verse_valid=False,
-                    second_verse_valid=True,
-                    expected_qafiya="قَ"
+                    error_details="قافية خاطئة"
                 )
-            ]
+            ],
+            validation_summary="قافية خاطئة",
+            misaligned_bait_numbers=[]
+        )
+        
+        # Tashkeel issue
+        tashkeel_validation = TashkeelValidationResult(
+            overall_valid=False,
+            total_baits=1,
+            valid_baits=0,
+            invalid_baits=1,
+            bait_results=[
+                TashkeelBaitResult(
+                    bait_number=0,
+                    is_valid=False,
+                    error_details="حرف بدون تشكيل"
+                )
+            ],
+            validation_summary="يوجد أخطاء في التشكيل"
         )
         
         return QualityAssessment(
+            prosody_issues=["وزن خاطئ في البيت الأول"],
+            line_count_issues=["Wrong line count"],
+            qafiya_issues=["قافية خاطئة"],
+            tashkeel_issues=["حرف بدون تشكيل"],
+            overall_score=0.3,
+            is_acceptable=False,
+            recommendations=["تأكد من أن عدد الأبيات زوجي", "راجع الأوزان العروضية للأبيات", "راجع القافية في الأبيات", "راجع التشكيل في الأبيات"],
             line_count_validation=line_count_validation,
             prosody_validation=prosody_validation,
             qafiya_validation=qafiya_validation,
-            overall_score=0.3,
-            is_acceptable=False
+            tashkeel_validation=tashkeel_validation
         )
     
     def test_refiner_chain_with_all_refiners(self, mock_llm, mock_prompt_manager, sample_poem, sample_constraints, problematic_evaluation):
-        """Test refiner chain with all three refiners"""
+        """Test refiner chain with all four refiners"""
         # Create all refiners
         line_count_refiner = LineCountRefiner(mock_llm, mock_prompt_manager)
         prosody_refiner = ProsodyRefiner(mock_llm, mock_prompt_manager)
         qafiya_refiner = QafiyaRefiner(mock_llm, mock_prompt_manager)
+        tashkeel_refiner = TashkeelRefiner(mock_llm, mock_prompt_manager)
         
         # Test that all refiners identify issues
         assert line_count_refiner.should_refine(problematic_evaluation) is True
         assert prosody_refiner.should_refine(problematic_evaluation) is True
         assert qafiya_refiner.should_refine(problematic_evaluation) is True
+        assert tashkeel_refiner.should_refine(problematic_evaluation) is True
         
         # Test refiner names
         assert line_count_refiner.name == "line_count_refiner"
         assert prosody_refiner.name == "prosody_refiner"
         assert qafiya_refiner.name == "qafiya_refiner"
+        assert tashkeel_refiner.name == "tashkeel_refiner"
     
     @pytest.mark.asyncio
     async def test_refiner_chain_sequential_execution(self, mock_llm, mock_prompt_manager, sample_poem, sample_constraints):
@@ -123,31 +156,66 @@ class TestRefinerIntegration:
         refiners = [
             LineCountRefiner(mock_llm, mock_prompt_manager),
             ProsodyRefiner(mock_llm, mock_prompt_manager),
-            QafiyaRefiner(mock_llm, mock_prompt_manager)
+            QafiyaRefiner(mock_llm, mock_prompt_manager),
+            TashkeelRefiner(mock_llm, mock_prompt_manager)
         ]
         
         # Create chain
-        chain = RefinerChain(refiners, max_iterations=2)
+        chain = RefinerChain(refiners, mock_llm, max_iterations=2)
         
         # Mock evaluator to simulate improvement
         mock_evaluator = Mock()
-        mock_evaluator.evaluate_poem = AsyncMock()
-        mock_evaluator.evaluate_poem.side_effect = [
-            # First evaluation - low quality
-            QualityAssessment(
-                line_count_validation=LineCountValidationResult(is_valid=False),
-                prosody_validation=ProsodyValidationResult(overall_valid=False),
-                qafiya_validation=QafiyaValidationResult(overall_valid=False),
-                overall_score=0.3
-            ),
-            # Second evaluation - improved quality
-            QualityAssessment(
-                line_count_validation=LineCountValidationResult(is_valid=True),
-                prosody_validation=ProsodyValidationResult(overall_valid=True),
-                qafiya_validation=QafiyaValidationResult(overall_valid=True),
-                overall_score=0.9
-            )
-        ]
+        mock_evaluator.evaluate_poem = Mock()
+                # Create mock poems with quality assessments
+        mock_poem_1 = Mock(spec=LLMPoem)
+        mock_poem_1.verses = ["verse1", "verse2", "verse3", "verse4"]
+        mock_poem_1.quality = QualityAssessment(
+            prosody_issues=["وزن خاطئ"],
+            line_count_issues=["عدد خاطئ"],
+            qafiya_issues=["قافية خاطئة"],
+            tashkeel_issues=["تشكيل خاطئ"],
+            overall_score=0.3,
+            is_acceptable=False,
+            recommendations=["تأكد من أن عدد الأبيات زوجي", "راجع الأوزان العروضية للأبيات", "راجع القافية في الأبيات", "راجع التشكيل في الأبيات"],
+            line_count_validation=LineCountValidationResult(is_valid=False, line_count=3, expected_even=True, validation_summary="عدد خاطئ"),
+            prosody_validation=ProsodyValidationResult(overall_valid=False, total_baits=1, valid_baits=0, invalid_baits=1, bait_results=[], bahr_used="طويل", validation_summary="وزن خاطئ"),
+            qafiya_validation=QafiyaValidationResult(overall_valid=False, total_baits=1, valid_baits=0, invalid_baits=1, bait_results=[], validation_summary="قافية خاطئة", misaligned_bait_numbers=[]),
+            tashkeel_validation=TashkeelValidationResult(overall_valid=False, total_baits=1, valid_baits=0, invalid_baits=1, bait_results=[], validation_summary="تشكيل خاطئ")     
+        )
+        
+        mock_poem_2 = Mock(spec=LLMPoem)
+        mock_poem_2.verses = ["verse1", "verse2", "verse3", "verse4"]
+        mock_poem_2.quality = QualityAssessment(
+            prosody_issues=[],
+            line_count_issues=[],
+            qafiya_issues=[],
+            tashkeel_issues=[],
+            overall_score=0.9,
+            is_acceptable=True,
+            recommendations=[],
+            line_count_validation=LineCountValidationResult(is_valid=True, line_count=4, expected_even=True, validation_summary="عدد صحيح"),
+            prosody_validation=ProsodyValidationResult(overall_valid=True, total_baits=2, valid_baits=2, invalid_baits=0, bait_results=[], bahr_used="طويل", validation_summary="وزن صحيح"),
+            qafiya_validation=QafiyaValidationResult(overall_valid=True, total_baits=2, valid_baits=2, invalid_baits=0, bait_results=[], validation_summary="قافية صحيحة", misaligned_bait_numbers=[]),
+            tashkeel_validation=TashkeelValidationResult(overall_valid=True, total_baits=2, valid_baits=2, invalid_baits=0, bait_results=[], validation_summary="تشكيل صحيح")      
+        )
+        
+        mock_poem_3 = Mock(spec=LLMPoem)
+        mock_poem_3.verses = ["verse1", "verse2", "verse3", "verse4"]
+        mock_poem_3.quality = QualityAssessment(
+            prosody_issues=[],
+            line_count_issues=[],
+            qafiya_issues=[],
+            tashkeel_issues=[],
+            overall_score=0.9,
+            is_acceptable=True,
+            recommendations=[],
+            line_count_validation=LineCountValidationResult(is_valid=True, line_count=4, expected_even=True, validation_summary="عدد صحيح"),
+            prosody_validation=ProsodyValidationResult(overall_valid=True, total_baits=2, valid_baits=2, invalid_baits=0, bait_results=[], bahr_used="طويل", validation_summary="وزن صحيح"),
+            qafiya_validation=QafiyaValidationResult(overall_valid=True, total_baits=2, valid_baits=2, invalid_baits=0, bait_results=[], validation_summary="قافية صحيحة", misaligned_bait_numbers=[]),
+            tashkeel_validation=TashkeelValidationResult(overall_valid=True, total_baits=2, valid_baits=2, invalid_baits=0, bait_results=[], validation_summary="تشكيل صحيح")      
+        )
+        
+        mock_evaluator.evaluate_poem.side_effect = [mock_poem_1, mock_poem_2, mock_poem_3]
         chain.evaluator = mock_evaluator
         
         # Execute refinement
@@ -156,12 +224,12 @@ class TestRefinerIntegration:
         # Verify results
         assert result_poem is not None
         assert len(history) > 0
-        assert mock_evaluator.evaluate_poem.call_count == 2
+        assert mock_evaluator.evaluate_poem.call_count == 3  # Initial + 1 iteration + final evaluation
         
         # Verify refinement steps
         for step in history:
             assert isinstance(step, RefinementStep)
-            assert step.refiner_name in ["line_count_refiner", "prosody_refiner", "qafiya_refiner"]
+            assert step.refiner_name in ["line_count_refiner", "prosody_refiner", "qafiya_refiner", "tashkeel_refiner"]
             assert step.iteration >= 0
             assert step.before is not None
             assert step.after is not None
@@ -175,10 +243,18 @@ class TestRefinerIntegration:
         
         # Create evaluation with line count issue
         evaluation = QualityAssessment(
+            prosody_issues=[],
+            line_count_issues=["Wrong line count"],
+            qafiya_issues=[],
+            tashkeel_issues=[],
+            overall_score=0.7,
+            is_acceptable=False,
+            recommendations=["تأكد من أن عدد الأبيات زوجي"],
             line_count_validation=LineCountValidationResult(
                 is_valid=False,
-                expected_count=4,
-                actual_count=3
+                line_count=3,
+                expected_even=True,
+                validation_summary="Wrong line count"
             )
         )
         
@@ -188,13 +264,22 @@ class TestRefinerIntegration:
     
     def test_refiner_chain_quality_calculation(self):
         """Test quality score calculation in refiner chain"""
-        chain = RefinerChain([])
+        mock_llm = Mock(spec=BaseLLM)
+        chain = RefinerChain([], mock_llm)
         
         # Test perfect poem
         perfect_evaluation = QualityAssessment(
-            line_count_validation=LineCountValidationResult(is_valid=True),
-            prosody_validation=ProsodyValidationResult(overall_valid=True),
-            qafiya_validation=QafiyaValidationResult(overall_valid=True)
+            prosody_issues=[],
+            line_count_issues=[],
+            qafiya_issues=[],
+            tashkeel_issues=[],
+            overall_score=1.0,
+            is_acceptable=True,
+            recommendations=[],
+            line_count_validation=LineCountValidationResult(is_valid=True, line_count=2, expected_even=True, validation_summary="عدد صحيح"),
+            prosody_validation=ProsodyValidationResult(overall_valid=True, total_baits=1, valid_baits=1, invalid_baits=0, bait_results=[], bahr_used="طويل", validation_summary="وزن صحيح"),
+            qafiya_validation=QafiyaValidationResult(overall_valid=True, total_baits=1, valid_baits=1, invalid_baits=0, bait_results=[], validation_summary="قافية صحيحة", misaligned_bait_numbers=[]),
+            tashkeel_validation=TashkeelValidationResult(overall_valid=True, total_baits=1, valid_baits=1, invalid_baits=0, bait_results=[], validation_summary="تشكيل صحيح")
         )
         perfect_evaluation.poem = Mock()
         perfect_evaluation.poem.verses = ["verse1", "verse2"]
@@ -204,9 +289,17 @@ class TestRefinerIntegration:
         
         # Test poem with issues
         problematic_evaluation = QualityAssessment(
-            line_count_validation=LineCountValidationResult(is_valid=False),
-            prosody_validation=ProsodyValidationResult(overall_valid=False),
-            qafiya_validation=QafiyaValidationResult(overall_valid=False)
+            prosody_issues=["وزن خاطئ"],
+            line_count_issues=["عدد خاطئ"],
+            qafiya_issues=["قافية خاطئة"],
+            tashkeel_issues=["تشكيل خاطئ"],
+            overall_score=0.3,
+            is_acceptable=False,
+            recommendations=["تأكد من أن عدد الأبيات زوجي", "راجع الأوزان العروضية للأبيات", "راجع القافية في الأبيات", "راجع التشكيل في الأبيات"],
+            line_count_validation=LineCountValidationResult(is_valid=False, line_count=1, expected_even=True, validation_summary="عدد خاطئ"),
+            prosody_validation=ProsodyValidationResult(overall_valid=False, total_baits=1, valid_baits=0, invalid_baits=1, bait_results=[], bahr_used="طويل", validation_summary="وزن خاطئ"),
+            qafiya_validation=QafiyaValidationResult(overall_valid=False, total_baits=1, valid_baits=0, invalid_baits=1, bait_results=[], validation_summary="قافية خاطئة", misaligned_bait_numbers=[]),
+            tashkeel_validation=TashkeelValidationResult(overall_valid=False, total_baits=1, valid_baits=0, invalid_baits=1, bait_results=[], validation_summary="تشكيل خاطئ")
         )
         problematic_evaluation.poem = Mock()
         problematic_evaluation.poem.verses = ["verse1", "verse2"]
@@ -217,7 +310,8 @@ class TestRefinerIntegration:
     
     def test_refinement_summary_statistics(self):
         """Test refinement summary generation"""
-        chain = RefinerChain([])
+        mock_llm = Mock(spec=BaseLLM)
+        chain = RefinerChain([], mock_llm)
         
         # Create mock refinement history
         history = [
@@ -251,8 +345,40 @@ class TestRefinerIntegration:
         
         assert summary["total_steps"] == 3
         assert set(summary["refiners_used"]) == {"line_count_refiner", "prosody_refiner", "qafiya_refiner"}
-        assert summary["quality_improvement"] == 0.6  # 0.9 - 0.3
+        assert abs(summary["quality_improvement"] - 0.6) < 0.001  # 0.9 - 0.3
         assert summary["iterations"] == 2  # Max iteration was 1
+    
+    def test_refinement_summary_with_tashkeel(self):
+        """Test refinement summary generation including tashkeel refiner"""
+        mock_llm = Mock(spec=BaseLLM)
+        chain = RefinerChain([], mock_llm)
+        
+        # Create mock refinement history with tashkeel refiner
+        history = [
+            RefinementStep(
+                refiner_name="tashkeel_refiner",
+                iteration=0,
+                before=Mock(spec=LLMPoem),
+                after=Mock(spec=LLMPoem),
+                quality_before=0.4,
+                quality_after=0.7
+            ),
+            RefinementStep(
+                refiner_name="line_count_refiner",
+                iteration=1,
+                before=Mock(spec=LLMPoem),
+                after=Mock(spec=LLMPoem),
+                quality_before=0.7,
+                quality_after=0.9
+            )
+        ]
+        
+        summary = chain.get_refinement_summary(history)
+        
+        assert summary["total_steps"] == 2
+        assert set(summary["refiners_used"]) == {"tashkeel_refiner", "line_count_refiner"}
+        assert summary["quality_improvement"] == 0.5  # 0.9 - 0.4
+        assert summary["iterations"] == 2
     
     @pytest.mark.asyncio
     async def test_refiner_metadata_preservation(self, mock_llm, mock_prompt_manager, sample_poem, sample_constraints):
@@ -261,10 +387,18 @@ class TestRefinerIntegration:
         
         # Create evaluation with line count issue
         evaluation = QualityAssessment(
+            prosody_issues=[],
+            line_count_issues=["Wrong line count"],
+            qafiya_issues=[],
+            tashkeel_issues=[],
+            overall_score=0.7,
+            is_acceptable=False,
+            recommendations=["تأكد من أن عدد الأبيات زوجي"],
             line_count_validation=LineCountValidationResult(
                 is_valid=False,
-                expected_count=4,
-                actual_count=3
+                line_count=3,
+                expected_even=True,
+                validation_summary="Wrong line count"
             )
         )
         
@@ -284,7 +418,8 @@ class TestRefinerIntegration:
         refiners = [
             LineCountRefiner(mock_llm),
             ProsodyRefiner(mock_llm),
-            QafiyaRefiner(mock_llm)
+            QafiyaRefiner(mock_llm),
+            TashkeelRefiner(mock_llm)
         ]
         
         for refiner in refiners:

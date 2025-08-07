@@ -5,6 +5,7 @@ template: |
   
   **السياق والمعايير:**
   - البحر الشعري المطلوب: {meter}
+  - تفعيلات البحر الشعري المطلوب: {meeter_tafeelat}
   - القافية: {qafiya}
   - نمط القافية: {qafiya_pattern}
   - الموضوع: {theme}
@@ -56,6 +57,7 @@ template: |
 category: generation
 parameters:
   - meter
+  - meeter_tafeelat
   - qafiya
   - qafiya_pattern
   - theme

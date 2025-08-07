@@ -53,19 +53,31 @@ class OpenAIAdapter(BaseLLM):
             self.logger.debug(f"Making OpenAI API call with model: {params['model']}")
             start_time = time.time()
             
-            response = self.client.chat.completions.create(
-                model=params["model"],
-                messages=messages,
-                temperature=params.get("temperature", self.config.temperature),
-                max_tokens=params.get("max_tokens", self.config.max_tokens),
-                top_p=params.get("top_p", self.config.top_p),
-                frequency_penalty=params.get("frequency_penalty", self.config.frequency_penalty),
-                presence_penalty=params.get("presence_penalty", self.config.presence_penalty),
-                **{k: v for k, v in params.items() if k not in [
-                    "model", "temperature", "max_tokens", "top_p", 
-                    "frequency_penalty", "presence_penalty"
-                ]}
-            )
+            # Prepare API parameters, filtering out None values
+            api_params = {
+                "model": params["model"],
+                "messages": messages,
+            }
+            
+            # Add optional parameters only if they're explicitly provided in kwargs
+            # This avoids issues with models that have parameter restrictions
+            if "temperature" in kwargs and kwargs["temperature"] is not None:
+                api_params["temperature"] = kwargs["temperature"]
+            if "max_tokens" in kwargs and kwargs["max_tokens"] is not None:
+                api_params["max_tokens"] = kwargs["max_tokens"]
+            if "top_p" in kwargs and kwargs["top_p"] is not None:
+                api_params["top_p"] = kwargs["top_p"]
+            if "frequency_penalty" in kwargs and kwargs["frequency_penalty"] is not None:
+                api_params["frequency_penalty"] = kwargs["frequency_penalty"]
+            if "presence_penalty" in kwargs and kwargs["presence_penalty"] is not None:
+                api_params["presence_penalty"] = kwargs["presence_penalty"]
+            
+            # Add other parameters that aren't None
+            for k, v in params.items():
+                if k not in ["model", "temperature", "max_tokens", "top_p", "frequency_penalty", "presence_penalty"] and v is not None:
+                    api_params[k] = v
+            
+            response = self.client.chat.completions.create(**api_params)
             
             end_time = time.time()
             

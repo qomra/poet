@@ -487,7 +487,7 @@ class CorpusManager:
         theme_key = theme.strip().lower()
         return any(theme_key in indexed_theme for indexed_theme in self._theme_index.keys())
     
-    def validate_qafiya_exists(self, qafiya: str) -> bool:
+    def evaluate_qafiya_exists(self, qafiya: str) -> bool:
         """Check if qafiya exists in corpus"""
         self.load_corpus()
         qafiya_key = qafiya.strip().lower()
