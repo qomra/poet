@@ -1,5 +1,3 @@
-# poet/refinement/refiner_chain.py
-
 import logging
 from typing import List, Tuple, Optional
 from poet.refinement.base import BaseRefiner, RefinementStep
@@ -7,7 +5,7 @@ from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
 from poet.evaluation.poem import PoemEvaluator, EvaluationType
-
+from poet.logging.harmony_capture import capture_method
 
 class RefinerChain:
     """Manages sequential execution of refiners"""
@@ -15,7 +13,7 @@ class RefinerChain:
     def __init__(self, refiners: List[BaseRefiner], llm, max_iterations: int = 1):
         self.refiners = refiners
         self.max_iterations = max_iterations
-        self.evaluator = PoemEvaluator(llm)  # Your existing evaluator
+        self.evaluator = PoemEvaluator(llm)
         self.logger = logging.getLogger(self.__class__.__name__)
     
     async def refine(self, 
@@ -62,7 +60,7 @@ class RefinerChain:
                         before=before_poem,
                         after=refined_poem,
                         quality_before=quality_score,
-                        quality_after=None,  # Will be calculated in next iteration
+                        quality_after=None,
                         details=f"Applied {refiner.name} to fix issues"
                     )
                     
@@ -152,4 +150,23 @@ class RefinerChain:
             "refiners_used": refiners_used,
             "quality_improvement": quality_improvement,
             "iterations": max(step.iteration for step in refinement_history) + 1
-        } 
+        }
+
+class CapturedRefinerChain(RefinerChain):
+    """
+    Wrapper that adds Harmony capture to RefinerChain
+    Simply inherit and decorate the methods you want to capture
+    """
+    
+    @capture_method("RefinerChain", "refine")
+    async def refine(self, 
+                     poem: LLMPoem, 
+                     constraints: Constraints,
+                     target_quality: float = 0.8) -> Tuple[LLMPoem, List[RefinementStep]]:
+        """Wrapped refine method with automatic capture"""
+        return await super().refine(poem, constraints, target_quality)
+    
+    @capture_method("RefinerChain", "summary")
+    def get_refinement_summary(self, refinement_history: List[RefinementStep]) -> dict:
+        """Wrapped summary method with automatic capture"""
+        return super().get_refinement_summary(refinement_history)

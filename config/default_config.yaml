@@ -18,18 +18,18 @@ llm:
   openai:
     api_key: null
     base_url: "https://api.openai.com/v1"
-    timeout: 30
+    timeout: 120
     max_retries: 3
   
   anthropic:
     api_key: null
     base_url: null
-    timeout: 30
+    timeout: 120
     max_retries: 3
   
   gemini:
     api_key: null
-    timeout: 30
+    timeout: 120
     max_retries: 3
 
 # Generation Parameters  

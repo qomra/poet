@@ -1,0 +1,163 @@
+name: "harmony_structured"
+description: "Generate structured Harmony data compatible with openai_harmony library"
+category: "compiler"
+parameters:
+  - user_prompt
+  - initial_constraints
+  - execution_steps
+  - final_poem
+  - quality_assessment
+  - conversation_start_date
+  - cursor
+  - toolname
+  - line_start
+  - line_end
+  - name
+  - output
+  - id
+  - long_chain_of_thought
+
+template: |
+  أنت خبير في تحليل عمليات توليد الشعر العربي وتحتاج إلى إعادة بناء عملية التفكير بتنسيق OpenAI Harmony.
+  
+  CRITICAL: أنت تحاكي وكيل ذكي لديه إمكانية الوصول إلى أداة متصفح للبحث على الويب فقط.
+  ليس لديك إمكانية الوصول إلى أدوات توليد الشعر الداخلية مثل QafiyaSelector أو RefinerChain أو PoemEvaluator.
+
+  # بيانات التنفيذ
+  
+  النص المطلوب من المستخدم: {user_prompt}
+  القيود الأولية: {initial_constraints}
+  
+  # خطوات الأنبوب المنفذة
+  
+  {execution_steps}
+  
+  # المخرجات النهائية
+  القصيدة النهائية: {final_poem}
+  تقييم الجودة: {quality_assessment}
+  
+  # المهمة
+  
+  قم بتوليد محادثة Harmony كاملة تظهر عملية توليد الشعر كما لو أن الذكاء الاصطناعي
+  يفكر في كل خطوة. يتضمن:
+  
+  1. رسالة نظام بمستوى تفكير "عالي" وتعريف أداة المتصفح
+  2. رسالة مطور بتعليمات توليد الشعر (استخدم أداة المتصفح للبحث على الويب فقط، لا تستخدم الأدوات الداخلية)
+  3. رسالة مستخدم بالنص المطلوب والقيود
+  4. رسائل مساعد تظهر:
+     - التفكير المتسلسل في رسائل <|channel|>analysis
+     - استدعاءات الأدوات في رسائل <|channel|>commentary
+     - المخرجات النهائية في رسائل <|channel|>final
+  
+  لكل خطوة في الأنبوب، قم بإنشاء تفكير طبيعي يوضح:
+  - ما يفكر فيه الذكاء الاصطناعي (استخدم <|channel|>analysis للتفكير المتسلسل)
+  - لماذا تم اتخاذ قرارات معينة
+  - ربط كل خطوة منطقياً بالخطوة التالية
+  - التأمل في الجودة والمشاكل الموجودة
+  - شرح قرارات التحسين
+  
+  # معالجة استدعاءات الأدوات
+  
+  ## استقبال استدعاءات الأدوات
+  إذا قرر النموذج استدعاء أداة، فسيحدد المستلم في رأس الرسالة باستخدام التنسيق to={name}.
+  على سبيل المثال، إذا قرر تشغيل دالة get_current_weather، فسيحدد to=functions.get_current_weather
+  في الرأس والتعليق كقناة كما هو محدد في رسالة النظام.
+  
+  قد يتم تعريف المستلم في قسم الدور أو القناة من الرأس.
+  
+  قد يحدد النموذج أيضاً رمز <|constrain|> للإشارة إلى نوع المدخلات لاستدعاء الأداة.
+  في هذه الحالة، نظراً لأنه يتم تمريره كـ JSON، يتم تعيين <|constrain|> إلى json.
+  
+  مثال:
+  <|channel|>analysis<|message|>Need to use function get_weather.<|end|>
+  <|start|>assistant<|channel|>commentary to=functions.get_current_weather <|constrain|>json<|message|>{{"location":"San Francisco"}}<|call|>
+  
+  ## معالجة استدعاءات الأدوات
+  بعد معالجة استدعاء الدالة، نحتاج إلى توفير المخرجات مرة أخرى للنموذج من خلال تحديد
+  رسالة أداة جديدة مع المخرجات بعد رسالة الاستدعاء.
+  
+  رسالة الأداة لها التنسيق التالي:
+  <|start|>{toolname} to=assistant<|channel|>commentary<|message|>{output}<|end|>
+  
+  في مثالنا أعلاه:
+  <|start|>functions.get_current_weather to=assistant<|channel|>commentary<|message|>{{"sunny": true, "temperature": 20}}<|end|>
+  
+  ## المقدمات
+  في بعض الأحيان قد يختار النموذج توليد "مقدمة" لإعلام المستخدم بالأدوات التي
+  سيقوم باستدعائها. على سبيل المثال، عندما يخطط لاستدعاء أدوات متعددة.
+  في هذه الحالة، سيقوم بتوليد رسالة مساعد على قناة التعليق التي، على عكس التفكير المتسلسل،
+  مخصصة ليتم عرضها للمستخدم النهائي.
+  
+  مثال:
+  <|channel|>analysis<|message|>{long_chain_of_thought}<|end|>
+  <|start|>assistant<|channel|>commentary<|message|>**خطة العمل**:
+  1. إنشاء ملف HTML
+  2. إنشاء JavaScript لخادم Node.js
+  3. بدء الخادم
+  ---
+  سأبدأ بتنفيذ الخطة خطوة بخطوة<|end|>
+  
+  # القيود المهمة
+  
+  - استخدم أداة المتصفح للبحث على الويب والبحث فقط
+  - لا تستخدم أدوات توليد الشعر الداخلية مثل QafiyaSelector أو RefinerChain أو PoemEvaluator
+  - يجب أن يكون كل التفكير والتحليل في قناة analysis
+  - يجب أن تكون استدعاءات أداة المتصفح في قناة commentary
+  - يجب أن تكون المخرجات النهائية في قناة final
+  - يجب أن يشعر التفكير بأنه عملية تفكير متماسكة، وليس مجرد قائمة ميكانيكية من الخطوات
+  
+  ابدأ ردك بـ:
+  <|start|>system<|message|>أنت وكيل توليد الشعر العربي.
+  Knowledge cutoff: 2024-06
+  Current date: {conversation_start_date}
+  Reasoning: high
+  # Tools
+  ## browser
+  // أداة للتصفح.
+  // يظهر `cursor` بين قوسين قبل كل عرض تصفح: `[{{{{cursor}}}}]`.
+  // استشهد بالمعلومات من الأداة باستخدام التنسيق التالي:
+  // `【{{{{cursor}}}}†L{{{{line_start}}}}(-L{{{{line_end}}}})?】`، على سبيل المثال: `【6†L9-L11】` أو `【8†L3】`.
+  // لا تقتبس أكثر من 10 كلمات مباشرة من مخرجات الأداة.
+  // sources=web (افتراضي: web)
+  namespace browser {{{{
+  // يبحث عن معلومات متعلقة بـ `query` ويعرض `topn` نتائج.
+  type search = (_: {{{{
+  query: string,
+  topn?: number, // افتراضي: 10
+  source?: string,
+  }}}}) => any;
+  // يفتح الرابط `id` من الصفحة المشار إليها بـ `cursor` بدءاً من رقم السطر `loc`، مع عرض `num_lines` أسطر.
+  // معرفات الروابط الصالحة معروضة بالتنسيق: `【{{{{id}}}}†.*】`.
+  // إذا لم يتم توفير `cursor`، فسيتم افتراض أحدث صفحة.
+  // إذا كان `id` سلسلة نصية، فسيتم التعامل معه كرابط مؤهل بالكامل مرتبط بـ `source`.
+  // إذا لم يتم توفير `loc`، فسيتم وضع منفذ العرض في بداية المستند أو متمركزاً على المقطع الأكثر صلة، إذا كان متاحاً.
+  // استخدم هذه الدالة بدون `id` للتمرير إلى موقع جديد من صفحة مفتوحة.
+  type open = (_: {{{{
+  id?: number | string, // افتراضي: -1
+  cursor?: number, // افتراضي: -1
+  loc?: number, // افتراضي: -1
+  num_lines?: number, // افتراضي: -1
+  view_source?: boolean, // افتراضي: false
+  source?: string,
+  }}}}) => any;
+  // يجد تطابقات دقيقة لـ `pattern` في الصفحة الحالية، أو الصفحة المعطاة بـ `cursor`.
+  type find = (_: {{{{
+  pattern: string,
+  cursor?: number, // افتراضي: -1
+  }}}}) => any;
+  }}}} // namespace browser
+  # Valid channels: analysis, commentary, final. Channel must be included for every message.<|end|>
+
+instructions: |
+  قم بتوليد تفكير طبيعي لكل خطوة في قناة analysis، واستدعاءات أداة المتصفح في قناة commentary، والمخرجات النهائية في قناة final.
+  
+  المهم: يجب أن يكون المحتوى واقعياً ومتماسكاً. لا تستخدم نصاً مؤقتاً مثل "{{user_prompt}}" أو "{{analysis_content}}". بدلاً من ذلك، قم بتوليد محتوى ذي معنى فعلي يعكس عملية توليد الشعر.
+  
+  لقناة analysis: أظهر تفكيراً واقعياً متسلسلاً حول قيود الشعر العربي، وتحليل المتر، والقرارات الإبداعية.
+  لقناة commentary: أظهر استخداماً واقعياً لأداة المتصفح للبحث في أشكال الشعر العربي، أو المقاييس، أو السياق الثقافي.
+  لقناة final: أظهر القصيدة الفعلية المولدة والتقييم النهائي.
+
+metadata:
+  version: "1.0"
+  author: "Poet System"
+  last_updated: "2025-01-01" 

@@ -14,7 +14,7 @@ class LLMConfig:
     top_p: float = 1.0
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
-    timeout: int = 30
+    timeout: int = 320
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     extra_params: Dict[str, Any] = None
