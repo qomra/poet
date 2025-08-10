@@ -1,0 +1,983 @@
+{
+  "execution_id": "35b22e65-a7a3-4818-be1d-4454f364f502",
+  "started_at": "2025-08-10T19:28:49.587439",
+  "user_prompt": "أريدك أن تكتب قصيدة عربية كلاسيكية تتناول موضوع الغزل وتعبر عن حزن الشاعر بسبب الفراق. يجب أن تتضمن القصيدة تصويرًا عاطفيًا للمحب الذي يعاني من ألم الفراق، مع التركيز على الدموع التي تتدفق من عينيه كرمز للحزن العميق. يجب أن يشعر القارئ بأن الشاعر يعاني وكأن كل جزء من جسده يحمل قلبًا نابضًا بسبب شدة الحزن. استخدم أسلوبًا شعريًا يجمع بين الصور القوية والعواطف الجياشة، مع الحفاظ على نبرة حزينة وعاطفية. يجب أن تكون القصيدة مكونة من 2 أبيات على بحر الكامل، مع استخدام قافية القاف في نهاية كل بيت.",
+  "initial_constraints": {
+    "meter": "بحر الكامل",
+    "qafiya": "ق",
+    "theme": "غزل",
+    "tone": "حزينة"
+  },
+  "calls": [
+    {
+      "call_id": "cf7e3e87-3b66-4581-a7a9-2009a709a07c",
+      "timestamp": "2025-08-10T19:28:49.682188",
+      "component_name": "QafiyaSelector",
+      "method_name": "select_qafiya",
+      "call_type": "process",
+      "inputs": {
+        "arg_0": {
+          "meter": "بحر الكامل",
+          "meeter_tafeelat": null,
+          "qafiya": "ق",
+          "qafiya_harakah": null,
+          "qafiya_type": null,
+          "qafiya_type_description_and_examples": null,
+          "qafiya_pattern": null,
+          "line_count": null,
+          "theme": "غزل",
+          "tone": "حزينة",
+          "imagery": [],
+          "keywords": [],
+          "sections": [],
+          "register": null,
+          "era": null,
+          "poet_style": null,
+          "ambiguities": [],
+          "llm_suggestions": null,
+          "llm_reasoning": null,
+          "original_prompt": null
+        },
+        "arg_1": "أريدك أن تكتب قصيدة عربية كلاسيكية تتناول موضوع الغزل وتعبر عن حزن الشاعر بسبب الفراق. يجب أن تتضمن القصيدة تصويرًا عاطفيًا للمحب الذي يعاني من ألم الفراق، مع التركيز على الدموع التي تتدفق من عينيه كرمز للحزن العميق. يجب أن يشعر القارئ بأن الشاعر يعاني وكأن كل جزء من جسده يحمل قلبًا نابضًا بسبب شدة الحزن. استخدم أسلوبًا شعريًا يجمع بين الصور القوية والعواطف الجياشة، مع الحفاظ على نبرة حزينة وعاطفية. يجب أن تكون القصيدة مكونة من 2 أبيات على بحر الكامل، مع استخدام قافية القاف في نهاية كل بيت."
+      },
+      "outputs": {
+        "meter": "بحر الكامل",
+        "meeter_tafeelat": null,
+        "qafiya": "ق",
+        "qafiya_harakah": "مكسور",
+        "qafiya_type": "متواتر",
+        "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+        "qafiya_pattern": "قِ",
+        "line_count": null,
+        "theme": "غزل",
+        "tone": "حزينة",
+        "imagery": [],
+        "keywords": [],
+        "sections": [],
+        "register": null,
+        "era": null,
+        "poet_style": null,
+        "ambiguities": [],
+        "llm_suggestions": null,
+        "llm_reasoning": null,
+        "original_prompt": null
+      },
+      "error": null,
+      "llm_provider": null,
+      "model_name": null,
+      "prompt": null,
+      "response": null,
+      "tokens_used": null,
+      "duration_ms": 4147,
+      "success": true
+    },
+    {
+      "call_id": "9cbfca99-7f2c-475d-9d7b-e4fc6747da2d",
+      "timestamp": "2025-08-10T19:28:53.830229",
+      "component_name": "BahrSelector",
+      "method_name": "select_bahr",
+      "call_type": "process",
+      "inputs": {
+        "arg_0": {
+          "meter": "بحر الكامل",
+          "meeter_tafeelat": null,
+          "qafiya": "ق",
+          "qafiya_harakah": "مكسور",
+          "qafiya_type": "متواتر",
+          "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+          "qafiya_pattern": "قِ",
+          "line_count": null,
+          "theme": "غزل",
+          "tone": "حزينة",
+          "imagery": [],
+          "keywords": [],
+          "sections": [],
+          "register": null,
+          "era": null,
+          "poet_style": null,
+          "ambiguities": [],
+          "llm_suggestions": null,
+          "llm_reasoning": null,
+          "original_prompt": null
+        },
+        "arg_1": "أريدك أن تكتب قصيدة عربية كلاسيكية تتناول موضوع الغزل وتعبر عن حزن الشاعر بسبب الفراق. يجب أن تتضمن القصيدة تصويرًا عاطفيًا للمحب الذي يعاني من ألم الفراق، مع التركيز على الدموع التي تتدفق من عينيه كرمز للحزن العميق. يجب أن يشعر القارئ بأن الشاعر يعاني وكأن كل جزء من جسده يحمل قلبًا نابضًا بسبب شدة الحزن. استخدم أسلوبًا شعريًا يجمع بين الصور القوية والعواطف الجياشة، مع الحفاظ على نبرة حزينة وعاطفية. يجب أن تكون القصيدة مكونة من 2 أبيات على بحر الكامل، مع استخدام قافية القاف في نهاية كل بيت."
+      },
+      "outputs": {
+        "meter": "بحر الكامل",
+        "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+        "qafiya": "ق",
+        "qafiya_harakah": "مكسور",
+        "qafiya_type": "متواتر",
+        "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+        "qafiya_pattern": "قِ",
+        "line_count": null,
+        "theme": "غزل",
+        "tone": "حزينة",
+        "imagery": [],
+        "keywords": [],
+        "sections": [],
+        "register": null,
+        "era": null,
+        "poet_style": null,
+        "ambiguities": [],
+        "llm_suggestions": null,
+        "llm_reasoning": null,
+        "original_prompt": null
+      },
+      "error": null,
+      "llm_provider": null,
+      "model_name": null,
+      "prompt": null,
+      "response": null,
+      "tokens_used": null,
+      "duration_ms": 0,
+      "success": true
+    },
+    {
+      "call_id": "8804fa23-9a0f-455c-9fd9-ff96b1fd742a",
+      "timestamp": "2025-08-10T19:28:53.830370",
+      "component_name": "RefinerChain",
+      "method_name": "refine",
+      "call_type": "refine",
+      "inputs": {
+        "target_quality": 1.0,
+        "arg_0": {
+          "verses": [
+            "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+            "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+            "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+            "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ العَبَقْ"
+          ],
+          "llm_provider": "test",
+          "model_name": "hardcoded",
+          "constraints": {
+            "meter": "بحر الكامل",
+            "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+            "qafiya": "ق",
+            "qafiya_harakah": "مكسور",
+            "qafiya_type": "متواتر",
+            "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+            "qafiya_pattern": "قِ",
+            "line_count": null,
+            "theme": "غزل",
+            "tone": "حزينة",
+            "imagery": [],
+            "keywords": [],
+            "sections": [],
+            "register": null,
+            "era": null,
+            "poet_style": null,
+            "ambiguities": [],
+            "llm_suggestions": null,
+            "llm_reasoning": null,
+            "original_prompt": null
+          },
+          "generation_timestamp": "2025-08-10T19:28:53.830284",
+          "quality": null
+        },
+        "arg_1": {
+          "meter": "بحر الكامل",
+          "meeter_tafeelat": null,
+          "qafiya": "ق",
+          "qafiya_harakah": "مكسور",
+          "qafiya_type": "متواتر",
+          "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+          "qafiya_pattern": "قِ",
+          "line_count": null,
+          "theme": "غزل",
+          "tone": "حزينة",
+          "imagery": [],
+          "keywords": [],
+          "sections": [],
+          "register": null,
+          "era": null,
+          "poet_style": null,
+          "ambiguities": [],
+          "llm_suggestions": null,
+          "llm_reasoning": null,
+          "original_prompt": null
+        }
+      },
+      "outputs": [
+        {
+          "verses": [
+            "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+            "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+            "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+            "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+          ],
+          "llm_provider": "test",
+          "model_name": "hardcoded",
+          "constraints": {
+            "meter": "بحر الكامل",
+            "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+            "qafiya": "ق",
+            "qafiya_harakah": "مكسور",
+            "qafiya_type": "متواتر",
+            "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+            "qafiya_pattern": "قِ",
+            "line_count": null,
+            "theme": "غزل",
+            "tone": "حزينة",
+            "imagery": [],
+            "keywords": [],
+            "sections": [],
+            "register": null,
+            "era": null,
+            "poet_style": null,
+            "ambiguities": [],
+            "llm_suggestions": null,
+            "llm_reasoning": null,
+            "original_prompt": null
+          },
+          "generation_timestamp": "2025-08-10T19:28:53.830284",
+          "quality": {
+            "prosody_issues": [],
+            "line_count_issues": [],
+            "qafiya_issues": [
+              "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+            ],
+            "tashkeel_issues": [],
+            "overall_score": 0.9,
+            "is_acceptable": true,
+            "recommendations": [
+              "راجع القافية في الأبيات"
+            ],
+            "prosody_validation": {
+              "overall_valid": true,
+              "total_baits": 2,
+              "valid_baits": 2,
+              "invalid_baits": 0,
+              "bait_results": [
+                {
+                  "bait_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+                  "is_valid": true,
+                  "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتْفَاعِلْ",
+                  "error_details": null,
+                  "diacritized_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ"
+                },
+                {
+                  "bait_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ",
+                  "is_valid": true,
+                  "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ",
+                  "error_details": null,
+                  "diacritized_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+                }
+              ],
+              "bahr_used": "بحر الكامل",
+              "validation_summary": "جميع الأبيات (2) صحيحة عروضياً على بحر بحر الكامل",
+              "diacritics_applied": true
+            },
+            "qafiya_validation": {
+              "overall_valid": false,
+              "total_baits": 2,
+              "valid_baits": 1,
+              "invalid_baits": 1,
+              "bait_results": [
+                {
+                  "bait_number": 1,
+                  "is_valid": false,
+                  "error_details": "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+                },
+                {
+                  "bait_number": 2,
+                  "is_valid": true,
+                  "error_details": null
+                }
+              ],
+              "validation_summary": "1 من 2 أبيات صحيحة قافياً. الأبيات الخاطئة: 1 على القافية المطلوبة (ق)",
+              "misaligned_bait_numbers": [
+                1
+              ],
+              "expected_qafiya": "ق",
+              "qafiya_harakah": "مكسور",
+              "qafiya_type": "متواتر",
+              "qafiya_pattern": "قِ",
+              "issues": [
+                "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+              ]
+            },
+            "line_count_validation": null,
+            "tashkeel_validation": null
+          }
+        },
+        [
+          {
+            "refiner_name": "qafiya_refiner",
+            "iteration": 0,
+            "before": {
+              "verses": [
+                "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+                "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+                "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+                "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ العَبَقْ"
+              ],
+              "llm_provider": "test",
+              "model_name": "hardcoded",
+              "constraints": {
+                "meter": "بحر الكامل",
+                "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+                "qafiya": "ق",
+                "qafiya_harakah": "مكسور",
+                "qafiya_type": "متواتر",
+                "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+                "qafiya_pattern": "قِ",
+                "line_count": null,
+                "theme": "غزل",
+                "tone": "حزينة",
+                "imagery": [],
+                "keywords": [],
+                "sections": [],
+                "register": null,
+                "era": null,
+                "poet_style": null,
+                "ambiguities": [],
+                "llm_suggestions": null,
+                "llm_reasoning": null,
+                "original_prompt": null
+              },
+              "generation_timestamp": "2025-08-10T19:28:53.830284",
+              "quality": {
+                "prosody_issues": [],
+                "line_count_issues": [],
+                "qafiya_issues": [
+                  "العجز ينتهي بحرف 'ق' ولكن بدون كسرة. القافية المطلوبة هي 'قِ' (قاف مكسور)."
+                ],
+                "tashkeel_issues": [],
+                "overall_score": 0.9,
+                "is_acceptable": true,
+                "recommendations": [
+                  "راجع القافية في الأبيات"
+                ],
+                "prosody_validation": {
+                  "overall_valid": true,
+                  "total_baits": 2,
+                  "valid_baits": 2,
+                  "invalid_baits": 0,
+                  "bait_results": [
+                    {
+                      "bait_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+                      "is_valid": true,
+                      "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ",
+                      "error_details": null,
+                      "diacritized_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ"
+                    },
+                    {
+                      "bait_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ العَبَقْ",
+                      "is_valid": true,
+                      "pattern": "مُتْفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ#مُتْفَاعِلُنْ مُتَفَاعِلُنْ مُتْفَاعِلُنْ",
+                      "error_details": null,
+                      "diacritized_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ العَبَقْ"
+                    }
+                  ],
+                  "bahr_used": "بحر الكامل",
+                  "validation_summary": "جميع الأبيات (2) صحيحة عروضياً على بحر بحر الكامل",
+                  "diacritics_applied": true
+                },
+                "qafiya_validation": {
+                  "overall_valid": false,
+                  "total_baits": 2,
+                  "valid_baits": 1,
+                  "invalid_baits": 1,
+                  "bait_results": [
+                    {
+                      "bait_number": 1,
+                      "is_valid": true,
+                      "error_details": null
+                    },
+                    {
+                      "bait_number": 2,
+                      "is_valid": false,
+                      "error_details": "العجز ينتهي بحرف 'ق' ولكن بدون كسرة. القافية المطلوبة هي 'قِ' (قاف مكسور)."
+                    }
+                  ],
+                  "validation_summary": "1 من 2 أبيات صحيحة قافياً. الأبيات الخاطئة: 1 على القافية المطلوبة (ق)",
+                  "misaligned_bait_numbers": [
+                    2
+                  ],
+                  "expected_qafiya": "ق",
+                  "qafiya_harakah": "مكسور",
+                  "qafiya_type": "متواتر",
+                  "qafiya_pattern": "قِ",
+                  "issues": [
+                    "العجز ينتهي بحرف 'ق' ولكن بدون كسرة. القافية المطلوبة هي 'قِ' (قاف مكسور)."
+                  ]
+                },
+                "line_count_validation": null,
+                "tashkeel_validation": null
+              }
+            },
+            "after": {
+              "verses": [
+                "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+                "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+                "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+                "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+              ],
+              "llm_provider": "test",
+              "model_name": "hardcoded",
+              "constraints": {
+                "meter": "بحر الكامل",
+                "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+                "qafiya": "ق",
+                "qafiya_harakah": "مكسور",
+                "qafiya_type": "متواتر",
+                "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+                "qafiya_pattern": "قِ",
+                "line_count": null,
+                "theme": "غزل",
+                "tone": "حزينة",
+                "imagery": [],
+                "keywords": [],
+                "sections": [],
+                "register": null,
+                "era": null,
+                "poet_style": null,
+                "ambiguities": [],
+                "llm_suggestions": null,
+                "llm_reasoning": null,
+                "original_prompt": null
+              },
+              "generation_timestamp": "2025-08-10T19:28:53.830284",
+              "quality": {
+                "prosody_issues": [],
+                "line_count_issues": [],
+                "qafiya_issues": [
+                  "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+                ],
+                "tashkeel_issues": [],
+                "overall_score": 0.9,
+                "is_acceptable": true,
+                "recommendations": [
+                  "راجع القافية في الأبيات"
+                ],
+                "prosody_validation": {
+                  "overall_valid": true,
+                  "total_baits": 2,
+                  "valid_baits": 2,
+                  "invalid_baits": 0,
+                  "bait_results": [
+                    {
+                      "bait_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+                      "is_valid": true,
+                      "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتْفَاعِلْ",
+                      "error_details": null,
+                      "diacritized_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ"
+                    },
+                    {
+                      "bait_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ",
+                      "is_valid": true,
+                      "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ",
+                      "error_details": null,
+                      "diacritized_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+                    }
+                  ],
+                  "bahr_used": "بحر الكامل",
+                  "validation_summary": "جميع الأبيات (2) صحيحة عروضياً على بحر بحر الكامل",
+                  "diacritics_applied": true
+                },
+                "qafiya_validation": {
+                  "overall_valid": false,
+                  "total_baits": 2,
+                  "valid_baits": 1,
+                  "invalid_baits": 1,
+                  "bait_results": [
+                    {
+                      "bait_number": 1,
+                      "is_valid": false,
+                      "error_details": "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+                    },
+                    {
+                      "bait_number": 2,
+                      "is_valid": true,
+                      "error_details": null
+                    }
+                  ],
+                  "validation_summary": "1 من 2 أبيات صحيحة قافياً. الأبيات الخاطئة: 1 على القافية المطلوبة (ق)",
+                  "misaligned_bait_numbers": [
+                    1
+                  ],
+                  "expected_qafiya": "ق",
+                  "qafiya_harakah": "مكسور",
+                  "qafiya_type": "متواتر",
+                  "qafiya_pattern": "قِ",
+                  "issues": [
+                    "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+                  ]
+                },
+                "line_count_validation": null,
+                "tashkeel_validation": null
+              }
+            },
+            "quality_before": 0.9,
+            "quality_after": 0.9,
+            "details": "Applied qafiya_refiner to fix issues"
+          }
+        ]
+      ],
+      "error": null,
+      "llm_provider": null,
+      "model_name": null,
+      "prompt": null,
+      "response": null,
+      "tokens_used": null,
+      "duration_ms": 36054,
+      "success": true
+    },
+    {
+      "call_id": "c7f0bd95-2df5-44d1-9e56-c32afd594a18",
+      "timestamp": "2025-08-10T19:29:29.884695",
+      "component_name": "PoemEvaluator",
+      "method_name": "evaluate_poem",
+      "call_type": "evaluate",
+      "inputs": {
+        "arg_0": {
+          "verses": [
+            "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+            "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+            "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+            "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+          ],
+          "llm_provider": "test",
+          "model_name": "hardcoded",
+          "constraints": {
+            "meter": "بحر الكامل",
+            "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+            "qafiya": "ق",
+            "qafiya_harakah": "مكسور",
+            "qafiya_type": "متواتر",
+            "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+            "qafiya_pattern": "قِ",
+            "line_count": null, 
+            "theme": "غزل",
+            "tone": "حزينة",
+            "imagery": [],
+            "keywords": [],
+            "sections": [],
+            "register": null,
+            "era": null,
+            "poet_style": null,
+            "ambiguities": [],
+            "llm_suggestions": null,
+            "llm_reasoning": null,
+            "original_prompt": null
+          },
+          "generation_timestamp": "2025-08-10T19:28:53.830284",
+          "quality": {
+            "prosody_issues": [],
+            "line_count_issues": [],
+            "qafiya_issues": [
+              "القافية في نهاية العجز هي 'رَقْ' وليست 'قِ' كما هو مطلوب. كما أن نوع القافية هو متدارك (ساكنان متتاليان) وليس متواتر (متحرك واحد بين ساكنين)."
+            ],
+            "tashkeel_issues": [],
+            "overall_score": 0.9,
+            "is_acceptable": true,
+            "recommendations": [
+              "راجع القافية في الأبيات"
+            ],
+            "prosody_validation": {
+              "overall_valid": true,
+              "total_baits": 2,
+              "valid_baits": 2,
+              "invalid_baits": 0,
+              "bait_results": [
+                {
+                  "bait_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+                  "is_valid": true,
+                  "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ",
+                  "error_details": null,
+                  "diacritized_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ"
+                },
+                {
+                  "bait_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ",
+                  "is_valid": true,
+                  "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ",
+                  "error_details": null,
+                  "diacritized_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+                }
+              ],
+              "bahr_used": "بحر الكامل",
+              "validation_summary": "جميع الأبيات (2) صحيحة عروضياً على بحر بحر الكامل",
+              "diacritics_applied": true
+            },
+            "qafiya_validation": {
+              "overall_valid": false,
+              "total_baits": 2,
+              "valid_baits": 1,
+              "invalid_baits": 1,
+              "bait_results": [
+                {
+                  "bait_number": 1,
+                  "is_valid": false,
+                  "error_details": "القافية في نهاية العجز هي 'رَقْ' وليست 'قِ' كما هو مطلوب. كما أن نوع القافية هو متدارك (ساكنان متتاليان) وليس متواتر (متحرك واحد بين ساكنين)."
+                },
+                {
+                  "bait_number": 2,
+                  "is_valid": true,
+                  "error_details": null
+                }
+              ],
+              "validation_summary": "1 من 2 أبيات صحيحة قافياً. الأبيات الخاطئة: 1 على القافية المطلوبة (ق)",
+              "misaligned_bait_numbers": [
+                1
+              ],
+              "expected_qafiya": "ق",
+              "qafiya_harakah": "مكسور",
+              "qafiya_type": "متواتر",
+              "qafiya_pattern": "قِ",
+              "issues": [
+                "القافية في نهاية العجز هي 'رَقْ' وليست 'قِ' كما هو مطلوب. كما أن نوع القافية هو متدارك (ساكنان متتاليان) وليس متواتر (متحرك واحد بين ساكنين)."
+              ]
+            },
+            "line_count_validation": null,
+            "tashkeel_validation": null
+          }
+        },
+        "arg_1": {
+          "meter": "بحر الكامل",
+          "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+          "qafiya": "ق",
+          "qafiya_harakah": "مكسور",
+          "qafiya_type": "متواتر",
+          "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+          "qafiya_pattern": "قِ",
+          "line_count": null,
+          "theme": "غزل",
+          "tone": "حزينة",
+          "imagery": [],
+          "keywords": [],
+          "sections": [],
+          "register": null,
+          "era": null,
+          "poet_style": null,
+          "ambiguities": [],
+          "llm_suggestions": null,
+          "llm_reasoning": null,
+          "original_prompt": null
+        },
+        "arg_2": [
+          {},
+          {}
+        ]
+      },
+      "outputs": {
+        "verses": [
+          "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+          "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+          "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+          "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+        ],
+        "llm_provider": "test",
+        "model_name": "hardcoded",
+        "constraints": {
+          "meter": "بحر الكامل",
+          "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+          "qafiya": "ق",
+          "qafiya_harakah": "مكسور",
+          "qafiya_type": "متواتر",
+          "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+          "qafiya_pattern": "قِ",
+          "line_count": null,
+          "theme": "غزل",
+          "tone": "حزينة",
+          "imagery": [],
+          "keywords": [],
+          "sections": [],
+          "register": null,
+          "era": null,
+          "poet_style": null,
+          "ambiguities": [],
+          "llm_suggestions": null,
+          "llm_reasoning": null,
+          "original_prompt": null
+        },
+        "generation_timestamp": "2025-08-10T19:28:53.830284",
+        "quality": {
+          "prosody_issues": [],
+          "line_count_issues": [],
+          "qafiya_issues": [
+            "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+          ],
+          "tashkeel_issues": [],
+          "overall_score": 0.9,
+          "is_acceptable": true,
+          "recommendations": [
+            "راجع القافية في الأبيات"
+          ],
+          "prosody_validation": {
+            "overall_valid": true,
+            "total_baits": 2,
+            "valid_baits": 2,
+            "invalid_baits": 0,
+            "bait_results": [
+              {
+                "bait_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+                "is_valid": true,
+                "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتْفَاعِلْ",
+                "error_details": null,
+                "diacritized_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ"
+              },
+              {
+                "bait_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ",
+                "is_valid": true,
+                "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ",
+                "error_details": null,
+                "diacritized_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+              }
+            ],
+            "bahr_used": "بحر الكامل",
+            "validation_summary": "جميع الأبيات (2) صحيحة عروضياً على بحر بحر الكامل",
+            "diacritics_applied": true
+          },
+          "qafiya_validation": {
+            "overall_valid": false,
+            "total_baits": 2,
+            "valid_baits": 1,
+            "invalid_baits": 1,
+            "bait_results": [
+              {
+                "bait_number": 1,
+                "is_valid": false,
+                "error_details": "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+              },
+              {
+                "bait_number": 2,
+                "is_valid": true,
+                "error_details": null
+              }
+            ],
+            "validation_summary": "1 من 2 أبيات صحيحة قافياً. الأبيات الخاطئة: 1 على القافية المطلوبة (ق)",
+            "misaligned_bait_numbers": [
+              1
+            ],
+            "expected_qafiya": "ق",
+            "qafiya_harakah": "مكسور",
+            "qafiya_type": "متواتر",
+            "qafiya_pattern": "قِ",
+            "issues": [
+              "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+            ]
+          },
+          "line_count_validation": null,
+          "tashkeel_validation": null
+        }
+      },
+      "error": null,
+      "llm_provider": null,
+      "model_name": null,
+      "prompt": null,
+      "response": null,
+      "tokens_used": null,
+      "duration_ms": 15012,
+      "success": true
+    }
+  ],
+  "final_poem": {
+    "verses": [
+      "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+      "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+      "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+      "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+    ],
+    "llm_provider": "test",
+    "model_name": "hardcoded",
+    "constraints": {
+      "meter": "بحر الكامل",
+      "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+      "qafiya": "ق",
+      "qafiya_harakah": "مكسور",
+      "qafiya_type": "متواتر",
+      "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+      "qafiya_pattern": "قِ",
+      "line_count": null,
+      "theme": "غزل",
+      "tone": "حزينة",
+      "imagery": [],
+      "keywords": [],
+      "sections": [],
+      "register": null,
+      "era": null,
+      "poet_style": null,
+      "ambiguities": [],
+      "llm_suggestions": null,
+      "llm_reasoning": null,
+      "original_prompt": null
+    },
+    "generation_timestamp": "2025-08-10T19:28:53.830284",
+    "quality": {
+      "prosody_issues": [],
+      "line_count_issues": [],
+      "qafiya_issues": [
+        "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+      ],
+      "tashkeel_issues": [],
+      "overall_score": 0.9,
+      "is_acceptable": true,
+      "recommendations": [
+        "راجع القافية في الأبيات"
+      ],
+      "prosody_validation": {
+        "overall_valid": true,
+        "total_baits": 2,
+        "valid_baits": 2,
+        "invalid_baits": 0,
+        "bait_results": [
+          {
+            "bait_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+            "is_valid": true,
+            "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتْفَاعِلْ",
+            "error_details": null,
+            "diacritized_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ"
+          },
+          {
+            "bait_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ",
+            "is_valid": true,
+            "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ",
+            "error_details": null,
+            "diacritized_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+          }
+        ],
+        "bahr_used": "بحر الكامل",
+        "validation_summary": "جميع الأبيات (2) صحيحة عروضياً على بحر بحر الكامل",
+        "diacritics_applied": true
+      },
+      "qafiya_validation": {
+        "overall_valid": false,
+        "total_baits": 2,
+        "valid_baits": 1,
+        "invalid_baits": 1,
+        "bait_results": [
+          {
+            "bait_number": 1,
+            "is_valid": false,
+            "error_details": "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+          },
+          {
+            "bait_number": 2,
+            "is_valid": true,
+            "error_details": null
+          }
+        ],
+        "validation_summary": "1 من 2 أبيات صحيحة قافياً. الأبيات الخاطئة: 1 على القافية المطلوبة (ق)",
+        "misaligned_bait_numbers": [
+          1
+        ],
+        "expected_qafiya": "ق",
+        "qafiya_harakah": "مكسور",
+        "qafiya_type": "متواتر",
+        "qafiya_pattern": "قِ",
+        "issues": [
+          "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+        ]
+      },
+      "line_count_validation": null,
+      "tashkeel_validation": null
+    }
+  },
+  "quality_assessment": {
+    "verses": [
+      "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ",
+      "وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+      "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا",
+      "وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+    ],
+    "llm_provider": "test",
+    "model_name": "hardcoded",
+    "constraints": {
+      "meter": "بحر الكامل",
+      "meeter_tafeelat": "متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن متفاعلن",
+      "qafiya": "ق",
+      "qafiya_harakah": "مكسور",
+      "qafiya_type": "متواتر",
+      "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
+      "qafiya_pattern": "قِ",
+      "line_count": null,
+      "theme": "غزل",
+      "tone": "حزينة",
+      "imagery": [],
+      "keywords": [],
+      "sections": [],
+      "register": null,
+      "era": null,
+      "poet_style": null,
+      "ambiguities": [],
+      "llm_suggestions": null,
+      "llm_reasoning": null,
+      "original_prompt": null
+    },
+    "generation_timestamp": "2025-08-10T19:28:53.830284",
+    "quality": {
+      "prosody_issues": [],
+      "line_count_issues": [],
+      "qafiya_issues": [
+        "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+      ],
+      "tashkeel_issues": [],
+      "overall_score": 0.9,
+      "is_acceptable": true,
+      "recommendations": [
+        "راجع القافية في الأبيات"
+      ],
+      "prosody_validation": {
+        "overall_valid": true,
+        "total_baits": 2,
+        "valid_baits": 2,
+        "invalid_baits": 0,
+        "bait_results": [
+          {
+            "bait_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ",
+            "is_valid": true,
+            "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتْفَاعِلْ",
+            "error_details": null,
+            "diacritized_text": "تَبْكي السَّحابُ عَلَى فِراقِكَ يا شَفَقْ#وَالْقَلْبُ يَشْكُو مَا أَصابَهُ مِنْ حُرَقْ"
+          },
+          {
+            "bait_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ",
+            "is_valid": true,
+            "pattern": "مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ#مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ",
+            "error_details": null,
+            "diacritized_text": "فِي لَيْلَةٍ حَزِنَتْ عَلَيْكَ دُجَى السُّهَا#وَجْدِي عَلَيْكَ يَزِيدُ مَعْ نَفْحِ الْعَبِقِ"
+          }
+        ],
+        "bahr_used": "بحر الكامل",
+        "validation_summary": "جميع الأبيات (2) صحيحة عروضياً على بحر بحر الكامل",
+        "diacritics_applied": true
+      },
+      "qafiya_validation": {
+        "overall_valid": false,
+        "total_baits": 2,
+        "valid_baits": 1,
+        "invalid_baits": 1,
+        "bait_results": [
+          {
+            "bait_number": 1,
+            "is_valid": false,
+            "error_details": "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+          },
+          {
+            "bait_number": 2,
+            "is_valid": true,
+            "error_details": null
+          }
+        ],
+        "validation_summary": "1 من 2 أبيات صحيحة قافياً. الأبيات الخاطئة: 1 على القافية المطلوبة (ق)",
+        "misaligned_bait_numbers": [
+          1
+        ],
+        "expected_qafiya": "ق",
+        "qafiya_harakah": "مكسور",
+        "qafiya_type": "متواتر",
+        "qafiya_pattern": "قِ",
+        "issues": [
+          "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
+        ]
+      },
+      "line_count_validation": null,
+      "tashkeel_validation": null
+    }
+  },
+  "completed_at": null,
+  "total_duration_ms": null,
+  "total_llm_calls": 0,
+  "total_tokens": 0
+}

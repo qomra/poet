@@ -94,9 +94,11 @@ class Constraints:
         """Convert constraints to dictionary"""
         return {
             "meter": self.meter,
+            "meeter_tafeelat": self.meeter_tafeelat,
             "qafiya": self.qafiya,
             "qafiya_harakah": self.qafiya_harakah,
             "qafiya_type": self.qafiya_type.value if self.qafiya_type is not None else None,
+            "qafiya_type_description_and_examples": self.qafiya_type_description_and_examples,
             "qafiya_pattern": self.qafiya_pattern,
             "line_count": self.line_count,
             "theme": self.theme,
@@ -107,7 +109,10 @@ class Constraints:
             "register": self.register,
             "era": self.era,
             "poet_style": self.poet_style,
-            "ambiguities": self.ambiguities
+            "ambiguities": self.ambiguities,
+            "llm_suggestions": self.llm_suggestions,
+            "llm_reasoning": self.llm_reasoning,
+            "original_prompt": self.original_prompt
         }
     
     @classmethod
@@ -127,6 +132,7 @@ class Constraints:
         
         return cls(
             meter=data.get("meter"),
+            meeter_tafeelat=data.get("meeter_tafeelat"),
             qafiya=data.get("qafiya"),
             qafiya_harakah=data.get("qafiya_harakah"),
             qafiya_type=qafiya_type,
@@ -140,7 +146,8 @@ class Constraints:
             register=data.get("register"),
             era=data.get("era"),
             poet_style=data.get("poet_style"),
-            ambiguities=data.get("ambiguities", [])
+            ambiguities=data.get("ambiguities", []),
+            original_prompt=data.get("original_prompt")
         )
     
 
@@ -158,12 +165,12 @@ class Constraints:
             qafiya_info = f"القافية: {self.qafiya}"
             if self.qafiya_harakah:
                 qafiya_info += f" ({self.qafiya_harakah})"
-            if self.qafiya_pattern:
-                qafiya_info += f" [{self.qafiya_pattern}]"
             if self.qafiya_type:
                 qafiya_info += f" ({self.qafiya_type})"
             if self.qafiya_type_description_and_examples:
-                qafiya_info += f" ({self.qafiya_type_description_and_examples})"
+                qafiya_info += f" {self.qafiya_type_description_and_examples}"
+            if self.qafiya_pattern:
+                qafiya_info += f" [{self.qafiya_pattern}]"
             parts.append(qafiya_info)
         if self.line_count:
             parts.append(f"الأبيات: {self.line_count}")

@@ -27,6 +27,7 @@ from poet.logging.integration import HarmonyIntegration
 from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.analysis.qafiya_selector import QafiyaSelector
+from poet.analysis.bahr_selector import BahrSelector
 from poet.evaluation.poem import PoemEvaluator
 from poet.refinement.refiner_chain import RefinerChain
 from poet.evaluation.poem import EvaluationType
@@ -61,22 +62,33 @@ async def load_or_generate_execution():
             total_tokens=fixture_data.get("total_tokens", 0)
         )
         
+        # Set additional fields if they exist in the fixture
+        if fixture_data.get("completed_at"):
+            execution.completed_at = datetime.fromisoformat(fixture_data["completed_at"])
+        if fixture_data.get("total_duration_ms"):
+            execution.total_duration_ms = fixture_data["total_duration_ms"]
+        
         # Convert calls back to CapturedCall objects
         for call_data in fixture_data.get("calls", []):
             call = CapturedCall(
                 call_id=call_data.get("call_id", ""),
                 timestamp=datetime.fromisoformat(call_data.get("timestamp", "2025-01-01T00:00:00Z")),
-                component_name=call_data.get("component", ""),
-                method_name=call_data.get("method", ""),
-                call_type="",  # Not in fixture
-                inputs=call_data.get("input", {}),
-                outputs=call_data.get("output", {}),
-                tokens_used=call_data.get("tokens_used", 0)
+                component_name=call_data.get("component_name", call_data.get("component", "")),  # Handle both old and new field names
+                method_name=call_data.get("method_name", call_data.get("method", "")),  # Handle both old and new field names
+                call_type=call_data.get("call_type", ""),  # Use call_type if available
+                inputs=call_data.get("inputs", call_data.get("input", {})),  # Handle both old and new field names
+                outputs=call_data.get("outputs", call_data.get("output", {})),  # Handle both old and new field names
+                error=call_data.get("error"),
+                llm_provider=call_data.get("llm_provider"),
+                model_name=call_data.get("model_name"),
+                prompt=call_data.get("prompt"),
+                response=call_data.get("response"),
+                tokens_used=call_data.get("tokens_used", 0),
             )
             execution.calls.append(call)
         
         print(f"Loaded execution ID: {execution.execution_id}")
-        return execution
+        return execution, True  # Indicate that it was loaded from fixture
     
     print("=== Generating new execution (fixture not found) ===")
     return await generate_execution()
@@ -128,6 +140,8 @@ async def generate_execution():
     # Create captured components
     qafiya_selector_orig = QafiyaSelector(llm, prompt_manager)
     qafiya_selector = capture_component(qafiya_selector_orig, "QafiyaSelector")
+    bahar_selector_orig = BahrSelector(llm, prompt_manager)
+    bahar_selector = capture_component(bahar_selector_orig, "BahrSelector")
     poem_evaluator_orig = PoemEvaluator(llm)
     poem_evaluator = capture_component(poem_evaluator_orig, "PoemEvaluator")
     
@@ -150,6 +164,7 @@ async def generate_execution():
     
     print("Step 1: Enriching constraints...")
     enriched_constraints = qafiya_selector.select_qafiya(constraints, user_prompt)
+    enriched_constraints = bahar_selector.select_bahr(enriched_constraints, user_prompt)
     
     # Use hardcoded initial poem for test predictability
     initial_poem = LLMPoem(
@@ -161,7 +176,7 @@ async def generate_execution():
         ],
         llm_provider='test', 
         model_name='hardcoded', 
-        constraints=constraints.to_dict()
+        constraints=enriched_constraints.to_dict()
     )
     
     print("Step 2: Refining poem...")
@@ -182,6 +197,9 @@ async def generate_execution():
     from poet.logging.harmony_capture import get_capture
     capture = get_capture()
     execution = capture.get_execution()
+    # put final_poem to execution
+    execution.final_poem = refined_poem.to_dict()
+    execution.quality_assessment = final_evaluation.to_dict()
     
     if execution:
         print(f"Generated execution ID: {execution.execution_id}")
@@ -189,7 +207,7 @@ async def generate_execution():
         print(f"Total LLM calls: {execution.total_llm_calls}")
         print(f"Total tokens: {execution.total_tokens}")
     
-    return execution
+    return execution, False  # Return tuple with flag indicating it was generated
 
 
 async def generate_harmony_data(execution, llm):
@@ -219,15 +237,20 @@ async def generate_harmony_data(execution, llm):
         else:
             print("  - System message: Not found in structured data")
         
-        if 'conversation' in structured_data:
-            print(f"  - Conversation length: {len(structured_data['conversation'])} messages")
+        if 'messages' in structured_data:
+            print(f"  - Messages count: {len(structured_data['messages'])}")
         else:
-            print("  - Conversation: Not found in structured data")
+            print("  - Messages: Not found in structured data")
         
         # Convert to conversation format
         try:
             conversation = compiler.create_harmony_conversation(structured_data)
-            messages = str(conversation) if conversation else "Failed to create conversation"
+            if isinstance(conversation, dict) and 'error' in conversation:
+                print(f"  - Conversation creation failed: {conversation['error']}")
+                messages = "Failed to create conversation"
+            else:
+                print(f"  - Conversation created successfully: {type(conversation)}")
+                messages = str(conversation) if conversation else "Failed to create conversation"
         except Exception as e:
             print(f"⚠️ Warning: Could not create harmony conversation: {e}")
             messages = "Failed to create conversation"
@@ -244,22 +267,8 @@ async def generate_harmony_data(execution, llm):
 def save_outputs(execution, structured_data, conversation_str):
     """Save all outputs to files"""
     
-    output_dir = Path(__file__).parent / "temp"
-    output_dir.mkdir(exist_ok=True)
-    
-    # Save raw execution data
-    raw_file = output_dir / f"{execution.execution_id}_raw.json"
-    with open(raw_file, 'w', encoding='utf-8') as f:
-        json.dump(execution.to_dict(), f, ensure_ascii=False, indent=2)
-    print(f"Raw execution data saved to: {raw_file}")
-    
     # Save structured harmony data
     if structured_data:
-        structured_file = output_dir / f"{execution.execution_id}_structured.json"
-        with open(structured_file, 'w', encoding='utf-8') as f:
-            json.dump(structured_data, f, ensure_ascii=False, indent=2)
-        print(f"Structured harmony data saved to: {structured_file}")
-        
         # Save to fixtures directory
         fixture_path = Path(__file__).parent.parent.parent / "tests" / "fixtures" / "harmony_structured_test.json"
         with open(fixture_path, 'w', encoding='utf-8') as f:
@@ -268,11 +277,6 @@ def save_outputs(execution, structured_data, conversation_str):
     
     # Save harmony conversation
     if conversation_str:
-        harmony_file = output_dir / f"{execution.execution_id}_harmony.txt"
-        with open(harmony_file, 'w', encoding='utf-8') as f:
-            f.write(conversation_str)
-        print(f"Harmony conversation saved to: {harmony_file}")
-        
         # Save to fixtures directory
         fixture_path = Path(__file__).parent.parent.parent / "tests" / "fixtures" / "harmony_test_output.txt"
         with open(fixture_path, 'w', encoding='utf-8') as f:
@@ -293,7 +297,13 @@ async def main():
     """Main function to orchestrate the process"""
     
     # Load or generate execution
-    execution = await load_or_generate_execution()
+    result = await load_or_generate_execution()
+    if isinstance(result, tuple):
+        execution, was_loaded = result
+    else:
+        # Handle backward compatibility
+        execution = result
+        was_loaded = False
     
     if not execution:
         print("Failed to load or generate execution!")
@@ -319,8 +329,12 @@ async def main():
     
     structured_data, conversation_str = await generate_harmony_data(execution, llm)
     
-    # Save all outputs
-    save_outputs(execution, structured_data, conversation_str)
+    # Only save outputs if execution was generated (not loaded from fixture)
+    if not was_loaded:
+        save_outputs(execution, structured_data, conversation_str)
+        print("\n=== New execution data saved ===")
+    else:
+        print("\n=== Using existing fixture data (no saving) ===")
     
     print("\n=== Process completed successfully ===")
 

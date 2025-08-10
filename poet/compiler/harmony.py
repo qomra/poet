@@ -1,6 +1,7 @@
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 import json
+import re
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
 from poet.logging.harmony_capture import PipelineExecution
@@ -46,13 +47,19 @@ class HarmonyCompiler:
         # Generate structured response
         response = self.llm.generate(prompt)
         
+        # Debug: Print the raw response for troubleshooting
+        print(f"🔍 Raw LLM response (first 500 chars): {response[:500]}...")
+        
         # Parse the Harmony format response and convert to structured data
         try:
             structured_data = self._parse_harmony_response(response)
+            print(f"✅ Successfully parsed Harmony response with {len(structured_data.get('messages', []))} messages")
             return structured_data
         except Exception as e:
             # Fallback to raw response if parsing fails
-            return {"raw_response": response, "error": f"Failed to parse Harmony response: {str(e)}"}
+            print(f"❌ Failed to parse Harmony response: {str(e)}")
+            print(f"🔍 Raw response: {response}")
+            raise ValueError(f"Failed to parse Harmony response: {str(e)}")
     
     def _parse_harmony_response(self, response: str) -> dict:
         """
@@ -71,7 +78,7 @@ class HarmonyCompiler:
                 "reasoning_effort": "high",
                 "conversation_start_date": "2025-01-01",
                 "knowledge_cutoff": "2024-06",
-                "required_channels": ["analysis", "commentary", "final"],
+                "required_channels": ["analysis", "final"],
                 "tools": [
                     {
                         "type": "browser",
@@ -111,12 +118,24 @@ class HarmonyCompiler:
                 elif part.startswith('browser'):
                     role = 'tool'
                 
-                # Extract channel if present
+                # Extract channel if present - look for channel information in the content
                 if '<|channel|>' in part:
                     channel_start = part.find('<|channel|>') + len('<|channel|>')
                     channel_end = part.find('<|message|>')
                     if channel_end > channel_start:
                         channel = part[channel_start:channel_end].strip()
+                else:
+                    # Look for channel info in the content (like "# Valid channels: analysis, final")
+                    if 'channels:' in part or 'channels' in part:
+                        # Extract channel from text like "# Valid channels: analysis, final"
+                        channel_match = re.search(r'channels?:\s*([^.\n]+)', part, re.IGNORECASE)
+                        if channel_match:
+                            channels_text = channel_match.group(1).strip()
+                            # Extract first channel as default
+                            if 'analysis' in channels_text:
+                                channel = 'analysis'
+                            elif 'final' in channels_text:
+                                channel = 'final'
                 
                 # Extract message content
                 if '<|message|>' in part:
@@ -124,6 +143,18 @@ class HarmonyCompiler:
                     message_end = part.find('<|end|>')
                     if message_end > message_start:
                         content = part[message_start:message_end].strip()
+                else:
+                    # If no <|message|> tag, extract content after role
+                    if role:
+                        # Find the end of the role
+                        role_end = len(role)
+                        # Look for <|end|> tag
+                        end_tag = part.find('<|end|>')
+                        if end_tag > role_end:
+                            content = part[role_end:end_tag].strip()
+                        else:
+                            # If no end tag, take everything after role
+                            content = part[role_end:].strip()
                 
                 # Only add messages with content and valid roles
                 if content and role and role not in ['system', 'developer']:
@@ -151,6 +182,52 @@ class HarmonyCompiler:
             if structured_data["messages"]:
                 return structured_data
             else:
+                # If no messages found, check if we have a system message and create conversation from it
+                system_content = ""
+                for part in message_parts:
+                    if part.startswith('system'):
+                        if '<|message|>' in part:
+                            message_start = part.find('<|message|>') + len('<|message|>')
+                            message_end = part.find('<|end|>')
+                            if message_end > message_start:
+                                system_content = part[message_start:message_end].strip()
+                        else:
+                            # Extract content after 'system'
+                            system_content = part[6:].strip()
+                            if '<|end|>' in system_content:
+                                system_content = system_content[:system_content.find('<|end|>')].strip()
+                        break
+                
+                if system_content:
+                    # Create conversation structure from system content
+                    structured_data["messages"].append({
+                        "role": "user",
+                        "content": "أريد توليد شعر عربي",
+                        "channel": "analysis"
+                    })
+                    
+                    # Parse the system content to extract channel info
+                    if 'channels:' in system_content:
+                        channel_match = re.search(r'channels?:\s*([^.\n]+)', system_content, re.IGNORECASE)
+                        if channel_match:
+                            channels_text = channel_match.group(1).strip()
+                            if 'analysis' in channels_text:
+                                channel = 'analysis'
+                            elif 'final' in channels_text:
+                                channel = 'final'
+                            else:
+                                channel = 'analysis'
+                        else:
+                            channel = 'analysis'
+                    
+                    structured_data["messages"].append({
+                        "role": "assistant",
+                        "content": system_content,
+                        "channel": channel
+                    })
+                    
+                    return structured_data
+                
                 raise ValueError("No valid messages found in response")
                 
         except Exception as e:
@@ -183,7 +260,7 @@ class HarmonyCompiler:
             dev_data = structured_data.get("developer_message", {})
             developer_message = (
                 Message.from_role_and_content(Role.ASSISTANT, dev_data.get("instructions", "You are a specialized Arabic poetry generation system."))
-                .with_channel("commentary")
+                .with_channel("analysis")
             )
             
             # Create messages from structured data

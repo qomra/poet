@@ -30,11 +30,11 @@ class BahrSelector:
     
     def select_bahr(self, constraints: Constraints, original_prompt: str) -> Constraints:
         """
-        Select and standardize bahr specification for the given constraints.
+        Select and enhance bahr specification for the given constraints.
         
         Args:
-            constraints: Parsed user constraints
-            original_prompt: Original user prompt text
+            constraints: Current constraints object
+            original_prompt: Original user prompt for context
             
         Returns:
             Enhanced Constraints with standardized bahr specification
@@ -44,9 +44,11 @@ class BahrSelector:
         """
         try:
             # Check if bahr is already properly specified
-            if self._is_bahr_complete(constraints):
+            if self._is_bahr_complete(constraints) and self._validate_existing_bahr(constraints):
                 self.logger.info("Bahr already properly specified, validating...")
-                return self._validate_existing_bahr(constraints)
+                # add tafeelat to constraints
+                constraints.meeter_tafeelat = " ".join(self.meters_manager.get_meter_tafeelat(constraints.meter))
+                return constraints
             
             # Get missing components
             missing_components = self._get_missing_bahr_components(constraints)
