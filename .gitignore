@@ -4,6 +4,8 @@ tools/scraper/gemini/*.js
 tools/scraper/gemini/*.md
 tests/fixtures/llms.json
 tests/fixtures/search_providers.json
+tools/datasets/diwan/data/
+tools/datasets/diwan/plots/
 **/*diwan*.json*
 **/*diwan*.html*
 **/package-lock.json*
