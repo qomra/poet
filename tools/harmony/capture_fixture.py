@@ -264,7 +264,7 @@ async def generate_harmony_data(execution, llm):
         return None, None
 
 
-def save_outputs(execution, structured_data, conversation_str):
+def save_outputs(execution, structured_data, conversation_str,was_loaded):
     """Save all outputs to files"""
     
     # Save structured harmony data
@@ -284,13 +284,14 @@ def save_outputs(execution, structured_data, conversation_str):
         print(f"Harmony output saved to: {fixture_path}")
     
     # Save execution fixture
-    fixture_path = Path(__file__).parent.parent.parent / "tests" / "fixtures" / "harmony_test.json"
-    fixture_path.parent.mkdir(exist_ok=True)
-    
-    with open(fixture_path, 'w', encoding='utf-8') as f:
-        json.dump(execution.to_dict(), f, ensure_ascii=False, indent=2)
-    
-    print(f"Execution fixture saved to: {fixture_path}")
+    if not was_loaded:  
+        fixture_path = Path(__file__).parent.parent.parent / "tests" / "fixtures" / "harmony_test.json"
+        fixture_path.parent.mkdir(exist_ok=True)
+        
+        with open(fixture_path, 'w', encoding='utf-8') as f:
+            json.dump(execution.to_dict(), f, ensure_ascii=False, indent=2)
+        
+        print(f"Execution fixture saved to: {fixture_path}")
 
 
 async def main():
@@ -330,11 +331,8 @@ async def main():
     structured_data, conversation_str = await generate_harmony_data(execution, llm)
     
     # Only save outputs if execution was generated (not loaded from fixture)
-    if not was_loaded:
-        save_outputs(execution, structured_data, conversation_str)
-        print("\n=== New execution data saved ===")
-    else:
-        print("\n=== Using existing fixture data (no saving) ===")
+
+    save_outputs(execution, structured_data, conversation_str,was_loaded)
     
     print("\n=== Process completed successfully ===")
 
