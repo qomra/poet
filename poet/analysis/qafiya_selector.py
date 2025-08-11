@@ -66,8 +66,7 @@ class QafiyaSelector:
         return (
             constraints.qafiya is not None and
             constraints.qafiya_harakah is not None and
-            constraints.qafiya_type is not None and
-            constraints.qafiya_pattern is not None
+            constraints.qafiya_type is not None 
         )
     
     def _get_missing_qafiya_components(self, constraints: Constraints) -> list:
@@ -79,8 +78,6 @@ class QafiyaSelector:
             missing.append('qafiya_harakah')
         if not constraints.qafiya_type:
             missing.append('qafiya_type')
-        if not constraints.qafiya_pattern:
-            missing.append('qafiya_pattern')
         return missing
     
     def _validate_existing_qafiya(self, constraints: Constraints) -> Constraints:
@@ -99,10 +96,10 @@ class QafiyaSelector:
                 theme=constraints.theme or "غير محدد",
                 tone=constraints.tone or "غير محدد",
                 era=constraints.era or "غير محدد",
-                existing_qafiya=constraints.qafiya or "غير محدد",
+                existing_qafiya=constraints.qafiya or "غير محدد",   
                 existing_harakah=constraints.qafiya_harakah or "غير محدد",
-                existing_type=constraints.qafiya_type.value if constraints.qafiya_type is not None else "غير محدد",
-                existing_pattern=constraints.qafiya_pattern or "غير محدد",
+                existing_type=constraints.qafiya_type or "غير محدد",
+                existing_type_description_and_examples=constraints.qafiya_type_description_and_examples or "غير محدد",
                 missing_components=", ".join(missing_components)
             )
             # Get LLM response
@@ -116,9 +113,8 @@ class QafiyaSelector:
             if constraints.qafiya_harakah:
                 qafiya_spec['qafiya_harakah'] = constraints.qafiya_harakah
             if constraints.qafiya_type:
-                qafiya_spec['qafiya_type'] = constraints.qafiya_type.value if constraints.qafiya_type is not None else None
-            if constraints.qafiya_pattern:
-                qafiya_spec['qafiya_pattern'] = constraints.qafiya_pattern
+                qafiya_spec['qafiya_type'] = constraints.qafiya_type
+                qafiya_spec['qafiya_type_description_and_examples'] = constraints.qafiya_type_description_and_examples
 
             return qafiya_spec
             
@@ -178,7 +174,7 @@ class QafiyaSelector:
     
     def _validate_response_structure(self, data: Dict[str, Any]):
         """Validate that the response has the expected structure"""
-        required_fields = ['qafiya_letter', 'qafiya_harakah', 'qafiya_type', 'qafiya_pattern']
+        required_fields = ['qafiya_letter', 'qafiya_harakah', 'qafiya_type']
         
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
@@ -197,7 +193,6 @@ class QafiyaSelector:
             qafiya=qafiya_spec['qafiya_letter'],
             qafiya_harakah=qafiya_spec['qafiya_harakah'],
             qafiya_type=QafiyaType(qafiya_spec['qafiya_type']),
-            qafiya_pattern=qafiya_spec.get('qafiya_pattern', f"{qafiya_spec['qafiya_letter']}{self._get_harakah_symbol(qafiya_spec['qafiya_harakah'])}"),
             line_count=constraints.line_count,
             theme=constraints.theme,
             tone=constraints.tone,

@@ -47,52 +47,7 @@ class LineCountRefiner(BaseRefiner):
         except Exception as e:
             self.logger.error(f"Failed to refine line count: {e}")
             return poem  # Return original poem if refinement fails
-    
-    async def _add_verses(self, poem: LLMPoem, constraints: Constraints, count_to_add: int) -> LLMPoem:
-        """Add verses to reach target count"""
-        # Format prompt for adding verses
-        formatted_prompt = self.prompt_manager.format_prompt(
-            'verse_completion',
-            meter=constraints.meter or "غير محدد",
-            qafiya=constraints.qafiya or "غير محدد",
-            qafiya_pattern=constraints.qafiya_pattern or "",
-            theme=constraints.theme or "غير محدد",
-            tone=constraints.tone or "غير محدد",
-            existing_verses="\n".join(poem.verses),
-            verses_to_add=count_to_add
-        )
-        
-        # Generate additional verses
-        response = self.llm.generate(formatted_prompt)
-        new_verses = self._parse_verses_from_response(response)
-        
-        # Combine with existing verses
-        all_verses = poem.verses + new_verses[:count_to_add]
-        
-        # Create new poem
-        return LLMPoem(
-            verses=all_verses,
-            llm_provider=poem.llm_provider,
-            model_name=poem.model_name,
-            constraints=poem.constraints,
-            generation_timestamp=poem.generation_timestamp
-        )
-    
-    async def _remove_verses(self, poem: LLMPoem, constraints: Constraints, count_to_remove: int) -> LLMPoem:
-        """Remove verses to reach target count"""
-        # Keep the best verses (first ones, assuming they're better)
-        target_count = len(poem.verses) - count_to_remove
-        kept_verses = poem.verses[:target_count]
-        
-        # Create new poem
-        return LLMPoem(
-            verses=kept_verses,
-            llm_provider=poem.llm_provider,
-            model_name=poem.model_name,
-            constraints=poem.constraints,
-            generation_timestamp=poem.generation_timestamp
-        )
-    
+
     def _parse_verses_from_response(self, response: str) -> List[str]:
         """Parse verses from LLM response"""
         try:

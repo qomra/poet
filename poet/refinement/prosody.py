@@ -92,7 +92,7 @@ class ProsodyRefiner(BaseRefiner):
             meter=constraints.meter or "غير محدد",
             meeter_tafeelat=constraints.meeter_tafeelat or "غير محدد",
             qafiya=constraints.qafiya or "غير محدد",
-            qafiya_pattern=constraints.qafiya_pattern or "",
+            qafiya_harakah=constraints.qafiya_harakah or "",
             theme=constraints.theme or "غير محدد",
             tone=constraints.tone or "غير محدد",
             existing_verses=verse,

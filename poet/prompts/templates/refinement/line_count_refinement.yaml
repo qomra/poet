@@ -6,7 +6,7 @@ template: |
   **السياق الحالي:**
   - البحر الشعري: {meter}
   - القافية: {qafiya}
-  - نمط القافية: {qafiya_pattern}
+  - حركة القافية: {qafiya_harakah}
   - الموضوع: {theme}
   - النبرة: {tone}
   
@@ -54,7 +54,7 @@ category: generation
 parameters:
   - meter
   - qafiya
-  - qafiya_pattern
+  - qafiya_harakah
   - theme
   - tone
   - existing_verses

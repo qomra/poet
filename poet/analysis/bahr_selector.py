@@ -240,7 +240,6 @@ class BahrSelector:
             qafiya=constraints.qafiya,
             qafiya_harakah=constraints.qafiya_harakah,
             qafiya_type=constraints.qafiya_type,
-            qafiya_pattern=constraints.qafiya_pattern,
             line_count=constraints.line_count,
             theme=constraints.theme,
             tone=constraints.tone,

@@ -57,7 +57,15 @@ class TestHarmonyCompiler:
     def mock_llm(self):
         """Create a mock LLM"""
         llm = Mock(spec=BaseLLM)
-        llm.generate.return_value = "<|start|>system<|message|>Test response<|end|>"
+        llm.generate.return_value = """<|start|>system<|message|>You are an Arabic Poetry Generation Agent.
+Knowledge cutoff: 2024-06
+Current date: 2025-01-10
+Reasoning: high
+# Valid channels: analysis, commentary, final.<|end|>
+
+<|start|>assistant<|channel|>analysis<|message|>I'll analyze this poetry generation pipeline execution and reconstruct the reasoning process.<|end|>
+
+<|start|>assistant<|channel|>final<|message|>Here is the final analysis of the poetry generation pipeline.<|end|>"""
         return llm
     
     @pytest.fixture

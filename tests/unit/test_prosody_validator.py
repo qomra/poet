@@ -355,7 +355,7 @@ class TestProsodyEvaluator:
         
         assert result.is_valid is False
         assert result.pattern == ""
-        assert "فشل في تحليل" in result.error_details
+        assert "استجابة غير واضحة من الذكاء الاصطناعي" in result.error_details
     
     def test_validate_bait_with_llm_no_llm_provider(self, prosody_evaluator):
         """Test LLM validation when no LLM provider is available"""

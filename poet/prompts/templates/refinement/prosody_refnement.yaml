@@ -7,7 +7,9 @@ template: |
   - البحر الشعري المطلوب: {meter}
   - تفعيلات البحر الشعري المطلوب: {meeter_tafeelat}
   - القافية: {qafiya}
-  - نمط القافية: {qafiya_pattern}
+  - حركة القافية: {qafiya_harakah}
+  - نوع القافية: {qafiya_type}
+  - وصف نوع القافية وأمثلة: {qafiya_type_description_and_examples}
   - الموضوع: {theme}
   - النبرة: {tone}
   
@@ -59,7 +61,9 @@ parameters:
   - meter
   - meeter_tafeelat
   - qafiya
-  - qafiya_pattern
+  - qafiya_harakah
+  - qafiya_type
+  - qafiya_type_description_and_examples
   - theme
   - tone
   - existing_verses

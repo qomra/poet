@@ -37,7 +37,6 @@ class TestQafiyaSelector:
             qafiya="ع",
             qafiya_harakah="مكسور",
             qafiya_type=QafiyaType.MUTAWATIR,
-            qafiya_pattern="عِ"
         )
         
         assert qafiya_selector._is_qafiya_complete(constraints) is True
@@ -56,24 +55,23 @@ class TestQafiyaSelector:
         # No qafiya specified
         constraints = Constraints()
         missing = qafiya_selector._get_missing_qafiya_components(constraints)
-        assert set(missing) == {'qafiya_letter', 'qafiya_harakah', 'qafiya_type', 'qafiya_pattern'}
+        assert set(missing) == {'qafiya_letter', 'qafiya_harakah', 'qafiya_type'}
         
         # Only letter specified
         constraints = Constraints(qafiya="ع")
         missing = qafiya_selector._get_missing_qafiya_components(constraints)
-        assert set(missing) == {'qafiya_harakah', 'qafiya_type', 'qafiya_pattern'}
+        assert set(missing) == {'qafiya_harakah', 'qafiya_type'}
         
         # Letter and harakah specified
         constraints = Constraints(qafiya="ع", qafiya_harakah="مكسور")
         missing = qafiya_selector._get_missing_qafiya_components(constraints)
-        assert set(missing) == {'qafiya_type', 'qafiya_pattern'}
+        assert set(missing) == {'qafiya_type'}
         
         # Complete specification
         constraints = Constraints(
             qafiya="ع",
             qafiya_harakah="مكسور",
-            qafiya_type=QafiyaType.MUTAWATIR,
-            qafiya_pattern="عِ"
+            qafiya_type=QafiyaType.MUTAWATIR
         )
         missing = qafiya_selector._get_missing_qafiya_components(constraints)
         assert missing == []
@@ -83,8 +81,7 @@ class TestQafiyaSelector:
         constraints = Constraints(
             qafiya="ع",
             qafiya_harakah="مكسور",
-            qafiya_type=QafiyaType.MUTAWATIR,
-            qafiya_pattern="عِ"
+            qafiya_type=QafiyaType.MUTAWATIR
         )
         
         result = qafiya_selector.select_qafiya(constraints, "test prompt")
@@ -92,7 +89,6 @@ class TestQafiyaSelector:
         assert result.qafiya == "ع"
         assert result.qafiya_harakah == "مكسور"
         assert result.qafiya_type == QafiyaType.MUTAWATIR
-        assert result.qafiya_pattern == "عِ"
     
     def test_select_qafiya_with_no_spec(self, qafiya_selector, basic_constraints, mock_llm):
         """Test qafiya selection when no qafiya is specified"""
@@ -103,7 +99,6 @@ class TestQafiyaSelector:
             "qafiya_letter": "ع",
             "qafiya_harakah": "مكسور",
             "qafiya_type": "متواتر",
-            "qafiya_pattern": "عِ",
             "explanation": "قافية العين المكسورة من نوع المتواتر، مناسبة للغزل والحب"
         }
         ```
@@ -116,7 +111,6 @@ class TestQafiyaSelector:
         assert result.qafiya == "ع"
         assert result.qafiya_harakah == "مكسور"
         assert result.qafiya_type == QafiyaType.MUTAWATIR
-        assert result.qafiya_pattern == "عِ"
     
     def test_select_qafiya_with_partial_spec_letter_only(self, qafiya_selector, mock_llm):
         """Test qafiya selection with only letter specified"""
@@ -134,7 +128,6 @@ class TestQafiyaSelector:
             "qafiya_letter": "ع",
             "qafiya_harakah": "مكسور",
             "qafiya_type": "متواتر",
-            "qafiya_pattern": "عِ",
             "explanation": "تم إكمال القافية بملء المكونات المفقودة"
         }
         ```
@@ -148,7 +141,6 @@ class TestQafiyaSelector:
         assert result.qafiya == "ع"
         assert result.qafiya_harakah == "مكسور"
         assert result.qafiya_type == QafiyaType.MUTAWATIR
-        assert result.qafiya_pattern == "عِ"
     
     def test_select_qafiya_with_partial_spec_letter_and_harakah(self, qafiya_selector, mock_llm):
         """Test qafiya selection with letter and harakah specified"""
@@ -167,7 +159,6 @@ class TestQafiyaSelector:
             "qafiya_letter": "ق",
             "qafiya_harakah": "مضموم",
             "qafiya_type": "متواتر",
-            "qafiya_pattern": "قُ",
             "explanation": "تم إكمال القافية بملء المكونات المفقودة"
         }
         ```
@@ -181,7 +172,6 @@ class TestQafiyaSelector:
         assert result.qafiya == "ق"
         assert result.qafiya_harakah == "مضموم"
         assert result.qafiya_type == QafiyaType.MUTAWATIR
-        assert result.qafiya_pattern == "قُ"
     
     def test_enhance_constraints(self, qafiya_selector, basic_constraints):
         """Test constraint enhancement with qafiya specification"""
@@ -189,7 +179,6 @@ class TestQafiyaSelector:
             "qafiya_letter": "ر",
             "qafiya_harakah": "مضموم",
             "qafiya_type": "متواتر",
-            "qafiya_pattern": "رُ"
         }
         
         result = qafiya_selector._enhance_constraints(basic_constraints, qafiya_spec)
@@ -199,7 +188,6 @@ class TestQafiyaSelector:
         assert result.qafiya == "ر"
         assert result.qafiya_harakah == "مضموم"
         assert result.qafiya_type == QafiyaType.MUTAWATIR
-        assert result.qafiya_pattern == "رُ"
     
     def test_get_harakah_symbol(self, qafiya_selector):
         """Test harakah symbol conversion"""
@@ -216,7 +204,8 @@ class TestQafiyaSelector:
         {
             "qafiya_letter": "ع",
             "qafiya_harakah": "مكسور",
-            "qafiya_type": "متواتر"
+            "qafiya_type": "متواتر",
+            "qafiya_type_description_and_examples": "متواتر: متحرك واحد بين ساكنين"
         }
         ```
         '''
@@ -226,7 +215,8 @@ class TestQafiyaSelector:
         assert result["qafiya_letter"] == "ع"
         assert result["qafiya_harakah"] == "مكسور"
         assert result["qafiya_type"] == "متواتر"
-    
+        assert result["qafiya_type_description_and_examples"] == "متواتر: متحرك واحد بين ساكنين"
+        
     def test_parse_llm_response_invalid_json(self, qafiya_selector):
         """Test parsing invalid LLM response"""
         response = "invalid json response"
@@ -253,10 +243,10 @@ class TestQafiyaSelector:
         data = {
             "qafiya_letter": "ع",
             "qafiya_harakah": "مكسور",
-            "qafiya_type": "نوع غير صحيح"
+            "qafiya_type": "نوع غير صحيح",
         }
         
-        with pytest.raises(ValueError, match="Invalid qafiya_type"):
+        with pytest.raises(ValueError, match="Invalid qafiya_type.*Must be one of"):
             qafiya_selector._validate_response_structure(data)
     
     def test_validate_response_structure_valid(self, qafiya_selector):
@@ -264,7 +254,7 @@ class TestQafiyaSelector:
         data = {
             "qafiya_letter": "ع",
             "qafiya_harakah": "مكسور",
-            "qafiya_type": "متواتر"
+            "qafiya_type": "متواتر",
         }
         
         # Should not raise any exception
@@ -286,7 +276,6 @@ class TestQafiyaSelector:
             "qafiya_letter": "ر",
             "qafiya_harakah": "مفتوح",
             "qafiya_type": "متواتر",
-            "qafiya_pattern": "رَ",
             "explanation": "test"
         }
         ```
@@ -295,7 +284,7 @@ class TestQafiyaSelector:
         mock_llm.reset()
         
         result = qafiya_selector._fill_missing_qafiya_components(
-            constraints, "test prompt", ["qafiya_type", "qafiya_pattern"]
+            constraints, "test prompt", ["qafiya_type"]
         )
         
         # Should preserve existing components
@@ -303,7 +292,6 @@ class TestQafiyaSelector:
         assert result["qafiya_harakah"] == "مكسور"
         # Should fill missing components
         assert result["qafiya_type"] == "متواتر"
-        assert result["qafiya_pattern"] == "رَ"
     
     def test_qafiya_selector_error_handling(self, qafiya_selector, mock_llm):
         """Test error handling in qafiya selector"""

@@ -23,7 +23,6 @@
           "qafiya_harakah": null,
           "qafiya_type": null,
           "qafiya_type_description_and_examples": null,
-          "qafiya_pattern": null,
           "line_count": null,
           "theme": "غزل",
           "tone": "حزينة",
@@ -47,7 +46,6 @@
         "qafiya_harakah": "مكسور",
         "qafiya_type": "متواتر",
         "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-        "qafiya_pattern": "قِ",
         "line_count": null,
         "theme": "غزل",
         "tone": "حزينة",
@@ -85,7 +83,6 @@
           "qafiya_harakah": "مكسور",
           "qafiya_type": "متواتر",
           "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-          "qafiya_pattern": "قِ",
           "line_count": null,
           "theme": "غزل",
           "tone": "حزينة",
@@ -109,7 +106,6 @@
         "qafiya_harakah": "مكسور",
         "qafiya_type": "متواتر",
         "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-        "qafiya_pattern": "قِ",
         "line_count": null,
         "theme": "غزل",
         "tone": "حزينة",
@@ -157,7 +153,6 @@
             "qafiya_harakah": "مكسور",
             "qafiya_type": "متواتر",
             "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-            "qafiya_pattern": "قِ",
             "line_count": null,
             "theme": "غزل",
             "tone": "حزينة",
@@ -182,7 +177,6 @@
           "qafiya_harakah": "مكسور",
           "qafiya_type": "متواتر",
           "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-          "qafiya_pattern": "قِ",
           "line_count": null,
           "theme": "غزل",
           "tone": "حزينة",
@@ -215,7 +209,6 @@
             "qafiya_harakah": "مكسور",
             "qafiya_type": "متواتر",
             "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-            "qafiya_pattern": "قِ",
             "line_count": null,
             "theme": "غزل",
             "tone": "حزينة",
@@ -292,7 +285,6 @@
               "expected_qafiya": "ق",
               "qafiya_harakah": "مكسور",
               "qafiya_type": "متواتر",
-              "qafiya_pattern": "قِ",
               "issues": [
                 "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
               ]
@@ -321,7 +313,6 @@
                 "qafiya_harakah": "مكسور",
                 "qafiya_type": "متواتر",
                 "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-                "qafiya_pattern": "قِ",
                 "line_count": null,
                 "theme": "غزل",
                 "tone": "حزينة",
@@ -398,7 +389,6 @@
                   "expected_qafiya": "ق",
                   "qafiya_harakah": "مكسور",
                   "qafiya_type": "متواتر",
-                  "qafiya_pattern": "قِ",
                   "issues": [
                     "العجز ينتهي بحرف 'ق' ولكن بدون كسرة. القافية المطلوبة هي 'قِ' (قاف مكسور)."
                   ]
@@ -423,7 +413,6 @@
                 "qafiya_harakah": "مكسور",
                 "qafiya_type": "متواتر",
                 "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-                "qafiya_pattern": "قِ",
                 "line_count": null,
                 "theme": "غزل",
                 "tone": "حزينة",
@@ -500,7 +489,6 @@
                   "expected_qafiya": "ق",
                   "qafiya_harakah": "مكسور",
                   "qafiya_type": "متواتر",
-                  "qafiya_pattern": "قِ",
                   "issues": [
                     "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
                   ]
@@ -547,7 +535,6 @@
             "qafiya_harakah": "مكسور",
             "qafiya_type": "متواتر",
             "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-            "qafiya_pattern": "قِ",
             "line_count": null, 
             "theme": "غزل",
             "tone": "حزينة",
@@ -624,7 +611,6 @@
               "expected_qafiya": "ق",
               "qafiya_harakah": "مكسور",
               "qafiya_type": "متواتر",
-              "qafiya_pattern": "قِ",
               "issues": [
                 "القافية في نهاية العجز هي 'رَقْ' وليست 'قِ' كما هو مطلوب. كما أن نوع القافية هو متدارك (ساكنان متتاليان) وليس متواتر (متحرك واحد بين ساكنين)."
               ]
@@ -640,7 +626,6 @@
           "qafiya_harakah": "مكسور",
           "qafiya_type": "متواتر",
           "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-          "qafiya_pattern": "قِ",
           "line_count": null,
           "theme": "غزل",
           "tone": "حزينة",
@@ -676,7 +661,6 @@
           "qafiya_harakah": "مكسور",
           "qafiya_type": "متواتر",
           "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-          "qafiya_pattern": "قِ",
           "line_count": null,
           "theme": "غزل",
           "tone": "حزينة",
@@ -753,7 +737,6 @@
             "expected_qafiya": "ق",
             "qafiya_harakah": "مكسور",
             "qafiya_type": "متواتر",
-            "qafiya_pattern": "قِ",
             "issues": [
               "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
             ]
@@ -788,7 +771,6 @@
       "qafiya_harakah": "مكسور",
       "qafiya_type": "متواتر",
       "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-      "qafiya_pattern": "قِ",
       "line_count": null,
       "theme": "غزل",
       "tone": "حزينة",
@@ -865,7 +847,6 @@
         "expected_qafiya": "ق",
         "qafiya_harakah": "مكسور",
         "qafiya_type": "متواتر",
-        "qafiya_pattern": "قِ",
         "issues": [
           "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
         ]
@@ -890,7 +871,6 @@
       "qafiya_harakah": "مكسور",
       "qafiya_type": "متواتر",
       "qafiya_type_description_and_examples": "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ",
-      "qafiya_pattern": "قِ",
       "line_count": null,
       "theme": "غزل",
       "tone": "حزينة",
@@ -967,7 +947,6 @@
         "expected_qafiya": "ق",
         "qafiya_harakah": "مكسور",
         "qafiya_type": "متواتر",
-        "qafiya_pattern": "قِ",
         "issues": [
           "القافية غير صحيحة. العجز ينتهي بـ 'قْ' (قاف ساكنة) بدلاً من 'قِ' (قاف مكسورة) كما هو مطلوب. أيضاً، نوع القافية ليس متواتراً كما هو مطلوب."
         ]

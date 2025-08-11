@@ -104,7 +104,6 @@ class PoemEvaluator:
                     expected_qafiya=constraints.qafiya,
                     qafiya_harakah=constraints.qafiya_harakah,
                     qafiya_type=constraints.qafiya_type.value if constraints.qafiya_type is not None else None,
-                    qafiya_pattern=constraints.qafiya_pattern,
                     qafiya_type_description_and_examples=constraints.qafiya_type_description_and_examples
                 )
                 # Store detailed validation result

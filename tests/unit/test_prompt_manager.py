@@ -33,8 +33,11 @@ class TestPromptManager:
         assert template.name == 'qafiya_validation'
         assert template.category == PromptCategory.EVALUATION
         assert 'verses' in template.parameters
-        assert 'expected_qafiya' in template.parameters
-    
+        assert "qafiya" in template.parameters
+        assert "qafiya_type" in template.parameters
+        assert "qafiya" in template.parameters
+        assert "qafiya_type_description_and_examples" in template.parameters
+        
     def test_get_template_tashkeel(self, prompt_manager):
         """Test getting tashkeel template"""
         template = prompt_manager.get_template('tashkeel')
@@ -57,11 +60,11 @@ class TestPromptManager:
     def test_get_templates_by_category_generation(self, prompt_manager):
         """Test getting generation templates"""
         templates = prompt_manager.get_templates_by_category(PromptCategory.GENERATION)
-        assert len(templates) == 3
+        assert len(templates) == 2
         template_names = [t.name for t in templates]
         assert 'simple_poem_generation' in template_names
         assert 'imagery_creation' in template_names
-        assert 'verse_completion' in template_names
+
     
     def test_get_templates_by_category_evaluation(self, prompt_manager):
         """Test getting evaluation templates"""
@@ -74,10 +77,10 @@ class TestPromptManager:
     def test_list_templates(self, prompt_manager):
         """Test listing all available templates"""
         templates = prompt_manager.list_templates()
-        assert len(templates) == 14  # Updated to match actual count
+        assert len(templates) == 15  # Updated to match actual count
         expected_templates = [
             'unified_extraction',
-            'simple_poem_generation', 'imagery_creation', 'verse_completion',
+            'simple_poem_generation', 'imagery_creation', 
             'qafiya_validation', 'tashkeel',
             'bahr_selection', 'qafiya_completion'
         ]
@@ -120,9 +123,14 @@ class TestPromptManager:
         """Test formatting qafiya_validation prompt"""
         formatted = prompt_manager.format_prompt('qafiya_validation',
                                                 verses='بيت شعري تجريبي',
-                                                expected_qafiya='ق')
+                                                qafiya='ق',
+                                                qafiya_harakah='مكسور',
+                                                qafiya_type='متواتر',
+                                                qafiya_type_description_and_examples='قافية متواترة: متحرك واحد بين ساكنين')
         assert 'بيت شعري تجريبي' in formatted
         assert 'ق' in formatted
+        assert 'متواتر' in formatted
+        assert 'قافية متواترة: متحرك واحد بين ساكنين' in formatted
     
     def test_format_prompt_tashkeel(self, prompt_manager):
         """Test formatting tashkeel prompt"""

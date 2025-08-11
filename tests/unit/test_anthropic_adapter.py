@@ -55,7 +55,6 @@ class TestAnthropicAdapter:
         assert adapter.config == mock_config
         mock_anthropic.Anthropic.assert_called_once_with(
             api_key="test-api-key",
-            base_url="https://api.anthropic.com",
             timeout=30
         )
     

@@ -134,8 +134,7 @@ class TestRealSimpleGenerationValidation:
             {
                 "qafiya_letter": "ق",
                 "qafiya_harakah": "ساكن",
-                "qafiya_type": "مترادف",
-                "qafiya_pattern": "قْ"
+                "qafiya_type": "مترادف"
             }
             ```
             '''
@@ -236,7 +235,6 @@ class TestRealSimpleGenerationValidation:
         assert enriched_constraints.qafiya is not None
         assert enriched_constraints.qafiya_harakah is not None
         assert enriched_constraints.qafiya_type is not None
-        assert enriched_constraints.qafiya_pattern is not None
         
         # Verify poem generation
         assert isinstance(poem, LLMPoem)
@@ -351,8 +349,7 @@ class TestRealSimpleGenerationValidation:
             {
                 "qafiya_letter": "ع",
                 "qafiya_harakah": "مكسور",
-                "qafiya_type": "مترادف",
-                "qafiya_pattern": "عِ"
+                "qafiya_type": "مترادف"
             }
             ```
             '''

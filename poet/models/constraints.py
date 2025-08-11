@@ -43,7 +43,6 @@ class Constraints:
     qafiya_harakah: Optional[str] = None  # مفتوح، مكسور، مضموم، ساكن
     qafiya_type: Optional[QafiyaType] = None
     qafiya_type_description_and_examples: Optional[str] = field(default=None, init=False) # infered not passed by user
-    qafiya_pattern: Optional[str] = None  # Exact pattern like "عُ", "قَ", etc.
     line_count: Optional[int] = None
     
     # Thematic constraints  
@@ -80,7 +79,7 @@ class Constraints:
         # infer qafiya_type_examples from qafiya_type
         if self.qafiya_type:
             # convert qafiya_type to QafiyaTypeDescriptionAndExamples enum
-            self.qafiya_type_description_and_examples = QafiyaTypeDescriptionAndExamples[self.qafiya_type.name].value
+            self.qafiya_type_description_and_examples = QafiyaTypeDescriptionAndExamples[QafiyaType(self.qafiya_type).name].value
             
         # Basic validation
         if self.line_count is not None and self.line_count <= 0:
@@ -99,7 +98,6 @@ class Constraints:
             "qafiya_harakah": self.qafiya_harakah,
             "qafiya_type": self.qafiya_type.value if self.qafiya_type is not None else None,
             "qafiya_type_description_and_examples": self.qafiya_type_description_and_examples,
-            "qafiya_pattern": self.qafiya_pattern,
             "line_count": self.line_count,
             "theme": self.theme,
             "tone": self.tone,
@@ -136,7 +134,6 @@ class Constraints:
             qafiya=data.get("qafiya"),
             qafiya_harakah=data.get("qafiya_harakah"),
             qafiya_type=qafiya_type,
-            qafiya_pattern=data.get("qafiya_pattern"),
             line_count=data.get("line_count"),
             theme=data.get("theme"),
             tone=data.get("tone"),
@@ -169,8 +166,6 @@ class Constraints:
                 qafiya_info += f" ({self.qafiya_type})"
             if self.qafiya_type_description_and_examples:
                 qafiya_info += f" {self.qafiya_type_description_and_examples}"
-            if self.qafiya_pattern:
-                qafiya_info += f" [{self.qafiya_pattern}]"
             parts.append(qafiya_info)
         if self.line_count:
             parts.append(f"الأبيات: {self.line_count}")

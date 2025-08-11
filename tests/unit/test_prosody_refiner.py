@@ -367,7 +367,7 @@ class TestProsodyRefiner:
         
         fixed_verse = await refiner._fix_single_verse(original_verse, sample_constraints, error_details)
         
-        assert fixed_verse == "بيت مصحح"
+        assert fixed_verse[0] == "بيت مصحح"
         
         # Check that prompt was formatted correctly
         mock_prompt_manager.format_prompt.assert_called_once()

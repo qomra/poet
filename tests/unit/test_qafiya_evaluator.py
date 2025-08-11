@@ -59,7 +59,6 @@ class TestQafiyaEvaluator:
                 expected_qafiya="ل",
                 qafiya_harakah="مكسور",
                 qafiya_type="متواتر",
-                qafiya_pattern="لِ",
                 qafiya_type_description_and_examples="متواتر: متحرك واحد بين ساكنين"
             )
             
@@ -75,7 +74,6 @@ class TestQafiyaEvaluator:
             assert result.expected_qafiya == "ل"
             assert result.qafiya_harakah == "مكسور"
             assert result.qafiya_type == "متواتر"
-            assert result.qafiya_pattern == "لِ"
             assert result.misaligned_bait_numbers == []
             assert len(result.bait_results) == 2
             
@@ -103,7 +101,6 @@ class TestQafiyaEvaluator:
                 expected_qafiya="ل",
                 qafiya_harakah="مكسور",
                 qafiya_type="متواتر",
-                qafiya_pattern="لِ",
                 qafiya_type_description_and_examples="متواتر: متحرك واحد بين ساكنين"
             )
             
@@ -282,7 +279,6 @@ class TestQafiyaEvaluator:
             expected_qafiya="ل",
             qafiya_harakah="مكسور",
             qafiya_type="متواتر",
-            qafiya_pattern="لِ"
         )
         
         result_dict = validation_result.to_dict()
@@ -293,7 +289,6 @@ class TestQafiyaEvaluator:
         assert result_dict['expected_qafiya'] == "ل"
         assert result_dict['qafiya_harakah'] == "مكسور"
         assert result_dict['qafiya_type'] == "متواتر"
-        assert result_dict['qafiya_pattern'] == "لِ"
         assert len(result_dict['bait_results']) == 1
         assert result_dict['bait_results'][0]['bait_number'] == 1
         assert result_dict['bait_results'][0]['is_valid'] is True
@@ -337,16 +332,16 @@ class TestQafiyaEvaluator:
             assert result.expected_qafiya == "ل"
             assert result.qafiya_harakah is None
             assert result.qafiya_type is None
-            assert result.qafiya_pattern is None
             
-            # Test with only qafiya_pattern
+            # Test with only 
             result2 = self.validator.evaluate_qafiya(
                 self.valid_poem, 
-                qafiya_pattern="لِ"
+                qafiya_harakah="مكسور",
+                qafiya_type="متواتر",
+                qafiya_type_description_and_examples="متواتر: متحرك واحد بين ساكنين"
             )
             
             assert result2.expected_qafiya is None
-            assert result2.qafiya_pattern == "لِ"
     
     def test_evaluate_qafiya_single_bait_poem(self):
         """Test qafiya validation with a single bait poem"""

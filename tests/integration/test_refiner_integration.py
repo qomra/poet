@@ -49,8 +49,7 @@ class TestRefinerIntegration:
         return Constraints(
             line_count=4,  # Expecting 4 verses
             meter="بحر الطويل",
-            qafiya="ق",
-            qafiya_pattern="قَ"
+            qafiya="ق"
         )
     
     @pytest.fixture

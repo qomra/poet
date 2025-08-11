@@ -149,75 +149,7 @@ class TestLineCountRefiner:
         assert result == sample_poem
         assert result.verses == sample_poem.verses
     
-    @pytest.mark.asyncio
-    async def test_refine_add_verses(self, mock_llm, mock_prompt_manager, sample_poem, sample_constraints):
-        """Test refine when verses need to be added"""
-        refiner = LineCountRefiner(mock_llm, mock_prompt_manager)
-        
-        # Set constraints to require more verses
-        sample_constraints.line_count = 6
-        
-        line_count_validation = LineCountValidationResult(
-            is_valid=False,
-            line_count=4,
-            expected_even=True,
-            validation_summary="Need 2 more verses"
-        )
-        
-        evaluation = QualityAssessment(
-            prosody_issues=[],
-            line_count_issues=[],
-            qafiya_issues=[],
-            overall_score=0.8,
-            is_acceptable=False,
-            recommendations=[],
-            line_count_validation=line_count_validation
-        )
-        
-        result = await refiner.refine(sample_poem, sample_constraints, evaluation)
-        
-        # Should have more verses
-        assert len(result.verses) == 6
-        assert result.verses[:4] == sample_poem.verses  # Original verses preserved
-        assert result.verses[4:] == ["بيت جديد 1", "بيت جديد 2"]  # New verses added
-        
-        # Check that prompt was formatted correctly
-        mock_prompt_manager.format_prompt.assert_called_once()
-        call_args = mock_prompt_manager.format_prompt.call_args
-        assert call_args[0][0] == 'verse_completion'
-        assert call_args[1]['verses_to_add'] == 2
-    
-    @pytest.mark.asyncio
-    async def test_refine_remove_verses(self, mock_llm, sample_poem, sample_constraints):
-        """Test refine when verses need to be removed"""
-        refiner = LineCountRefiner(mock_llm)
-        
-        # Set constraints to require fewer verses
-        sample_constraints.line_count = 2
-        
-        line_count_validation = LineCountValidationResult(
-            is_valid=False,
-            line_count=4,
-            expected_even=True,
-            validation_summary="Need to remove 2 verses"
-        )
-        
-        evaluation = QualityAssessment(
-            prosody_issues=[],
-            line_count_issues=[],
-            qafiya_issues=[],
-            overall_score=0.8,
-            is_acceptable=False,
-            recommendations=[],
-            line_count_validation=line_count_validation
-        )
-        
-        result = await refiner.refine(sample_poem, sample_constraints, evaluation)
-        
-        # Should have fewer verses
-        assert len(result.verses) == 2
-        assert result.verses == sample_poem.verses[:2]  # First verses kept
-    
+
     @pytest.mark.asyncio
     async def test_refine_exception_handling(self, mock_llm, sample_poem, sample_constraints):
         """Test refine handles exceptions gracefully"""

@@ -91,8 +91,8 @@ class QafiyaRefiner(BaseRefiner):
         
         for i, bait_result in enumerate(qafiya_validation.bait_results):
             if not bait_result.is_valid:
-                # Get expected qafiya from constraints or use empty string
-                issue = bait_result.error_details
+                # Get error details from bait result, default to empty string if missing
+                issue = getattr(bait_result, 'error_details', '') or ''
                 wrong_qafiya_bait.append((i, issue))
         
         return wrong_qafiya_bait
@@ -102,12 +102,12 @@ class QafiyaRefiner(BaseRefiner):
         # Format prompt for fixing verse qafiya
 
         formatted_prompt = self.prompt_manager.format_prompt(
-            'qafiya_refinement_v2',
+            'qafiya_refinement',
             meter=constraints.meter or "غير محدد",
             meeter_tafeelat=constraints.meeter_tafeelat or "غير محدد",
             qafiya=constraints.qafiya or "غير محدد",
-            qafiya_pattern=constraints.qafiya_pattern or "",
-            qafiya_type=constraints.qafiya_type.value if constraints.qafiya_type is not None else "غير محدد",
+            qafiya_harakah=constraints.qafiya_harakah or "",
+            qafiya_type=constraints.qafiya_type or "غير محدد",
             qafiya_type_description_and_examples=constraints.qafiya_type_description_and_examples if constraints.qafiya_type_description_and_examples is not None else "غير محدد",
             theme=constraints.theme or "غير محدد",
             tone=constraints.tone or "غير محدد",

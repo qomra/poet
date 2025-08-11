@@ -16,7 +16,7 @@ template: |
   - حرف القافية: {existing_qafiya}
   - الحركة: {existing_harakah}
   - النوع: {existing_type}
-  - النمط: {existing_pattern}
+  - وصف النوع: {existing_type_description_and_examples}
 
   **المكونات المفقودة:**
   {missing_components}
@@ -68,7 +68,6 @@ template: |
     "qafiya_letter": "ع",
     "qafiya_harakah": "مكسور",
     "qafiya_type": "متواتر",
-    "qafiya_pattern": "عِ",
     "explanation": "تم إكمال القافية بملء المكونات المفقودة مع الحفاظ على المحددة مسبقاً"
   }}
   ```
@@ -88,7 +87,7 @@ parameters:
   - existing_qafiya
   - existing_harakah
   - existing_type
-  - existing_pattern
+  - existing_type_description_and_examples
   - missing_components
 metadata:
   version: "1.0"

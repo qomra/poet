@@ -8,7 +8,7 @@ template: |
 
   **القافية:**
   - **القافية المطلوبة:** {qafiya}
-  - **نمط القافية المطلوب:** {qafiya_pattern}
+  - **حركة القافية المطلوبة:** {qafiya_harakah}
   - **نوع القافية المستهدف:** {qafiya_type}
   - **شرح ونوع القافية (مرجع إلزامي):** {qafiya_type_description_and_examples}
 
@@ -36,7 +36,7 @@ category: evaluation
 parameters:
   - verses
   - qafiya
-  - qafiya_pattern
+  - qafiya_harakah
   - qafiya_type
   - qafiya_type_description_and_examples
 metadata:

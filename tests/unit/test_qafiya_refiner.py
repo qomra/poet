@@ -43,7 +43,8 @@ class TestQafiyaRefiner:
         return Constraints(
             meter="بحر الطويل",
             qafiya="ق",
-            qafiya_pattern="قَ"
+            qafiya_harakah="مكسور",
+            qafiya_type="متواتر"
         )
     
     def test_qafiya_refiner_initialization(self, mock_llm, mock_prompt_manager):
@@ -331,8 +332,8 @@ class TestQafiyaRefiner:
         
         # Should identify both wrong qafiya bait
         assert len(wrong_qafiya_bait) == 2
-        assert wrong_qafiya_bait[0] == (0, "")  # First bait (no expected_qafiya in new model)
-        assert wrong_qafiya_bait[1] == (1, "")  # Second bait
+        assert wrong_qafiya_bait[0] == (0, "قافية خاطئة في البيت الأول")  # First bait with error details
+        assert wrong_qafiya_bait[1] == (1, "قافية خاطئة في البيت الثاني")  # Second bait with error details
     
     def test_identify_wrong_qafiya_bait_no_bait_results(self, mock_llm):
         """Test identifying wrong qafiya bait when no bait results exist"""
@@ -358,18 +359,20 @@ class TestQafiyaRefiner:
         refiner = QafiyaRefiner(mock_llm, mock_prompt_manager)
         
         original_verse = "بيت بقافية خاطئة"
-        expected_qafiya = "قَ"
+        issue = "قافية خاطئة"
+        entire_poem = "بيت أول\nبيت ثاني\nبيت ثالث\nبيت رابع"
         
-        fixed_verse = await refiner._fix_single_verse_qafiya(original_verse, sample_constraints, expected_qafiya)
+        fixed_verse = await refiner._fix_single_verse_qafiya(original_verse, sample_constraints, issue, entire_poem)
         
-        assert fixed_verse == "بيت بقافية صحيحة"
+        assert fixed_verse == ["بيت بقافية صحيحة"]
         
         # Check that prompt was formatted correctly
         mock_prompt_manager.format_prompt.assert_called_once()
         call_args = mock_prompt_manager.format_prompt.call_args
         assert call_args[0][0] == 'qafiya_refinement'
         assert call_args[1]['existing_verses'] == original_verse
-        assert call_args[1]['context'] == f"إصلاح القافية للبيت. القافية المطلوبة: {expected_qafiya}"
+        assert call_args[1]['context'] == issue
+        assert call_args[1]['entire_poem'] == entire_poem
     
     def test_parse_verses_from_response_json(self, mock_llm):
         """Test parsing verses from JSON response"""
@@ -434,11 +437,9 @@ class TestQafiyaRefiner:
 
         # Create bait result with missing attributes
         bait_result = Mock()
-        bait_result.bait_index = 0
         bait_result.is_valid = False
-        bait_result.first_verse_valid = False
-        bait_result.second_verse_valid = True
-        bait_result.expected_qafiya = ""  # Empty expected_qafiya
+        # Set error_details to None to test the getattr fallback
+        bait_result.error_details = None
 
         qafiya_validation = QafiyaValidationResult(
             overall_valid=False,
@@ -454,5 +455,5 @@ class TestQafiyaRefiner:
         
         # Should handle missing attributes gracefully
         assert len(wrong_qafiya_bait) == 1
-        assert wrong_qafiya_bait[0][0] == 0  # bait index
-        assert wrong_qafiya_bait[0][1] == ""  # empty expected_qafiya 
+        assert wrong_qafiya_bait[0][0] == 0  # bait index from enumerate
+        assert wrong_qafiya_bait[0][1] == ""  # empty error_details from getattr fallback 

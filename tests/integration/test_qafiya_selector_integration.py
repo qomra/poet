@@ -124,7 +124,6 @@ class TestQafiyaSelectorIntegration:
     "qafiya_letter": "ق",
     "qafiya_harakah": "مضموم",
     "qafiya_type": "متواتر",
-    "qafiya_pattern": "قُ",
     "explanation": "قافية القاف المضمومة من نوع المتواتر، مناسبة للغزل الحزين"
 }
 ```'''
@@ -148,7 +147,6 @@ class TestQafiyaSelectorIntegration:
         assert enhanced_constraints.qafiya == "ق"  # Letter preserved
         assert enhanced_constraints.qafiya_harakah is not None
         assert enhanced_constraints.qafiya_type is not None
-        assert enhanced_constraints.qafiya_pattern is not None
         
         # Verify qafiya is appropriate for ghazal theme
         assert enhanced_constraints.qafiya in ["ق", "ع", "ر", "ل", "ن", "م"]
@@ -157,9 +155,8 @@ class TestQafiyaSelectorIntegration:
         
         # Verify pattern matches letter and harakah
         expected_pattern = f"ق{qafiya_selector._get_harakah_symbol(enhanced_constraints.qafiya_harakah)}"
-        assert enhanced_constraints.qafiya_pattern == expected_pattern
         
-        print(f"Example 1 - Qafiya: {enhanced_constraints.qafiya} ({enhanced_constraints.qafiya_harakah}) - {enhanced_constraints.qafiya_type.value} - {enhanced_constraints.qafiya_pattern}")
+        print(f"Example 1 - Qafiya: {enhanced_constraints.qafiya} ({enhanced_constraints.qafiya_harakah}) - {enhanced_constraints.qafiya_type.value} ")
     
     @pytest.mark.parametrize("llm_type", ["mock", "real"])
     def test_qafiya_selection_example_2(self, llm_type, mock_llm, real_llm, prompt_manager, test_data):
@@ -204,7 +201,6 @@ class TestQafiyaSelectorIntegration:
     "qafiya_letter": "ع",
     "qafiya_harakah": "مكسور",
     "qafiya_type": "متواتر",
-    "qafiya_pattern": "عِ",
     "explanation": "قافية العين المكسورة من نوع المتواتر، مناسبة للهجاء الحزين"
 }
 ```'''
@@ -228,7 +224,6 @@ class TestQafiyaSelectorIntegration:
         assert enhanced_constraints.qafiya == "ع"  # Letter preserved
         assert enhanced_constraints.qafiya_harakah is not None
         assert enhanced_constraints.qafiya_type is not None
-        assert enhanced_constraints.qafiya_pattern is not None
         
         # Verify qafiya is appropriate for hijaa theme
         assert enhanced_constraints.qafiya in ["ع", "ق", "ح", "خ", "غ"]
@@ -237,9 +232,8 @@ class TestQafiyaSelectorIntegration:
         
         # Verify pattern matches letter and harakah
         expected_pattern = f"ع{qafiya_selector._get_harakah_symbol(enhanced_constraints.qafiya_harakah)}"
-        assert enhanced_constraints.qafiya_pattern == expected_pattern
         
-        print(f"Example 2 - Qafiya: {enhanced_constraints.qafiya} ({enhanced_constraints.qafiya_harakah}) - {enhanced_constraints.qafiya_type.value} - {enhanced_constraints.qafiya_pattern}")
+        print(f"Example 2 - Qafiya: {enhanced_constraints.qafiya} ({enhanced_constraints.qafiya_harakah}) - {enhanced_constraints.qafiya_type.value}")
     
     @pytest.mark.parametrize("llm_type", ["mock", "real"])
     def test_qafiya_selection_without_specified_qafiya(self, llm_type, mock_llm, real_llm, prompt_manager):
@@ -283,7 +277,6 @@ class TestQafiyaSelectorIntegration:
     "qafiya_letter": "ر",
     "qafiya_harakah": "مضموم",
     "qafiya_type": "متواتر",
-    "qafiya_pattern": "رُ",
     "explanation": "قافية الراء المضمومة من نوع المتواتر، مناسبة للغزل الحزين"
 }
 ```'''
@@ -308,11 +301,10 @@ class TestQafiyaSelectorIntegration:
         assert enhanced_constraints.qafiya is not None
         assert enhanced_constraints.qafiya_harakah is not None
         assert enhanced_constraints.qafiya_type is not None
-        assert enhanced_constraints.qafiya_pattern is not None
         
         # Verify qafiya is appropriate for ghazal theme
         assert enhanced_constraints.qafiya in ["ع", "ر", "ل", "ن", "م"]
         assert enhanced_constraints.qafiya_harakah in ["مكسور", "مضموم", "مفتوح"]
         assert enhanced_constraints.qafiya_type in QafiyaType
         
-        print(f"No qafiya specified - Selected: {enhanced_constraints.qafiya} ({enhanced_constraints.qafiya_harakah}) - {enhanced_constraints.qafiya_type.value} - {enhanced_constraints.qafiya_pattern}") 
+        print(f"No qafiya specified - Selected: {enhanced_constraints.qafiya} ({enhanced_constraints.qafiya_harakah}) - {enhanced_constraints.qafiya_type.value}") 
