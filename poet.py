@@ -8,6 +8,8 @@ Main entry point for running poetry generation experiments.
 import argparse
 import sys
 import yaml
+import os
+import re
 from pathlib import Path
 from typing import Dict, Any
 
@@ -22,11 +24,44 @@ from poet.llm.groq_adapter import GroqAdapter
 from poet.llm.openai_adapter import OpenAIAdapter
 from poet.llm.anthropic_adapter import AnthropicAdapter
 
+def load_env_file(env_path: str = ".env") -> None:
+    """Load environment variables from .env file."""
+    if os.path.exists(env_path):
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key.strip()] = value.strip()
+
+def replace_env_placeholders(text: str) -> str:
+    """Replace environment variable placeholders in text."""
+    def replace_placeholder(match):
+        placeholder = match.group(1)
+        env_value = os.getenv(placeholder)
+        if env_value is None:
+            print(f"Warning: Environment variable {placeholder} not found")
+            return match.group(0)  # Keep original placeholder
+        return env_value
+    
+    # Replace ${VARIABLE_NAME} patterns
+    return re.sub(r'\$\{([^}]+)\}', replace_placeholder, text)
+
 def load_config(config_path: str) -> Dict[str, Any]:
-    """Load configuration from YAML file."""
+    """Load configuration from YAML file and replace environment variable placeholders."""
     try:
+        # First load environment variables from .env file
+        load_env_file()
+        
+        # Read the config file
         with open(config_path, 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
+            config_content = f.read()
+        
+        # Replace environment variable placeholders
+        config_content = replace_env_placeholders(config_content)
+        
+        # Parse the processed YAML
+        config = yaml.safe_load(config_content)
         return config
     except Exception as e:
         print(f"Error loading config file {config_path}: {e}")
