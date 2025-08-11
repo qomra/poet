@@ -1,0 +1,56 @@
+# Groq Configuration for Poet
+# This configuration uses the API key and settings from tests/fixtures/llms.json
+
+llm:
+  provider: "groq"
+  model: meta-llama/llama-4-scout-17b-16e-instruct  # From llms.json
+  api_key: "${GROQ_API_KEY}"  # Load from environment variable
+  api_base: "https://api.groq.com/v1"
+  temperature: 1
+  max_tokens: 8192  # From llms.json
+  timeout: 320  # From llms.json
+# llm:
+#   provider: anthropic
+#   model: claude-sonnet-4-20250514
+#   api_key: "${ANTHROPIC_API_KEY}"  # Load from environment variable
+#   temperature: 0.7
+#   max_tokens: 8192
+#   timeout: 320
+
+agent:
+  name: "simple_generation_refinement"
+  compilers:
+    harmony:
+      enabled: true
+      output_format: "structured"  # or "conversation"
+      save_output: true
+      output_dir: "outputs/harmony"
+      config:
+        system_message_template: "default"
+        include_metadata: true
+  pipeline:
+    - constraints_parser
+    - qafiya_selector
+    - bahr_selector
+    - generation
+    - evaluation:
+        metrics:
+        - "prosody"
+        - "qafiya"
+    - refiner_chain:
+        max_iterations: 3
+        target_quality: 1
+        refiners:
+          - prosody_refiner
+          - qafiya_refiner
+  logging:
+    output_dir: "outputs/simple_generation_refinement"
+    items:
+      - llm_calls
+      - harmony
+      
+experiment:
+interface:
+  type: "cli"
+  name: "simple_generation_refinement"
+  log_level: "INFO" 
