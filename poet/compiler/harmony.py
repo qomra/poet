@@ -53,6 +53,33 @@ class HarmonyCompiler:
         # Parse the Harmony format response and convert to structured data
         try:
             structured_data = self._parse_harmony_response(response)
+            
+            # Ensure there is a final message; if missing, append one from execution facts
+            has_final = any(
+                msg.get("role") == "assistant" and msg.get("channel") == "final"
+                for msg in structured_data.get("messages", [])
+            )
+            if not has_final:
+                try:
+                    final_poem_json = json.dumps(
+                        self._serialize_output(execution.final_poem), ensure_ascii=False, indent=2
+                    )
+                    quality_json = json.dumps(
+                        self._serialize_output(execution.quality_assessment), ensure_ascii=False, indent=2
+                    )
+                    fallback_final = {
+                        "role": "assistant",
+                        "channel": "final",
+                        "content": (
+                            "Here is the final poem and its quality assessment (auto-appended):\n\n"
+                            f"Final Poem:\n{final_poem_json}\n\n"
+                        ),
+                    }
+                    structured_data.setdefault("messages", []).append(fallback_final)
+                except Exception:
+                    # If even fallback cannot be formed, proceed without it
+                    pass
+            
             print(f"✅ Successfully parsed Harmony response with {len(structured_data.get('messages', []))} messages")
             return structured_data
         except Exception as e:
@@ -94,142 +121,67 @@ class HarmonyCompiler:
         
         # Parse the Harmony format response
         try:
-            # Split by message boundaries
-            message_parts = response.split('<|start|>')
-            
-            for part in message_parts:
-                if not part.strip():
+            # Regex-based robust parser for Harmony blocks
+            # Matches: <|start|>role[<|channel|>channel]<|message|>content<|end|>
+            pattern = re.compile(
+                r"<\|start\|>(\w+)(?:<\|channel\|>(\w+))?<\|message\|>(.*?)<\|end\|>",
+                re.DOTALL
+            )
+
+            matches = list(pattern.finditer(response))
+
+            for m in matches:
+                role = (m.group(1) or "").strip().lower()
+                channel = (m.group(2) or "").strip().lower() if m.group(2) else None
+                content = (m.group(3) or "").strip()
+
+                if not role or not content:
                     continue
-                    
-                # Extract role and channel
-                role = None
-                channel = None
-                content = ""
-                
-                # Check for role
-                if part.startswith('system'):
-                    role = 'system'
-                elif part.startswith('developer'):
-                    role = 'developer'
-                elif part.startswith('user'):
-                    role = 'user'
-                elif part.startswith('assistant'):
-                    role = 'assistant'
-                elif part.startswith('browser'):
-                    role = 'tool'
-                
-                # Extract channel if present - look for channel information in the content
-                if '<|channel|>' in part:
-                    channel_start = part.find('<|channel|>') + len('<|channel|>')
-                    channel_end = part.find('<|message|>')
-                    if channel_end > channel_start:
-                        channel = part[channel_start:channel_end].strip()
-                else:
-                    # Look for channel info in the content (like "# Valid channels: analysis, final")
-                    if 'channels:' in part or 'channels' in part:
-                        # Extract channel from text like "# Valid channels: analysis, final"
-                        channel_match = re.search(r'channels?:\s*([^.\n]+)', part, re.IGNORECASE)
-                        if channel_match:
-                            channels_text = channel_match.group(1).strip()
-                            # Extract first channel as default
-                            if 'analysis' in channels_text:
-                                channel = 'analysis'
-                            elif 'final' in channels_text:
-                                channel = 'final'
-                
-                # Extract message content
-                if '<|message|>' in part:
-                    message_start = part.find('<|message|>') + len('<|message|>')
-                    message_end = part.find('<|end|>')
-                    if message_end > message_start:
-                        content = part[message_start:message_end].strip()
-                else:
-                    # If no <|message|> tag, extract content after role
-                    if role:
-                        # Find the end of the role
-                        role_end = len(role)
-                        # Look for <|end|> tag
-                        end_tag = part.find('<|end|>')
-                        if end_tag > role_end:
-                            content = part[role_end:end_tag].strip()
-                        else:
-                            # If no end tag, take everything after role
-                            content = part[role_end:].strip()
-                
-                # Only add messages with content and valid roles
-                if content and role and role not in ['system', 'developer']:
-                    message_data = {
-                        "role": role,
-                        "content": content
-                    }
-                    
+
+                # Only keep user/assistant messages in messages list
+                if role in ["user", "assistant"]:
+                    message_data = {"role": role, "content": content}
                     if channel:
                         message_data["channel"] = channel
-                    
-                    # Add recipient if present (for tool calls)
-                    if ' to=' in part:
-                        recipient_start = part.find(' to=') + 4
-                        recipient_end = part.find(' ', recipient_start)
-                        if recipient_end == -1:
-                            recipient_end = part.find('<', recipient_start)
-                        if recipient_end > recipient_start:
-                            recipient = part[recipient_start:recipient_end].strip()
-                            message_data["recipient"] = recipient
-                    
                     structured_data["messages"].append(message_data)
-            
-            # If we successfully parsed messages, return the structured data
+
+            # Fallback: if nothing matched, try very loose split parsing (legacy)
+            if not structured_data["messages"]:
+                message_parts = response.split('<|start|>')
+                for part in message_parts:
+                    p = part.lstrip()
+                    if not p:
+                        continue
+                    role = None
+                    if p.startswith('system'):
+                        role = 'system'
+                    elif p.startswith('developer'):
+                        role = 'developer'
+                    elif p.startswith('user'):
+                        role = 'user'
+                    elif p.startswith('assistant'):
+                        role = 'assistant'
+                    if not role:
+                        continue
+                    # Best-effort content extraction
+                    if '<|message|>' in p and '<|end|>' in p:
+                        content = p.split('<|message|>', 1)[1].rsplit('<|end|>', 1)[0].strip()
+                    else:
+                        continue
+                    channel = None
+                    if '<|channel|>' in p:
+                        channel = p.split('<|channel|>', 1)[1].split('<|message|>', 1)[0].strip()
+                    if role in ["user", "assistant"] and content:
+                        msg = {"role": role, "content": content}
+                        if channel:
+                            msg["channel"] = channel
+                        structured_data["messages"].append(msg)
+
             if structured_data["messages"]:
                 return structured_data
             else:
-                # If no messages found, check if we have a system message and create conversation from it
-                system_content = ""
-                for part in message_parts:
-                    if part.startswith('system'):
-                        if '<|message|>' in part:
-                            message_start = part.find('<|message|>') + len('<|message|>')
-                            message_end = part.find('<|end|>')
-                            if message_end > message_start:
-                                system_content = part[message_start:message_end].strip()
-                        else:
-                            # Extract content after 'system'
-                            system_content = part[6:].strip()
-                            if '<|end|>' in system_content:
-                                system_content = system_content[:system_content.find('<|end|>')].strip()
-                        break
-                
-                if system_content:
-                    # Create conversation structure from system content
-                    structured_data["messages"].append({
-                        "role": "user",
-                        "content": "أريد توليد شعر عربي",
-                        "channel": "analysis"
-                    })
-                    
-                    # Parse the system content to extract channel info
-                    if 'channels:' in system_content:
-                        channel_match = re.search(r'channels?:\s*([^.\n]+)', system_content, re.IGNORECASE)
-                        if channel_match:
-                            channels_text = channel_match.group(1).strip()
-                            if 'analysis' in channels_text:
-                                channel = 'analysis'
-                            elif 'final' in channels_text:
-                                channel = 'final'
-                            else:
-                                channel = 'analysis'
-                        else:
-                            channel = 'analysis'
-                    
-                    structured_data["messages"].append({
-                        "role": "assistant",
-                        "content": system_content,
-                        "channel": channel
-                    })
-                    
-                    return structured_data
-                
                 raise ValueError("No valid messages found in response")
-                
+
         except Exception as e:
             raise ValueError(f"Failed to parse Harmony response: {str(e)}")
     

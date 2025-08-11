@@ -93,7 +93,6 @@ async def load_or_generate_execution():
     print("=== Generating new execution (fixture not found) ===")
     return await generate_execution()
 
-
 async def generate_execution():
     """Generate execution by running the full workflow"""
     
@@ -209,7 +208,6 @@ async def generate_execution():
     
     return execution, False  # Return tuple with flag indicating it was generated
 
-
 async def generate_harmony_data(execution, llm):
     """Generate structured harmony data from execution"""
     
@@ -263,7 +261,6 @@ async def generate_harmony_data(execution, llm):
         traceback.print_exc()
         return None, None
 
-
 def save_outputs(execution, structured_data, conversation_str,was_loaded):
     """Save all outputs to files"""
     
@@ -292,7 +289,6 @@ def save_outputs(execution, structured_data, conversation_str,was_loaded):
             json.dump(execution.to_dict(), f, ensure_ascii=False, indent=2)
         
         print(f"Execution fixture saved to: {fixture_path}")
-
 
 async def main():
     """Main function to orchestrate the process"""
