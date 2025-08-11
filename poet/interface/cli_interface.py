@@ -3,57 +3,25 @@
 import sys
 import time
 import signal
-import threading
 from typing import Dict, Any, Optional
 from .base_interface import BaseInterface
 
-class LoggingInterceptor:
-    """Intercepts logging calls and prints them to console."""
-    
-    def __init__(self, log_level: str = "INFO"):
-        self.log_level = log_level.upper()
-        self.original_handlers = {}
-        self._setup_interception()
-    
-    def _setup_interception(self):
-        """Setup logging interception."""
-        import logging
-        
-        # Store original handlers
-        root_logger = logging.getLogger()
-        for handler in root_logger.handlers[:]:
-            self.original_handlers[id(handler)] = handler
-            root_logger.removeHandler(handler)
-        
-        # Add our custom handler
-        custom_handler = logging.StreamHandler(sys.stdout)
-        custom_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-        root_logger.addHandler(custom_handler)
-        root_logger.setLevel(logging.DEBUG)
-    
-    def restore_logging(self):
-        """Restore original logging configuration."""
-        import logging
-        
-        root_logger = logging.getLogger()
-        
-        # Remove our custom handler
-        for handler in root_logger.handlers[:]:
-            root_logger.removeHandler(handler)
-        
-        # Restore original handlers
-        for handler in self.original_handlers.values():
-            root_logger.addHandler(handler)
-
 class CLIInterface(BaseInterface):
-    """CLI interface for running poet experiments."""
+    """Interactive CLI interface for poetry generation."""
     
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
+    def __init__(self, agent):
+        # Store the agent instead of config
+        self.agent = agent
         self.running = False
-        self.completed = False
-        self.log_interceptor = None
         self._setup_signal_handlers()
+        
+        # Setup basic logging
+        import logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(levelname)s: %(message)s'
+        )
+        self.logger = logging.getLogger(self.__class__.__name__)
     
     def _setup_signal_handlers(self):
         """Setup signal handlers for graceful shutdown."""
@@ -62,66 +30,128 @@ class CLIInterface(BaseInterface):
     
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals."""
-        self.logger.info(f"Received signal {signum}, shutting down gracefully...")
+        print(f"\nReceived signal {signum}, shutting down gracefully...")
         self.running = False
     
-    def _setup_logging_interception(self):
-        """Setup logging interception for CLI output."""
-        log_level = self.config.get("interface", {}).get("log_level", "INFO")
-        self.log_interceptor = LoggingInterceptor(log_level)
-    
-    def _restore_logging(self):
-        """Restore original logging configuration."""
-        if self.log_interceptor:
-            self.log_interceptor.restore_logging()
-    
     def run(self) -> None:
-        """Run the CLI interface."""
+        """Run the interactive CLI interface."""
         try:
-            self._setup_logging_interception()
             self.running = True
-            self.completed = False
             
-            print(f"🚀 Starting {self.config.get('interface', {}).get('name', 'Poet Experiment')}")
-            print("Press Ctrl+C to stop")
-            print("-" * 50)
+            print("🚀 Welcome to Poet - Arabic Poetry Generation System")
+            print("=" * 60)
+            print("Commands:")
+            print("  - Type your poetry prompt and press Enter")
+            print("  - Type 'quit' or 'exit' to close")
+            print("  - Type 'help' for more information")
+            print("  - Type 'status' to see pipeline status")
+            print("-" * 60)
             
-            # Main loop
-            while self.running and not self.completed:
+            # Main input loop
+            while self.running:
                 try:
-                    # Check for completion
-                    if self.is_completed():
-                        self.completed = True
-                        break
+                    # Get user input
+                    user_input = input("\n🎭 Enter your poetry prompt: ").strip()
                     
-                    # Small delay to prevent busy waiting
-                    time.sleep(0.1)
+                    if not user_input:
+                        continue
+                    
+                    # Handle special commands
+                    if user_input.lower() in ['quit', 'exit', 'q']:
+                        print("👋 Goodbye!")
+                        break
+                    elif user_input.lower() in ['help', 'h']:
+                        self._show_help()
+                        continue
+                    elif user_input.lower() in ['status', 's']:
+                        self._show_status()
+                        continue
+                    elif user_input.lower() in ['clear', 'cls']:
+                        import os
+                        os.system('clear' if os.name == 'posix' else 'cls')
+                        continue
+                    
+                    # Process poetry generation
+                    print(f"\n🔄 Processing: {user_input}")
+                    print("-" * 40)
+                    
+                    result = self.agent.run_pipeline(user_input)
+                    
+                    if result['success']:
+                        print("\n✅ Poetry generation completed successfully!")
+                        if 'poem' in result:
+                            print("\n📜 Generated Poem:")
+                            print("=" * 40)
+                            poem = result['poem']
+                            print(str(poem))
+                            print("=" * 40)
+                        
+                        if 'evaluation' in result:
+                            print("\n📊 Evaluation:")
+                            print("-" * 20)
+                            eval_data = result['evaluation']
+                            if isinstance(eval_data, dict):
+                                for key, value in eval_data.items():
+                                    if key != 'lines':  # Skip line details
+                                        print(f"  {key}: {value}")
+                            else:
+                                print(f"  {eval_data}")
+                    else:
+                        print(f"\n❌ Generation failed: {result.get('error', 'Unknown error')}")
+                    
+                    print("\n" + "=" * 60)
                     
                 except KeyboardInterrupt:
                     print("\n⏹️  Interrupted by user")
                     break
-                except Exception as e:
-                    print(f"❌ Error: {e}")
+                except EOFError:
+                    print("\n👋 End of input, goodbye!")
                     break
-            
-            if self.completed:
-                print("✅ Experiment completed successfully!")
-            else:
-                print("⏹️  Experiment stopped")
+                except Exception as e:
+                    print(f"\n❌ Error: {e}")
+                    import traceback
+                    traceback.print_exc()
                 
         finally:
-            self._restore_logging()
             self.cleanup()
+    
+    def _show_help(self):
+        """Show help information."""
+        print("\n📖 Help - Available Commands:")
+        print("  - Type any text to generate poetry")
+        print("  - quit/exit/q: Close the application")
+        print("  - help/h: Show this help message")
+        print("  - status/s: Show pipeline status")
+        print("  - clear/cls: Clear the screen")
+        print("\n💡 Tips:")
+        print("  - Be specific about your poetry requirements")
+        print("  - Include details about meter, rhyme, theme, etc.")
+        print("  - Examples:")
+        print("    * 'اكتب قصيدة عن الحب في بحر الطويل'")
+        print("    * 'قصيدة في مدح العلم على وزن الرمل'")
+        print("    * 'شعر عن الوطن مع قافية في الهمزة'")
+    
+    def _show_status(self):
+        """Show pipeline status."""
+        try:
+            pipeline_info = self.agent.get_pipeline_info()
+            print(f"\n🔧 Pipeline Status:")
+            print(f"  - Total nodes: {pipeline_info['node_count']}")
+            print("  - Active nodes:")
+            for node in pipeline_info['nodes']:
+                print(f"    • {node['name']}")
+        except Exception as e:
+            print(f"❌ Could not get pipeline status: {e}")
     
     def is_completed(self) -> bool:
         """Check if the interface has completed."""
-        return self.completed
+        return not self.running
     
     def cleanup(self) -> None:
         """Cleanup resources."""
         self.running = False
-        self._restore_logging()
+        print("\n🧹 Cleaning up...")
     
     def mark_completed(self):
         """Mark the interface as completed."""
-        self.completed = True
+        self.running = False

@@ -32,8 +32,12 @@ class PipelineEngine:
             llm = self.context.get('llm')
             prompt_manager = self.context.get('prompt_manager')
             
+            # Check if harmony capture is enabled
+            harmony_enabled = self.context.get('harmony_capture_enabled', False)
+            self.logger.info(f"Adding node {node_class.__name__}, harmony_capture_enabled: {harmony_enabled}")
+            
             # Handle different node types with their specific requirements
-            if node_class.__name__ == 'RefinerChain' or node_class.__name__ == 'CapturedRefinerChain':
+            if node_class.__name__ == 'RefinerChain' :
                 # RefinerChain only needs llm and config
                 if node_config:
                     node = node_class(llm=llm, **node_config)
@@ -45,6 +49,13 @@ class PipelineEngine:
                     node = node_class(llm=llm, prompt_manager=prompt_manager, **node_config)
                 else:
                     node = node_class(llm=llm, prompt_manager=prompt_manager)
+            
+            # If harmony capture is enabled, wrap the node with capture middleware
+            if harmony_enabled and not node_class.__name__.startswith('Captured'):
+                from poet.logging.capture_middleware import capture_component
+                # Wrap the node immediately after creation, before adding to pipeline
+                node = capture_component(node, node_class.__name__)
+                self.logger.info(f"Wrapped {node_class.__name__} with capture middleware")
             
             self.nodes.append(node)
             self.logger.info(f"Added node: {node.name}")

@@ -61,25 +61,54 @@ class BaseRefiner(Node):
         # Extract required data
         poem = input_data.get('poem')
         constraints = input_data.get('constraints')
+        evaluation = input_data.get('evaluation')
         
         if not poem:
             raise ValueError("poem not found in input_data")
         if not constraints:
             raise ValueError("constraints not found in input_data")
         
-        # For now, just return the poem as-is (no actual refinement)
-        # In a real implementation, this would apply various refinements
-        self.logger.info(f"Refiner node executed (no actual refinement applied)")
+        # Check if refinement is needed
+        if evaluation and not self.should_refine(evaluation):
+            self.logger.info(f"{self.name}: No refinement needed")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
         
-        return {
-            'poem': poem,
-            'refined': True,
-            'refinement_iterations': 0
-        }
+        # Apply refinement
+        try:
+            # Since we can't use async in sync context, we'll need to handle this differently
+            # For now, we'll create a simple refinement that can be done synchronously
+            refined_poem = self._apply_sync_refinement(poem, constraints, evaluation)
+            
+            self.logger.info(f"{self.name}: Refinement applied successfully")
+            return {
+                'poem': refined_poem,
+                'refined': True,
+                'refinement_iterations': 1
+            }
+        except Exception as e:
+            self.logger.error(f"{self.name}: Refinement failed: {e}")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
+    
+    def _apply_sync_refinement(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
+        """
+        Apply refinement synchronously. This is a fallback since the main refine method is async.
+        Subclasses should override this method to provide actual refinement logic.
+        """
+        # Default implementation - return poem unchanged
+        # Subclasses should override this method
+        return poem
     
     def get_required_inputs(self) -> list:
         """Get list of required input keys for this node."""
-        return ['poem', 'constraints']
+        return ['poem', 'constraints', 'evaluation']
     
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""

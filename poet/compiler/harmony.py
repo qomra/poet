@@ -273,18 +273,31 @@ LLM Call:
         
         return "\n".join(steps)
     
-    def _serialize_output(self, output: Any) -> Any:
-        """Serialize output for JSON"""
-        if hasattr(output, 'to_dict'):
-            return output.to_dict()
-        elif hasattr(output, '__dict__'):
-            return {k: self._serialize_output(v) for k, v in output.__dict__.items() if not k.startswith('_')}
-        elif isinstance(output, (list, tuple)):
-            return [self._serialize_output(item) for item in output]
-        elif isinstance(output, dict):
-            return {k: self._serialize_output(v) for k, v in output.items()}
-        else:
-            return output
+    def _serialize_output(self, output: Any, _depth: int = 0) -> Any:
+        """Serialize output for JSON with recursion protection"""
+        # Prevent infinite recursion
+        if _depth > 10:
+            return f"<max_depth_exceeded: {type(output).__name__}>"
+        
+        try:
+            # Handle common non-serializable types
+            if hasattr(output, '__class__') and 'threading' in str(output.__class__.__module__):
+                return f"<threading_object: {type(output).__name__}>"
+            if hasattr(output, '__class__') and 'logging' in str(output.__class__.__module__):
+                return f"<logging_object: {type(output).__name__}>"
+            
+            if hasattr(output, 'to_dict'):
+                return output.to_dict()
+            elif hasattr(output, '__dict__'):
+                return {k: self._serialize_output(v, _depth + 1) for k, v in output.__dict__.items() if not k.startswith('_')}
+            elif isinstance(output, (list, tuple)):
+                return [self._serialize_output(item, _depth + 1) for item in output]
+            elif isinstance(output, dict):
+                return {k: self._serialize_output(v, _depth + 1) for k, v in output.items()}
+            else:
+                return output
+        except Exception as e:
+            return f"<serialization_error: {str(e)}>"
     
     def save_harmony_reasoning(self, reasoning: str, output_file: Path):
         """Save generated reasoning to file"""

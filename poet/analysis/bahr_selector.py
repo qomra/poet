@@ -10,6 +10,7 @@ from poet.data.bohour_meters import BohourMetersManager
 from poet.core.node import Node
 
 
+
 class BahrSelectionError(Exception):
     """Raised when bahr selection fails"""
     pass
@@ -82,6 +83,7 @@ class BahrSelector(Node):
         if not constraints.meter:
             missing.append('meter_name')
         elif not self.meters_manager.validate_meter(constraints.meter):
+            self.logger.info(f"Meter {constraints.meter} is not recognized, adding meter_standardization")
             missing.append('meter_standardization')
         
         return missing
@@ -321,3 +323,6 @@ class BahrSelector(Node):
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""
         return ['constraints', 'bahr_selected'] 
+
+
+ 

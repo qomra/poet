@@ -58,7 +58,24 @@ class ProsodyEvaluator:
         "مجتث": Mujtath,
         "متقارب": Mutakareb,
         "محدث": Mutadarak,
-        
+
+        # short names with ال
+        "الطويل": Taweel,
+        "المديد": Madeed,
+        "البسيط": Baseet,
+        "الوافر": Wafer,
+        "الكامل": Kamel,
+        "الهزج": Hazaj,
+        "الرجز": Rajaz,
+        "الرمل": Ramal,
+        "السريع": Saree,
+        "المنسرح": Munsareh,
+        "الخفيف": Khafeef,
+        "المضارع": Mudhare,
+        "المقتضب": Muqtadheb,
+        "المجتث": Mujtath,
+        "المتقارب": Mutakareb,
+        "المحدث": Mutadarak,
         # English names
         "Taweel": Taweel,
         "Madeed": Madeed,

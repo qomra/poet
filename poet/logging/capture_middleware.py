@@ -23,16 +23,43 @@ class CaptureMiddleware:
         if not callable(attr) or name.startswith('_'):
             return attr
         
+        # Only capture main processing methods, not utility/validation methods
+        if not self._should_capture_method(name):
+            return attr
+        
         # Determine if it's async
         if asyncio.iscoroutinefunction(attr):
             return self._wrap_async_method(attr, name)
         else:
             return self._wrap_sync_method(attr, name)
     
+    def _should_capture_method(self, method_name: str) -> bool:
+        """Determine if a method should be captured based on its name"""
+        # Main processing methods to capture
+        capture_methods = {
+            'run',           # Main pipeline execution
+            'select_qafiya', # Qafiya selection
+            'select_bahr',   # Bahr selection
+            'refine',        # Refinement process
+            'evaluate_poem', # Poem evaluation
+            'generate',      # Generation process
+            'parse_constraints'  # Constraint parsing
+        }
+        
+        # Utility/validation methods to NOT capture
+        skip_methods = {
+            'validate_input', 'validate_output',
+            'get_required_inputs', 'get_output_keys',
+            'get_pipeline_info', 'get_refinement_summary'
+        }
+        
+        return method_name in capture_methods
+    
     def _wrap_sync_method(self, method: Callable, method_name: str) -> Callable:
         """Wrap synchronous method with capture"""
         @functools.wraps(method)
         def wrapper(*args, **kwargs):
+            print(f"🔍 CaptureMiddleware: Intercepting {self.component_name}.{method_name}")
             with self.capture.capture_call(
                 component_name=self.component_name,
                 method_name=method_name,
@@ -49,6 +76,7 @@ class CaptureMiddleware:
         """Wrap asynchronous method with capture"""
         @functools.wraps(method)
         async def wrapper(*args, **kwargs):
+            print(f"🔍 CaptureMiddleware: Intercepting {self.component_name}.{method_name} (async)")
             with self.capture.capture_call(
                 component_name=self.component_name,
                 method_name=method_name,

@@ -9,6 +9,7 @@ from poet.prompts.prompt_manager import PromptManager
 from poet.core.node import Node
 
 
+
 class QafiyaSelectionError(Exception):
     """Raised when qafiya selection fails"""
     pass
@@ -79,6 +80,7 @@ class QafiyaSelector(Node):
             missing.append('qafiya_harakah')
         if not constraints.qafiya_type:
             missing.append('qafiya_type')
+        
         return missing
     
     def _validate_existing_qafiya(self, constraints: Constraints) -> Constraints:
@@ -90,6 +92,7 @@ class QafiyaSelector(Node):
         """Fill missing qafiya components using LLM"""
         try:
             # Format the qafiya completion prompt
+            self.logger.info(f"Filling missing qafiya components: {missing_components}")
             formatted_prompt = self.prompt_manager.format_prompt(
                 'qafiya_completion',
                 original_prompt=original_prompt,
@@ -105,6 +108,7 @@ class QafiyaSelector(Node):
             )
             # Get LLM response
             response = self.llm.generate(formatted_prompt)
+
             # Parse the structured response
             qafiya_spec = self._parse_llm_response(response)
             
@@ -125,7 +129,7 @@ class QafiyaSelector(Node):
     
     def _select_qafiya_with_llm(self, constraints: Constraints, original_prompt: str) -> Dict[str, Any]:
         """Use LLM to select appropriate qafiya"""
-        
+        self.logger.info(f"Selecting qafiya with LLM")
         # Format the qafiya selection prompt
         formatted_prompt = self.prompt_manager.format_prompt(
             'qafiya_selection',
@@ -261,3 +265,6 @@ class QafiyaSelector(Node):
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""
         return ['constraints', 'qafiya_selected'] 
+
+
+ 

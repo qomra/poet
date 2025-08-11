@@ -23,7 +23,7 @@ template: |
 
   ### 3. البيت المستهدف والمطلوب تحليله وإصلاحه (المشكلة)
   - **البيت الأصلي (الذي يحتوي على خلل في القافية):**
-  {existing_verses}
+  {bad_bait}
   - **تحليل المشكلة:**
   {context}
 
@@ -72,7 +72,7 @@ parameters:
   - theme
   - tone
   - entire_poem
-  - existing_verses
+  - bad_bait
   - context
 metadata:
   version: "1.0"

@@ -181,25 +181,112 @@ class TashkeelRefiner(BaseRefiner):
         # Extract required data
         poem = input_data.get('poem')
         constraints = input_data.get('constraints')
+        evaluation = input_data.get('evaluation')
         
         if not poem:
             raise ValueError("poem not found in input_data")
         if not constraints:
             raise ValueError("constraints not found in input_data")
         
-        # For now, just return the poem as-is (no actual refinement)
-        # In a real implementation, this would apply tashkeel refinement
-        self.logger.info(f"Tashkeel refiner node executed (no actual refinement applied)")
+        # Check if refinement is needed
+        if evaluation and not self.should_refine(evaluation):
+            self.logger.info(f"{self.name}: No tashkeel refinement needed")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
         
-        return {
-            'poem': poem,
-            'refined': True,
-            'refinement_iterations': 0
-        }
+        # Apply refinement
+        try:
+            refined_poem = self._apply_sync_refinement(poem, constraints, evaluation)
+            
+            self.logger.info(f"{self.name}: Tashkeel refinement applied successfully")
+            return {
+                'poem': refined_poem,
+                'refined': True,
+                'refinement_iterations': 1
+            }
+        except Exception as e:
+            self.logger.error(f"{self.name}: Tashkeel refinement failed: {e}")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
+    
+    def _apply_sync_refinement(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
+        """
+        Apply tashkeel refinement synchronously.
+        """
+        if not evaluation.tashkeel_validation:
+            return poem
+        
+        # Get broken verses from evaluation
+        broken_verses = self._identify_broken_verses(evaluation.tashkeel_validation)
+        
+        if not broken_verses:
+            return poem
+        
+        self.logger.info(f"Fixing tashkeel for {len(broken_verses)} broken verses")
+        
+        # Fix each broken verse
+        fixed_verses = poem.verses.copy()
+        for verse_index, error_details in broken_verses:
+            fixed_verse = self._fix_single_verse_sync(
+                poem.verses[verse_index], 
+                constraints, 
+                error_details
+            )
+            if fixed_verse:
+                fixed_verses[verse_index] = fixed_verse
+            else:
+                self.logger.warning(f"Verse {verse_index} is not yet tashkeel fixed. Using original verse.")
+                
+        # Create new poem
+        return LLMPoem(
+            verses=fixed_verses,
+            llm_provider=poem.llm_provider,
+            model_name=poem.model_name,
+            constraints=poem.constraints,
+            generation_timestamp=poem.generation_timestamp
+        )
+    
+    def _identify_broken_verses(self, tashkeel_validation) -> List[tuple]:
+        """Identify verses with tashkeel violations"""
+        broken_verses = []
+        
+        if not hasattr(tashkeel_validation, 'verse_results') or tashkeel_validation.verse_results is None:
+            return broken_verses
+        
+        for i, verse_result in enumerate(tashkeel_validation.verse_results):
+            if not verse_result.is_valid:
+                broken_verses.append((i, verse_result.error_details))
+        
+        return broken_verses
+    
+    def _fix_single_verse_sync(self, verse: str, constraints: Constraints, error_details: str) -> Optional[str]:
+        """Fix a single verse's tashkeel synchronously"""
+        # Format prompt for fixing verse
+        formatted_prompt = self.prompt_manager.format_prompt(
+            'tashkeel',  # Use the evaluation prompt since there's no refinement prompt
+            meter=constraints.meter or "غير محدد",
+            qafiya=constraints.qafiya or "غير محدد",
+            theme=constraints.theme or "غير محدد",
+            tone=constraints.tone or "غير محدد",
+            existing_verse=verse,
+            context=f"إصلاح التشكيل. المشكلة: {error_details}"
+        )
+        
+        # Generate fixed verse
+        response = self.llm.generate(formatted_prompt)
+        fixed_verses = self._parse_verses_from_response(response)
+        
+        return fixed_verses[0] if fixed_verses else None
     
     def get_required_inputs(self) -> list:
         """Get list of required input keys for this node."""
-        return ['poem', 'constraints']
+        return ['poem', 'constraints', 'evaluation']
     
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""

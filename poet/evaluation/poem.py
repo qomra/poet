@@ -260,7 +260,7 @@ class PoemEvaluator(Node):
         
         # Get evaluation metrics from config
         evaluation_metrics = self.config.get('metrics', ['prosody', 'qafiya'])
-        evaluations = [EvaluationType(metric.upper()) for metric in evaluation_metrics if hasattr(EvaluationType, metric.upper())]
+        evaluations = [EvaluationType(metric.lower()) for metric in evaluation_metrics if hasattr(EvaluationType, metric.upper())]
         
         # Evaluate poem
         evaluated_poem = self.evaluate_poem(poem, constraints, evaluations)

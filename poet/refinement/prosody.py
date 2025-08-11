@@ -52,7 +52,7 @@ class ProsodyRefiner(BaseRefiner):
             fixed_verses = poem.verses.copy()
             for bait_index, error_details in broken_bait:
                 bait = "#".join(poem.verses[bait_index*2:bait_index*2+2])
-                fixed_bait = await self._fix_single_verse(
+                fixed_bait = await self._fix_single_bait(
                     bait, 
                     constraints, 
                     error_details
@@ -89,7 +89,7 @@ class ProsodyRefiner(BaseRefiner):
         
         return broken_bait
     
-    async def _fix_single_verse(self, verse: str, constraints: Constraints, error_details: str) -> str:
+    async def _fix_single_bait(self, verse: str, constraints: Constraints, error_details: str) -> str:
         """Fix a single verse's meter"""
         # Format prompt for fixing verse
         formatted_prompt = self.prompt_manager.format_prompt(
@@ -159,25 +159,105 @@ class ProsodyRefiner(BaseRefiner):
         # Extract required data
         poem = input_data.get('poem')
         constraints = input_data.get('constraints')
+        evaluation = input_data.get('evaluation')
         
         if not poem:
             raise ValueError("poem not found in input_data")
         if not constraints:
             raise ValueError("constraints not found in input_data")
         
-        # For now, just return the poem as-is (no actual refinement)
-        # In a real implementation, this would apply prosody refinement
-        self.logger.info(f"Prosody refiner node executed (no actual refinement applied)")
+        # Check if refinement is needed
+        if evaluation and not self.should_refine(evaluation):
+            self.logger.info(f"{self.name}: No prosody refinement needed")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
         
-        return {
-            'poem': poem,
-            'refined': True,
-            'refinement_iterations': 0
-        }
+        # Apply refinement
+        try:
+            refined_poem = self._apply_sync_refinement(poem, constraints, evaluation)
+            
+            self.logger.info(f"{self.name}: Prosody refinement applied successfully")
+            return {
+                'poem': refined_poem,
+                'refined': True,
+                'refinement_iterations': 1
+            }
+        except Exception as e:
+            self.logger.error(f"{self.name}: Prosody refinement failed: {e}")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
+    
+    def _apply_sync_refinement(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
+        """
+        Apply prosody refinement synchronously.
+        """
+        if not evaluation.prosody_validation:
+            return poem
+        
+        # Get broken verses from evaluation
+        broken_bait = self._identify_broken_bait(evaluation.prosody_validation)
+        
+        if not broken_bait:
+            return poem
+        
+        self.logger.info(f"Fixing prosody for {len(broken_bait)} broken verses")
+        
+        # Fix each broken verse
+        fixed_verses = poem.verses.copy()
+        for bait_index, error_details in broken_bait:
+            bait = "#".join(poem.verses[bait_index*2:bait_index*2+2])
+            fixed_bait = self._fix_single_bait_sync(
+                bait, 
+                constraints, 
+                error_details
+            )
+            if len(fixed_bait) == 2:
+                fixed_verses[bait_index*2] = fixed_bait[0]
+                fixed_verses[bait_index*2+1] = fixed_bait[1]
+            else:
+                self.logger.warning(f"Bait {bait_index} is not yet prosody fixed. Using original verses.")
+                
+        # Create new poem
+        return LLMPoem(
+            verses=fixed_verses,
+            llm_provider=poem.llm_provider,
+            model_name=poem.model_name,
+            constraints=poem.constraints,
+            generation_timestamp=poem.generation_timestamp
+        )
+    
+    def _fix_single_bait_sync(self, verse: str, constraints: Constraints, error_details: str) -> List[str]:
+        """Fix a single verse's meter synchronously"""
+        # Format prompt for fixing verse
+        formatted_prompt = self.prompt_manager.format_prompt(
+            'prosody_refinement',  # Use the correct template name from YAML
+            meter=constraints.meter or "غير محدد",
+            meeter_tafeelat=constraints.meeter_tafeelat or "غير محدد",
+            qafiya=constraints.qafiya or "غير محدد",
+            qafiya_type=constraints.qafiya_type or "غير محدد",
+            qafiya_type_description_and_examples=constraints.qafiya_type_description_and_examples or "غير محدد",
+            qafiya_harakah=constraints.qafiya_harakah or "",
+            theme=constraints.theme or "غير محدد",
+            tone=constraints.tone or "غير محدد",
+            existing_verses=verse,
+            context=f"إصلاح الوزن العروضي للبيت. المشكلة: {error_details}"
+        )
+        
+        # Generate fixed verse
+        response = self.llm.generate(formatted_prompt)
+        fixed_verses = self._parse_verses_from_response(response)
+        
+        return fixed_verses
     
     def get_required_inputs(self) -> list:
         """Get list of required input keys for this node."""
-        return ['poem', 'constraints']
+        return ['poem', 'constraints', 'evaluation']
     
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""

@@ -14,7 +14,7 @@ from typing import Dict, Any
 # Add the poet package to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from poet.core.agent import Agent
+from poet.core import Agent
 from poet.interface.cli_interface import CLIInterface
 from poet.llm.llm_factory import get_real_llm_from_env
 from poet.llm.base_llm import LLMConfig
@@ -74,13 +74,13 @@ def create_llm(config: Dict[str, Any]) -> Any:
         print(f"Error: Unknown LLM provider: {provider}")
         sys.exit(1)
 
-def create_interface(config: Dict[str, Any]) -> CLIInterface:
+def create_interface(config: Dict[str, Any], agent: Agent) -> CLIInterface:
     """Create interface based on configuration."""
     interface_config = config.get("interface", {})
     interface_type = interface_config.get("type", "cli")
     
     if interface_type == "cli":
-        return CLIInterface(config)
+        return CLIInterface(agent)
     else:
         print(f"Error: Unknown interface type: {interface_type}")
         sys.exit(1)
@@ -102,7 +102,7 @@ def run_experiment(config: Dict[str, Any], user_prompt: str = None):
     
     # Create interface
     print("🖥️  Creating interface...")
-    interface = create_interface(config)
+    interface = create_interface(config, agent)
     interface_type = config.get("interface", {}).get("type", "cli")
     print(f"✅ Interface created: {interface_type}")
     

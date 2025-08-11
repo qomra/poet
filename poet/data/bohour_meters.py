@@ -231,6 +231,9 @@ class BohourMetersManager:
             # Cache the meter info
             self._meters_cache[bahr_name] = meter_info
             self._meters_cache[arabic_name] = meter_info
+            # also add without بحر 
+            self._meters_cache[bahr_name.replace("بحر ", "")] = meter_info
+            self._meters_cache[arabic_name.replace("بحر ", "")] = meter_info
             
             # Create name mappings
             self._name_mapping[bahr_name] = arabic_name

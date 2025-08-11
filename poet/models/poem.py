@@ -47,3 +47,8 @@ class LLMPoem:
             "generation_timestamp": self.generation_timestamp.isoformat() if self.generation_timestamp else None,
             "quality": self.quality.to_dict() if self.quality else None
         } 
+    
+    def __str__(self):
+        """Return a string representation of the poem"""
+        newline = '\n'
+        return f"{newline.join(self.verses)}"

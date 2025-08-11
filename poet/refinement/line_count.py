@@ -101,25 +101,114 @@ class LineCountRefiner(BaseRefiner):
         # Extract required data
         poem = input_data.get('poem')
         constraints = input_data.get('constraints')
+        evaluation = input_data.get('evaluation')
         
         if not poem:
             raise ValueError("poem not found in input_data")
         if not constraints:
             raise ValueError("constraints not found in input_data")
         
-        # For now, just return the poem as-is (no actual refinement)
-        # In a real implementation, this would apply line count refinement
-        self.logger.info(f"Line count refiner node executed (no actual refinement applied)")
+        # Check if refinement is needed
+        if evaluation and not self.should_refine(evaluation):
+            self.logger.info(f"{self.name}: No line count refinement needed")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
         
-        return {
-            'poem': poem,
-            'refined': True,
-            'refinement_iterations': 0
-        }
+        # Apply refinement
+        try:
+            refined_poem = self._apply_sync_refinement(poem, constraints, evaluation)
+            
+            self.logger.info(f"{self.name}: Line count refinement applied successfully")
+            return {
+                'poem': refined_poem,
+                'refined': True,
+                'refinement_iterations': 1
+            }
+        except Exception as e:
+            self.logger.error(f"{self.name}: Line count refinement failed: {e}")
+            return {
+                'poem': poem,
+                'refined': False,
+                'refinement_iterations': 0
+            }
+    
+    def _apply_sync_refinement(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
+        """
+        Apply line count refinement synchronously.
+        """
+        if not evaluation.line_count_validation:
+            return poem
+        
+        # Check if line count is correct
+        if poem.evaluate_line_count():
+            return poem
+        
+        self.logger.info("Fixing line count - ensuring even number of verses")
+        
+        # Get target line count from constraints or use default
+        target_lines = getattr(constraints, 'line_count', 4)
+        if target_lines % 2 != 0:
+            target_lines = target_lines + 1  # Ensure even number
+        
+        current_lines = len(poem.verses)
+        
+        if current_lines < target_lines:
+            # Add more verses
+            additional_verses = self._generate_additional_verses(poem, constraints, target_lines - current_lines)
+            fixed_verses = poem.verses + additional_verses
+        elif current_lines > target_lines:
+            # Remove extra verses (keep even number)
+            target_lines = max(2, target_lines - (target_lines % 2))  # Ensure even
+            fixed_verses = poem.verses[:target_lines]
+        else:
+            # Already correct
+            return poem
+        
+        # Create new poem
+        return LLMPoem(
+            verses=fixed_verses,
+            llm_provider=poem.llm_provider,
+            model_name=poem.model_name,
+            constraints=poem.constraints,
+            generation_timestamp=poem.generation_timestamp
+        )
+    
+    def _generate_additional_verses(self, poem: LLMPoem, constraints: Constraints, count: int) -> List[str]:
+        """Generate additional verses to reach target line count"""
+        if count <= 0:
+            return []
+        
+        # Format prompt for generating additional verses
+        formatted_prompt = self.prompt_manager.format_prompt(
+            'line_count_refinement',
+            meter=constraints.meter or "غير محدد",
+            qafiya=constraints.qafiya or "غير محدد",
+            theme=constraints.theme or "غير محدد",
+            tone=constraints.tone or "غير محدد",
+            existing_verses="\n".join(poem.verses),
+            additional_verses_needed=count,
+            context="إضافة أبيات جديدة للحفاظ على الوزن والقافية"
+        )
+        
+        # Generate additional verses
+        response = self.llm.generate(formatted_prompt)
+        additional_verses = self._parse_verses_from_response(response)
+        
+        # Ensure we get the right number of verses
+        if len(additional_verses) >= count:
+            return additional_verses[:count]
+        else:
+            # If not enough verses generated, pad with simple verses
+            while len(additional_verses) < count:
+                additional_verses.append("بيت إضافي للحفاظ على الوزن")
+            return additional_verses
     
     def get_required_inputs(self) -> list:
         """Get list of required input keys for this node."""
-        return ['poem', 'constraints']
+        return ['poem', 'constraints', 'evaluation']
     
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""

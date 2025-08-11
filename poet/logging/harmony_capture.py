@@ -54,19 +54,32 @@ class CapturedCall:
             "success": self.success
         }
     
-    def _serialize_value(self, value: Any) -> Any:
-        """Serialize values, handling custom objects"""
-        if hasattr(value, 'to_dict'):
-            return value.to_dict()
-        elif hasattr(value, '__dict__'):
-            return {k: self._serialize_value(v) for k, v in value.__dict__.items() 
-                   if not k.startswith('_')}
-        elif isinstance(value, (list, tuple)):
-            return [self._serialize_value(v) for v in value]
-        elif isinstance(value, dict):
-            return {k: self._serialize_value(v) for k, v in value.items()}
-        else:
-            return value
+    def _serialize_value(self, value: Any, _depth: int = 0) -> Any:
+        """Serialize values, handling custom objects with recursion protection"""
+        # Prevent infinite recursion
+        if _depth > 10:
+            return f"<max_depth_exceeded: {type(value).__name__}>"
+        
+        try:
+            # Handle common non-serializable types
+            if hasattr(value, '__class__') and 'threading' in str(value.__class__.__module__):
+                return f"<threading_object: {type(value).__name__}>"
+            if hasattr(value, '__class__') and 'logging' in str(value.__class__.__module__):
+                return f"<logging_object: {type(value).__name__}>"
+            
+            if hasattr(value, 'to_dict'):
+                return value.to_dict()
+            elif hasattr(value, '__dict__'):
+                return {k: self._serialize_value(v, _depth + 1) for k, v in value.__dict__.items() 
+                       if not k.startswith('_')}
+            elif isinstance(value, (list, tuple)):
+                return [self._serialize_value(v, _depth + 1) for v in value]
+            elif isinstance(value, dict):
+                return {k: self._serialize_value(v, _depth + 1) for k, v in value.items()}
+            else:
+                return value
+        except Exception as e:
+            return f"<serialization_error: {str(e)}>"
 
 @dataclass
 class PipelineExecution:
@@ -121,19 +134,32 @@ class PipelineExecution:
             "total_tokens": self.total_tokens
         }
     
-    def _serialize_value(self, value: Any) -> Any:
-        """Serialize values, handling custom objects"""
-        if hasattr(value, 'to_dict'):
-            return value.to_dict()
-        elif hasattr(value, '__dict__'):
-            return {k: self._serialize_value(v) for k, v in value.__dict__.items() 
-                   if not k.startswith('_')}
-        elif isinstance(value, (list, tuple)):
-            return [self._serialize_value(v) for v in value]
-        elif isinstance(value, dict):
-            return {k: self._serialize_value(v) for k, v in value.items()}
-        else:
-            return value
+    def _serialize_value(self, value: Any, _depth: int = 0) -> Any:
+        """Serialize values, handling custom objects with recursion protection"""
+        # Prevent infinite recursion
+        if _depth > 10:
+            return f"<max_depth_exceeded: {type(value).__name__}>"
+        
+        try:
+            # Handle common non-serializable types
+            if hasattr(value, '__class__') and 'threading' in str(value.__class__.__module__):
+                return f"<threading_object: {type(value).__name__}>"
+            if hasattr(value, '__class__.__module__') and 'logging' in str(value.__class__.__module__):
+                return f"<logging_object: {type(value).__name__}>"
+            
+            if hasattr(value, 'to_dict'):
+                return value.to_dict()
+            elif hasattr(value, '__dict__'):
+                return {k: self._serialize_value(v, _depth + 1) for k, v in value.__dict__.items() 
+                       if not k.startswith('_')}
+            elif isinstance(value, (list, tuple)):
+                return [self._serialize_value(v, _depth + 1) for v in value]
+            elif isinstance(value, dict):
+                return {k: self._serialize_value(v, _depth + 1) for k, v in value.items()}
+            else:
+                return value
+        except Exception as e:
+            return f"<serialization_error: {str(e)}>"
 
 class ExecutionCapture:
     """
@@ -181,6 +207,7 @@ class ExecutionCapture:
         finally:
             call.duration_ms = int((datetime.now() - start_time).total_seconds() * 1000)
             self.current_execution.add_call(call)
+            print(f"🔍 Added call to execution: {component_name}.{method_name} (total calls: {len(self.current_execution.calls)})")
             self.current_call = None
     
     def capture_llm_details(self, provider: str, model: str, 
@@ -212,6 +239,10 @@ class ExecutionCapture:
         """Export execution as JSON"""
         if not self.current_execution:
             return "{}"
+        
+        print(f"🔍 Exporting execution with {len(self.current_execution.calls)} calls")
+        for i, call in enumerate(self.current_execution.calls):
+            print(f"  Call {i+1}: {call.component_name}.{call.method_name}")
         
         json_str = json.dumps(self.current_execution.to_dict(), 
                              indent=2, ensure_ascii=False)
