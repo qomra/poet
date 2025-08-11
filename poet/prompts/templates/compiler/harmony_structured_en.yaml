@@ -1,0 +1,124 @@
+name: "harmony_structured_en"
+description: "Generate structured Harmony data compatible with openai_harmony library (English)"
+category: "compiler"
+parameters:
+  - user_prompt
+  - initial_constraints
+  - execution_steps
+  - final_poem
+  - quality_assessment
+  - conversation_start_date
+  - cursor
+  - toolname
+  - line_start
+  - line_end
+  - name
+  - output
+  - id
+  - long_chain_of_thought
+
+template: |
+  You are an expert at analyzing Arabic poetry generation processes and you need to reconstruct the reasoning in the OpenAI Harmony format.
+
+  CRITICAL: You are simulating an intelligent agent that analyzes the Arabic poetry generation process.
+  You do not have access to any tools — only analyze the given inputs and outputs.
+  Do not mention the names of any tools, execution calls, or internal functions. Act as if you are building a causal reasoning map from your own internal perspective only.
+  Follow the facts in the execution data (execution_steps, final_poem, quality_assessment) without naming them directly; extract the facts and narrate your thinking as internal analysis.
+  Break the reasoning into small-to-medium steps whenever possible. Avoid merging generation and evaluation into a single step unless the content would be too short otherwise.
+
+  # Pipeline processing instructions
+
+  ## Reasoning over the workflow
+  While reviewing the workflow sequence, produce natural reasoning that explains:
+  - The constraints and requirements you analyzed
+  - The decisions you made and why
+  - How each step logically leads to the next
+  - Reflections on quality issues and problems
+  - Explanations of improvement choices
+
+  ## Expected analysis axes (without naming tools)
+  - Rhyme (qafiya) analysis: infer the required rhyme from constraints and final outputs, and explain why the chosen pattern fits.
+  - Meter analysis (baḥr/tafeelat): infer the meter and feet from constraints and final outputs, and explain the method of scansion/verification.
+  - Line generation and refinement: justify which lines were targeted for refinement, what changed, and why.
+  - Final evaluation: connect quality observations to the original constraints and the resulting poem.
+
+  # Execution data
+
+  User prompt: {user_prompt}
+  Initial constraints: {initial_constraints}
+
+  # Executed pipeline steps
+
+  {execution_steps}
+
+  # Final outputs
+  Final poem: {final_poem}
+  Quality assessment: {quality_assessment}
+
+  # Task
+
+  Produce a complete Harmony conversation that shows the AI thinking through each step. It includes:
+  1) A system message with "high" reasoning
+  2) A developer message with poetry-generation instructions (without referencing any tools or calls)
+  3) A user message containing the requested text and constraints
+  4) Assistant messages that show:
+     - Chained reasoning in <|channel|>analysis messages
+     - Final outputs in <|channel|>final messages
+
+  For each stage of the workflow, produce natural chain-of-thought that shows:
+  - What the AI is thinking (<|channel|>analysis)
+  - Why certain decisions are made
+  - How each stage connects to the next
+  - Reflections on quality issues
+  - Explanations of refinements
+
+  # Important constraints
+
+  - Do not use any tools — focus on analysis and reasoning only
+  - Do not mention or imply internal poetry tools (such as QafiyaSelector, RefinerChain, or PoemEvaluator) or execution call names
+  - All thinking and analysis must be in the analysis channel
+  - All final outputs must be in the final channel
+  - The reasoning should feel like a coherent internal process, not a mechanical list
+  - Commit to small-to-medium steps. If the task allows, separate generation, meter review, rhyme review, refinement, then evaluation
+  - Very important: the conversation must end with a single message in the final channel that contains both the final poem and the quality assessment
+
+  # Channel instructions
+  - analysis: for chained reasoning about each stage of the workflow
+  - final: for the final outputs (poem and quality assessment) — exactly one message at the end
+  - Do not use the commentary channel at this stage
+
+  # Required conversation structure
+  1. System message
+  2. Developer message
+  3. User message
+  4. Assistant messages in analysis channel (reasoning)
+  5. One final assistant message in final channel (required)
+
+  # Important note
+  After completing all reasoning in the analysis channel, you must end the conversation with exactly one message in the final channel that contains:
+  - The complete final poem
+  - The final quality assessment
+  - Any closing remarks
+
+  # Transition to the final result
+  When you finish analyzing:
+  1) Stop writing any more analysis messages.
+  2) Write exactly one message in the final channel.
+  3) Place the complete final poem (use {final_poem} as the basis without alteration).
+  4) Add the final quality assessment (use {quality_assessment} as the basis without alteration).
+  5) End the conversation after the final message.
+
+  Start your response with:
+  <|start|>system<|message|>You are an Arabic poetry generation agent.
+  Knowledge cutoff: 2024-06
+  Current date: {conversation_start_date}
+  Reasoning: high
+  # Valid channels: analysis, final. Channel must be included for every message.<|end|>
+
+  Then add the user message:
+  <|start|>user<|channel|>analysis<|message|>I want to generate Arabic poetry<|end|>
+
+  Then add assistant messages with appropriate channels:
+  <|start|>assistant<|channel|>analysis<|message|>I will analyze your requirements...<|end|>
+  <|start|>assistant<|channel|>final<|message|>Here is the final poem...<|end|>
+
