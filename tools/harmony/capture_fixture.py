@@ -8,7 +8,7 @@ Usage:
     
 Output files:
     - {execution_id}_raw.json: Raw execution data
-    - {execution_id}_harmony.txt: Harmony conversation format
+        - {execution_id}_harmony.txt: Harmony conversation format
     - {execution_id}_structured.json: Structured JSON for openai_harmony
     - harmony_structured_test.json: Structured data in fixtures directory
 """
@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from poet.llm.anthropic_adapter import AnthropicAdapter
+from poet.llm.groq_adapter import GroqAdapter
 from poet.prompts.prompt_manager import PromptManager
 from poet.logging.integration import HarmonyIntegration
 from poet.models.constraints import Constraints
@@ -113,14 +114,23 @@ async def generate_execution():
     user_prompt = example["prompt"]["text"]
     expected_constraints = example["agent"]["constraints"]
     
-    anthropic_config = llms_config["anthropic"]
+    # anthropic_config = llms_config["anthropic"]
+    # llm_config = LLMConfig(
+    #     model_name=anthropic_config["model"],
+    #     temperature=0.7,
+    #     api_key=anthropic_config["api_key"],
+    #     max_tokens=anthropic_config["max_tokens"]
+    # )
+    # llm = AnthropicAdapter(llm_config)
+    # use groq
+    groq_config = llms_config["groq"]
     llm_config = LLMConfig(
-        model_name=anthropic_config["model"],
+        model_name=groq_config["model"],
         temperature=0.7,
-        api_key=anthropic_config["api_key"],
-        max_tokens=anthropic_config["max_tokens"]
+        api_key=groq_config["api_key"],
+        max_tokens=groq_config["max_tokens"]
     )
-    llm = AnthropicAdapter(llm_config)
+    llm = GroqAdapter(llm_config)
     prompt_manager = PromptManager()
     
     # Create test data

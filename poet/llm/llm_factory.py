@@ -7,6 +7,7 @@ from typing import Optional, Dict, Any
 from .base_llm import BaseLLM, LLMConfig, LLMError
 from .openai_adapter import OpenAIAdapter
 from .anthropic_adapter import AnthropicAdapter
+from .groq_adapter import GroqAdapter
 
 def get_real_llm_from_env() -> Optional[BaseLLM]:
     """
@@ -40,6 +41,8 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
         api_key = os.getenv("OPENAI_API_KEY")
     elif provider == "anthropic" and os.getenv("ANTHROPIC_API_KEY"):
         api_key = os.getenv("ANTHROPIC_API_KEY")
+    elif provider == "groq" and os.getenv("GROQ_API_KEY"):
+        api_key = os.getenv("GROQ_API_KEY")
     
     if not api_key or api_key == "sk-" or api_key == "your-openai-api-key-here":
         return None
@@ -49,6 +52,8 @@ def get_real_llm_from_env() -> Optional[BaseLLM]:
         return _create_openai_llm(provider_config, api_key)
     elif provider == "anthropic":
         return _create_anthropic_llm(provider_config, api_key)
+    elif provider == "groq":
+        return _create_groq_llm(provider_config, api_key)
     elif provider == "gemini":
         raise NotImplementedError("Gemini adapter not implemented yet")
     else:
@@ -92,4 +97,15 @@ def _create_anthropic_llm(config_data: Dict[str, Any], api_key: str) -> Anthropi
         timeout=30
     )
     
-    return AnthropicAdapter(config) 
+    return AnthropicAdapter(config)
+
+def _create_groq_llm(config_data: Dict[str, Any], api_key: str) -> GroqAdapter:
+    """Create Groq LLM instance from configuration."""
+    config = LLMConfig(
+        model_name=config_data["model"],
+        api_key=api_key,
+        base_url=config_data.get("api_base"),
+        timeout=30
+    )
+    
+    return GroqAdapter(config) 

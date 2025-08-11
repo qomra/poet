@@ -7,6 +7,7 @@ from poet.models.constraints import Constraints
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
 from poet.data.bohour_meters import BohourMetersManager
+from poet.core.node import Node
 
 
 class BahrSelectionError(Exception):
@@ -14,7 +15,7 @@ class BahrSelectionError(Exception):
     pass
 
 
-class BahrSelector:
+class BahrSelector(Node):
     """
     Selects and standardizes bahr (meter) specifications for poem generation.
     
@@ -22,11 +23,11 @@ class BahrSelector:
     bahr name, format it correctly, and suggest sub-bahrs if applicable.
     """
     
-    def __init__(self, llm_provider: BaseLLM, prompt_manager: Optional[PromptManager] = None):
-        self.llm = llm_provider
+    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+        super().__init__(**kwargs)
+        self.llm = llm
         self.prompt_manager = prompt_manager or PromptManager()
         self.meters_manager = BohourMetersManager()
-        self.logger = logging.getLogger(__name__)
     
     def select_bahr(self, constraints: Constraints, original_prompt: str) -> Constraints:
         """
@@ -277,3 +278,46 @@ class BahrSelector:
             'common_themes': meter_info.common_themes,
             'difficulty_level': meter_info.difficulty_level
         } 
+    
+    def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute the bahr selection node.
+        
+        Args:
+            input_data: Input data containing constraints and user_prompt
+            context: Pipeline context with LLM and prompt_manager
+            
+        Returns:
+            Output data with enhanced constraints
+        """
+        # Set up context
+        self.llm = context.get('llm')
+        self.prompt_manager = context.get('prompt_manager') or PromptManager()
+        
+        if not self.llm:
+            raise ValueError("LLM not provided in context")
+        
+        # Extract required data
+        constraints = input_data.get('constraints')
+        user_prompt = input_data.get('user_prompt')
+        
+        if not constraints:
+            raise ValueError("constraints not found in input_data")
+        if not user_prompt:
+            raise ValueError("user_prompt not found in input_data")
+        
+        # Select bahr
+        enhanced_constraints = self.select_bahr(constraints, user_prompt)
+        
+        return {
+            'constraints': enhanced_constraints,
+            'bahr_selected': True
+        }
+    
+    def get_required_inputs(self) -> list:
+        """Get list of required input keys for this node."""
+        return ['constraints', 'user_prompt']
+    
+    def get_output_keys(self) -> list:
+        """Get list of output keys this node produces."""
+        return ['constraints', 'bahr_selected'] 

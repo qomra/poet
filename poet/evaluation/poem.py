@@ -14,6 +14,7 @@ from poet.evaluation.prosody import ProsodyEvaluator
 from poet.evaluation.qafiya import QafiyaEvaluator
 from poet.evaluation.tashkeel import TashkeelEvaluator
 from poet.llm.base_llm import BaseLLM
+from poet.core.node import Node
 
 logger = logging.getLogger(__name__)
 
@@ -26,24 +27,32 @@ class EvaluationType(Enum):
     TASHKEEL = "tashkeel"
 
 
-class PoemEvaluator:
+class PoemEvaluator(Node):
     """
     Orchestrates the poem evaluation workflow by running multiple validators
     and consolidating their results into a unified quality assessment.
     """
     
-    def __init__(self, llm: BaseLLM):
-        """
-        Initialize PoemEvaluator with required components.
-        
-        Args:
-            llm: LLM instance for validators that need it
-        """
+    def __init__(self, llm, metrics: List[str] = None, **kwargs):
+        super().__init__(**kwargs)
         self.llm = llm
+        self.metrics = metrics or ['prosody', 'qafiya']
+        # Initialize validators with the provided LLM
         self.line_count_validator = LineCountEvaluator()
-        self.prosody_validator = ProsodyEvaluator(llm)
-        self.qafiya_validator = QafiyaEvaluator(llm)
-        self.tashkeel_validator = TashkeelEvaluator(llm)
+        self.prosody_validator = ProsodyEvaluator(self.llm)
+        self.qafiya_validator = QafiyaEvaluator(self.llm)
+        self.tashkeel_validator = TashkeelEvaluator(self.llm)
+    
+    def _ensure_validators_initialized(self):
+        """Ensure all validators are initialized"""
+        if not self.line_count_validator:
+            self.line_count_validator = LineCountEvaluator()
+        if not self.prosody_validator:
+            self.prosody_validator = ProsodyEvaluator(self.llm)
+        if not self.qafiya_validator:
+            self.qafiya_validator = QafiyaEvaluator(self.llm)
+        if not self.tashkeel_validator:
+            self.tashkeel_validator = TashkeelEvaluator(self.llm)
     
     def evaluate_poem(self, poem: LLMPoem, constraints: Constraints, 
                      evaluations: List[EvaluationType]) -> LLMPoem:
@@ -58,6 +67,9 @@ class PoemEvaluator:
         Returns:
             Updated poem with quality assessment
         """
+        # Ensure validators are initialized
+        self._ensure_validators_initialized()
+        
         logger.info(f"Starting poem evaluation with {len(evaluations)} evaluation types")
         
         # Initialize quality components
@@ -214,3 +226,66 @@ class PoemEvaluator:
             qafiya_validation=qafiya_validation,
             tashkeel_validation=tashkeel_validation
         ) 
+    
+    def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute the poem evaluation node.
+        
+        Args:
+            input_data: Input data containing poem and constraints
+            context: Pipeline context
+            
+        Returns:
+            Output data with evaluation results
+        """
+        # Set up context
+        self.llm = context.get('llm')
+        if not self.llm:
+            raise ValueError("LLM not provided in context")
+        
+        # Initialize validators
+        self.line_count_validator = LineCountEvaluator()
+        self.prosody_validator = ProsodyEvaluator(self.llm)
+        self.qafiya_validator = QafiyaEvaluator(self.llm)
+        self.tashkeel_validator = TashkeelEvaluator(self.llm)
+        
+        # Extract required data
+        poem = input_data.get('poem')
+        constraints = input_data.get('constraints')
+        
+        if not poem:
+            raise ValueError("poem not found in input_data")
+        if not constraints:
+            raise ValueError("constraints not found in input_data")
+        
+        # Get evaluation metrics from config
+        evaluation_metrics = self.config.get('metrics', ['prosody', 'qafiya'])
+        evaluations = [EvaluationType(metric.upper()) for metric in evaluation_metrics if hasattr(EvaluationType, metric.upper())]
+        
+        # Evaluate poem
+        evaluated_poem = self.evaluate_poem(poem, constraints, evaluations)
+        
+        # Create evaluation result
+        evaluation_result = {
+            'prosody_score': evaluated_poem.quality.overall_score if evaluated_poem.quality else 0.0,
+            'qafiya_score': evaluated_poem.quality.overall_score if evaluated_poem.quality else 0.0,
+            'overall_score': evaluated_poem.quality.overall_score if evaluated_poem.quality else 0.0,
+            'evaluation_metrics': evaluation_metrics,
+            'evaluation_completed': True
+        }
+        
+        self.logger.info(f"Evaluation completed with overall score: {evaluation_result['overall_score']}")
+        
+        return {
+            'evaluation': evaluation_result,
+            'evaluated': True,
+            'poem': evaluated_poem
+        }
+    
+    def get_required_inputs(self) -> list:
+        """Get list of required input keys for this node."""
+        return ['poem', 'constraints']
+    
+    def get_output_keys(self) -> list:
+        """Get list of output keys this node produces."""
+        return ['evaluation', 'evaluated', 'poem']

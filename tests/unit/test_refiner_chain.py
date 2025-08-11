@@ -88,7 +88,7 @@ class TestRefinerChain:
     def test_refiner_chain_initialization(self, mock_llm):
         """Test refiner chain initialization"""
         refiners = [MockRefiner("refiner1"), MockRefiner("refiner2")]
-        chain = RefinerChain(refiners, mock_llm, max_iterations=5)
+        chain = RefinerChain(mock_llm, refiners, max_iterations=5)
         
         assert len(chain.refiners) == 2
         assert chain.max_iterations == 5
@@ -120,7 +120,7 @@ class TestRefinerChain:
         )
         mock_evaluator.evaluate_poem.return_value = mock_poem
         
-        chain = RefinerChain(refiners, mock_llm, max_iterations=3)
+        chain = RefinerChain(mock_llm, refiners, max_iterations=3)
         chain.evaluator = mock_evaluator
         
         result_poem, history = await chain.refine(sample_poem, sample_constraints, target_quality=0.8)
@@ -153,7 +153,7 @@ class TestRefinerChain:
         
         mock_evaluator.evaluate_poem.side_effect = [mock_poem1, mock_poem2, mock_poem3]
         
-        chain = RefinerChain(refiners, mock_llm, max_iterations=3)
+        chain = RefinerChain(mock_llm, refiners, max_iterations=3)
         chain.evaluator = mock_evaluator
         
         result_poem, history = await chain.refine(sample_poem, sample_constraints, target_quality=0.8)
@@ -180,7 +180,7 @@ class TestRefinerChain:
         mock_poem.quality = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], tashkeel_issues=[], overall_score=0.3, is_acceptable=False, recommendations=[])
         mock_evaluator.evaluate_poem.return_value = mock_poem
         
-        chain = RefinerChain(refiners, mock_llm, max_iterations=2)
+        chain = RefinerChain(mock_llm, refiners, max_iterations=2)
         chain.evaluator = mock_evaluator
         
         result_poem, history = await chain.refine(sample_poem, sample_constraints, target_quality=0.8)
@@ -207,7 +207,7 @@ class TestRefinerChain:
         mock_poem.quality = QualityAssessment(prosody_issues=[], line_count_issues=[], qafiya_issues=[], tashkeel_issues=[], overall_score=0.3, is_acceptable=False, recommendations=[])
         mock_evaluator.evaluate_poem.return_value = mock_poem
         
-        chain = RefinerChain(refiners, mock_llm, max_iterations=3)
+        chain = RefinerChain(mock_llm, refiners, max_iterations=3)
         chain.evaluator = mock_evaluator
         
         result_poem, history = await chain.refine(sample_poem, sample_constraints, target_quality=0.8)

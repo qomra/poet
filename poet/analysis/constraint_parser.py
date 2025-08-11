@@ -6,6 +6,7 @@ from typing import Optional, Dict, Any
 from poet.models.constraints import Constraints
 from poet.prompts.prompt_manager import PromptManager
 from poet.llm.base_llm import BaseLLM
+from poet.core.node import Node
 
 
 class ConstraintParsingError(Exception):
@@ -13,7 +14,7 @@ class ConstraintParsingError(Exception):
     pass
 
 
-class ConstraintParser:
+class ConstraintParser(Node):
     """
     Extracts and parses poetry constraints from natural language user input.
     
@@ -22,10 +23,10 @@ class ConstraintParser:
     clarification requests when needed.
     """
     
-    def __init__(self, llm_provider: BaseLLM, prompt_manager: Optional[PromptManager] = None):
-        self.llm = llm_provider
+    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+        super().__init__(**kwargs)
+        self.llm = llm
         self.prompt_manager = prompt_manager or PromptManager()
-        self.logger = logging.getLogger(__name__)
     
     def parse_constraints(self, user_prompt: str) -> Constraints:
         """
@@ -249,3 +250,42 @@ class ConstraintParser:
         # Basic validation is now done in Constraints.__post_init__
         # Just return True since constraints are validated on creation
         return True
+    
+    def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute the constraint parsing node.
+        
+        Args:
+            input_data: Input data containing user_prompt
+            context: Pipeline context with LLM and prompt_manager
+            
+        Returns:
+            Output data with parsed constraints
+        """
+        # Set up context
+        self.llm = context.get('llm')
+        self.prompt_manager = context.get('prompt_manager') or PromptManager()
+        
+        if not self.llm:
+            raise ValueError("LLM not provided in context")
+        
+        # Extract user prompt
+        user_prompt = input_data.get('user_prompt')
+        if not user_prompt:
+            raise ValueError("user_prompt not found in input_data")
+        
+        # Parse constraints
+        constraints = self.parse_constraints(user_prompt)
+        
+        return {
+            'constraints': constraints,
+            'parsed_constraints': True
+        }
+    
+    def get_required_inputs(self) -> list:
+        """Get list of required input keys for this node."""
+        return ['user_prompt']
+    
+    def get_output_keys(self) -> list:
+        """Get list of output keys this node produces."""
+        return ['constraints', 'parsed_constraints']

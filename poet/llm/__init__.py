@@ -12,6 +12,7 @@ from .base_llm import (
 )
 from .openai_adapter import OpenAIAdapter
 from .anthropic_adapter import AnthropicAdapter
+from .groq_adapter import GroqAdapter
 from .llm_factory import get_real_llm_from_env
 
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     "LLMInvalidRequestError",
     "OpenAIAdapter",
     "AnthropicAdapter",
+    "GroqAdapter",
     "get_real_llm_from_env"
 ]

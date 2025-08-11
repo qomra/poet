@@ -8,6 +8,7 @@ from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.llm.base_llm import BaseLLM
 from poet.prompts.prompt_manager import PromptManager
+from poet.core.node import Node
 
 
 class BasePoemGenerator(ABC):
@@ -53,7 +54,7 @@ class BasePoemGenerator(ABC):
         pass
 
 
-class SimplePoemGenerator(BasePoemGenerator):
+class SimplePoemGenerator(BasePoemGenerator, Node):
     """
     Simple poem generator that focuses on prosody and qafiya compliance.
     
@@ -61,8 +62,9 @@ class SimplePoemGenerator(BasePoemGenerator):
     This is a basic implementation for testing prosody validation.
     """
     
-    def __init__(self, llm_provider: BaseLLM, prompt_manager: Optional[PromptManager] = None):
-        super().__init__(llm_provider, prompt_manager)
+    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+        BasePoemGenerator.__init__(self, llm, prompt_manager)
+        Node.__init__(self, **kwargs)
     
     def generate_poem(self, constraints: Constraints) -> LLMPoem:
         """
@@ -171,6 +173,45 @@ class SimplePoemGenerator(BasePoemGenerator):
         except Exception as e:
             self.logger.error(f"Failed to parse LLM response: {e}")
             raise GenerationError(f"Response parsing failed: {e}")
+    
+    def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute the poem generation node.
+        
+        Args:
+            input_data: Input data containing constraints
+            context: Pipeline context with LLM and prompt_manager
+            
+        Returns:
+            Output data with generated poem
+        """
+        # Set up context
+        self.llm = context.get('llm')
+        self.prompt_manager = context.get('prompt_manager') or PromptManager()
+        
+        if not self.llm:
+            raise ValueError("LLM not provided in context")
+        
+        # Extract required data
+        constraints = input_data.get('constraints')
+        if not constraints:
+            raise ValueError("constraints not found in input_data")
+        
+        # Generate poem
+        poem = self.generate_poem(constraints)
+        
+        return {
+            'poem': poem,
+            'poem_generated': True
+        }
+    
+    def get_required_inputs(self) -> list:
+        """Get list of required input keys for this node."""
+        return ['constraints']
+    
+    def get_output_keys(self) -> list:
+        """Get list of output keys this node produces."""
+        return ['poem', 'poem_generated']
 
 
 class GenerationError(Exception):

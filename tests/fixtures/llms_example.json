@@ -6,5 +6,11 @@
         "api_key": "sk-",
         "api_base": "https://api.openai.com/v1",
         "api_version": "2023-05-19"
+    },
+    "groq": {
+        "name": "groq",
+        "model": "llama3-8b-8192",
+        "provider": "groq",
+        "api_key": "your-groq-api-key-here"
     }
 }

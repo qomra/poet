@@ -211,8 +211,7 @@ class QafiyaEvaluator:
     def _create_invalid_result(self, error_message: str, baits: List[tuple], 
                               expected_qafiya: Optional[str] = None,
                               qafiya_harakah: Optional[str] = None,
-                              qafiya_type: Optional[str] = None,
-                              qafiya_pattern: Optional[str] = None) -> QafiyaValidationResult:
+                              qafiya_type: Optional[str] = None) -> QafiyaValidationResult:
         """Create an invalid result for error cases"""
         bait_results = []
         for i, bait in enumerate(baits):
@@ -232,8 +231,7 @@ class QafiyaEvaluator:
             misaligned_bait_numbers=list(range(1, len(baits) + 1)),
             expected_qafiya=expected_qafiya,
             qafiya_harakah=qafiya_harakah,
-            qafiya_type=qafiya_type,
-            qafiya_pattern=qafiya_pattern
+            qafiya_type=qafiya_type
         )
     
     def _generate_validation_summary(self, valid_baits: int, invalid_baits: int, expected_qafiya: Optional[str] = None) -> str:
