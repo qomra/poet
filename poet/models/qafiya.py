@@ -35,7 +35,6 @@ class QafiyaValidationResult:
     expected_qafiya: Optional[str] = None
     qafiya_harakah: Optional[str] = None
     qafiya_type: Optional[str] = None
-    qafiya_pattern: Optional[str] = None
     issues: List[str] = None
     
     def __post_init__(self):
@@ -60,6 +59,5 @@ class QafiyaValidationResult:
             "expected_qafiya": self.expected_qafiya,
             "qafiya_harakah": self.qafiya_harakah,
             "qafiya_type": self.qafiya_type,
-            "qafiya_pattern": self.qafiya_pattern,
             "issues": self.issues
         } 
