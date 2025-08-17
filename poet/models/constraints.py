@@ -79,7 +79,7 @@ class Constraints:
         # infer qafiya_type_examples from qafiya_type
         if self.qafiya_type:
             # convert qafiya_type to QafiyaTypeDescriptionAndExamples enum
-            self.qafiya_type_description_and_examples = QafiyaTypeDescriptionAndExamples[QafiyaType(self.qafiya_type).name].value
+            self.qafiya_type_description_and_examples = QafiyaTypeDescriptionAndExamples[self.qafiya_type.name].value
             
         # Basic validation
         if self.line_count is not None and self.line_count <= 0:

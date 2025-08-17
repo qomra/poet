@@ -7,8 +7,9 @@ import json
 from poet.models.constraints import Constraints
 from poet.models.poem import LLMPoem
 from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
+from poet.prompts import get_global_prompt_manager
 from poet.core.node import Node
+from datetime import datetime
 
 
 class BasePoemGenerator(ABC):
@@ -19,9 +20,10 @@ class BasePoemGenerator(ABC):
     Provides common functionality for generating Arabic poetry based on constraints.
     """
     
-    def __init__(self, llm_provider: BaseLLM, prompt_manager: Optional[PromptManager] = None):
+    def __init__(self, llm_provider: BaseLLM, **kwargs):
         self.llm = llm_provider
-        self.prompt_manager = prompt_manager or PromptManager()
+        # Use global prompt manager instead of creating new instance
+        self.prompt_manager = get_global_prompt_manager()
         self.logger = logging.getLogger(self.__class__.__name__)
     
     @abstractmethod
@@ -62,55 +64,72 @@ class SimplePoemGenerator(BasePoemGenerator, Node):
     This is a basic implementation for testing prosody validation.
     """
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
-        BasePoemGenerator.__init__(self, llm, prompt_manager)
+    def __init__(self, llm: BaseLLM, **kwargs):
+        BasePoemGenerator.__init__(self, llm)
         Node.__init__(self, **kwargs)
+        # Override with global prompt manager
+        self.prompt_manager = get_global_prompt_manager()
     
     def generate_poem(self, constraints: Constraints) -> LLMPoem:
-        """
-        Generate a simple poem based on the given constraints.
-        
-        Args:
-            constraints: Constraints object specifying poem requirements
-            
-        Returns:
-            LLMPoem object containing the generated poem
-            
-        Raises:
-            GenerationError: If poem generation fails
-        """
+        """Generate a poem based on the given constraints."""
         try:
-            # Calculate verse count (each bait = 2 verses)
-            line_count = constraints.line_count or 4
-            verse_count = line_count * 2
-            
-            # Format the generation prompt
+            # Format the prompt
             formatted_prompt = self.prompt_manager.format_prompt(
                 'simple_poem_generation',
                 meter=constraints.meter or "غير محدد",
+                meeter_tafeelat=constraints.meeter_tafeelat or "غير محدد",
                 qafiya=constraints.qafiya or "غير محدد",
-                line_count=line_count,
-                verse_count=verse_count
+                qafiya_type=constraints.qafiya_type or "غير محدد",
+                qafiya_type_description_and_examples=constraints.qafiya_type_description_and_examples or "غير محدد",
+                qafiya_harakah=constraints.qafiya_harakah or "",
+                theme=constraints.theme or "غير محدد",
+                tone=constraints.tone or "غير محدد",
+                line_count=constraints.line_count or 4,
+                verse_count=(constraints.line_count or 4) * 2,  # Each bait = 2 verses
+                imagery=constraints.imagery or [],
+                keywords=constraints.keywords or [],
+                sections=constraints.sections or [],
+                register=constraints.register or "فصيح",
+                era=constraints.era or "كلاسيكي",
+                poet_style=constraints.poet_style or "غير محدد"
             )
             
-            # Generate poem using LLM
-            response = self.llm.generate(formatted_prompt)
+            # Try multiple times to generate a valid poem
+            max_retries = 3
+            last_error = None
             
-            # Parse the response to extract verses
-            verses = self._parse_llm_response(response)
+            for attempt in range(max_retries):
+                try:
+                    # Generate poem using LLM
+                    response = self.llm.generate(formatted_prompt)
+                    
+                    # Parse the response to extract verses
+                    verses = self._parse_llm_response(response)
+                    
+                    # If we get here, parsing succeeded
+                    break
+                    
+                except Exception as e:
+                    last_error = e
+                    if attempt < max_retries - 1:
+                        self.logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying...")
+                        continue
+                    else:
+                        # All retries failed, raise the last error
+                        raise last_error
             
-            # Create LLMPoem object
+            # Create and return the poem
             poem = LLMPoem(
                 verses=verses,
                 llm_provider=self.llm.__class__.__name__,
-                model_name=getattr(self.llm.config, 'model_name', 'unknown'),
-                constraints=constraints.to_dict()
+                model_name=getattr(self.llm, 'model_name', 'unknown'),
+                constraints=constraints,
+                generation_timestamp=datetime.now()
             )
             
             return poem
             
         except Exception as e:
-            self.logger.error(f"Failed to generate poem: {e}")
             raise GenerationError(f"Poem generation failed: {e}")
     
     def can_handle_constraints(self, constraints: Constraints) -> bool:
@@ -187,7 +206,8 @@ class SimplePoemGenerator(BasePoemGenerator, Node):
         """
         # Set up context
         self.llm = context.get('llm')
-        self.prompt_manager = context.get('prompt_manager') or PromptManager()
+        # Use global prompt manager instead of context or new instance
+        self.prompt_manager = get_global_prompt_manager()
         
         if not self.llm:
             raise ValueError("LLM not provided in context")

@@ -42,9 +42,7 @@ class RefinerChain(Node):
         current_poem = poem
         refinement_history = []
         
-        for iteration in range(self.max_iterations):
-            self.logger.info(f"Starting refinement iteration {iteration + 1}/{self.max_iterations}")
-            
+        for iteration in range(self.max_iterations):            
             # Evaluate current poem
             evaluated_poem = self.evaluator.evaluate_poem(
                 current_poem, 
@@ -173,7 +171,6 @@ class RefinerChain(Node):
             if hasattr(self, 'context') and self.context.get('harmony_capture_enabled', False):
                 from poet.logging.capture_middleware import capture_component
                 refiner = capture_component(refiner, refiner_name)
-                self.logger.info(f"Wrapped {refiner_name} with capture middleware")
             
             return refiner
             
@@ -236,12 +233,9 @@ class RefinerChain(Node):
             else:
                 refiner_config = self.config.get('refiners', ['prosody_refiner', 'qafiya_refiner', 'line_count_refiner', 'tashkeel_refiner'])
             
-            self.logger.info(f"Creating refiners from config: {refiner_config}")
-            
             # Create refiner instances based on configuration
             self.refiners = []
             for refiner_name in refiner_config:
-                self.logger.info(f"Creating refiner: {refiner_name}")
                 refiner = self._create_refiner(refiner_name, context)
                 if refiner:
                     self.logger.info(f"Successfully created refiner: {refiner_name}, type: {type(refiner)}")
@@ -288,7 +282,6 @@ class RefinerChain(Node):
         refiners_used = []
         
         for iteration in range(self.max_iterations):
-            self.logger.info(f"Starting refinement iteration {iteration + 1}/{self.max_iterations}")
             
             # Check if poem already has quality assessment or need to evaluate
             if hasattr(current_poem, 'quality') and current_poem.quality:

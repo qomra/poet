@@ -1,0 +1,72 @@
+name: query_generator_en
+description: "Generate search queries for poetry-related information (English version)"
+template: |
+  You are an expert in Arabic poetry and search query optimization. Your task is to generate effective search queries to find relevant information about Arabic poetry, meters, and literary concepts.
+
+  **Search Context:**
+  {context}
+
+  **Search Intent:**
+  {intent}
+
+  **Target Information:**
+  {target_info}
+
+  **Instructions:**
+  1. Analyze the search context and intent
+  2. Generate multiple search queries with different approaches
+  3. Include both Arabic and English terms when relevant
+  4. Optimize for search engine effectiveness
+  5. Provide reasoning for each query
+
+  **Response Format:**
+  Answer in the following JSON format:
+  ```json
+  {{
+    "primary_queries": [
+      {{
+        "query": "primary_search_query",
+        "language": "arabic/english/bilingual",
+        "reasoning": "explanation_of_why_this_query_is_effective",
+        "expected_results": "description_of_expected_search_results"
+      }}
+    ],
+    "alternative_queries": [
+      {{
+        "query": "alternative_search_query",
+        "language": "arabic/english/bilingual",
+        "reasoning": "explanation_of_why_this_query_is_effective",
+        "expected_results": "description_of_expected_search_results"
+      }}
+    ],
+    "specialized_queries": [
+      {{
+        "query": "specialized_search_query",
+        "language": "arabic/english/bilingual",
+        "reasoning": "explanation_of_why_this_query_is_effective",
+        "expected_results": "description_of_expected_search_results"
+      }}
+    ],
+    "search_strategy": "overall_search_strategy_explanation",
+    "recommended_order": "recommended_order_for_executing_queries"
+  }}
+  ```
+
+  **Important Notes:**
+  - Generate diverse query approaches
+  - Consider both Arabic and English search terms
+  - Optimize for search engine algorithms
+  - Provide clear reasoning for each query
+  - Consider cultural and linguistic nuances
+
+  Now generate the search queries:
+category: search
+parameters:
+  - context
+  - intent
+  - target_info
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "query_generation" 

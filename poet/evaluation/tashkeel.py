@@ -1,12 +1,12 @@
-# poet/evaluation/qafiya_evaluator.py
+# poet/evaluation/tashkeel.py
 
-import json
 import logging
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from poet.models.poem import LLMPoem
-from poet.models.tashkeel import TashkeelValidationResult, TashkeelBaitResult
+from poet.prompts import get_global_prompt_manager
 from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
+from poet.core.node import Node
+from poet.models.tashkeel import TashkeelValidationResult, TashkeelBaitResult
 
 class TashkeelValidationError(Exception):
     """Raised when qafiya validation fails"""
@@ -21,9 +21,9 @@ class TashkeelEvaluator:
     and identifies any misapplied diacritics.
     """
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None):
+    def __init__(self, llm: BaseLLM, **kwargs):
         self.llm = llm
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
     

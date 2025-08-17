@@ -49,6 +49,17 @@ class GroqAdapter(BaseLLM):
             # Prepare messages
             messages = [{"role": "user", "content": prompt}]
             
+            # # Log the input prompt for debugging
+            # self.logger.info(f"=== GROQ INPUT PROMPT ===")
+            # self.logger.info(f"Model: {params['model']}")
+            # self.logger.info(f"Temperature: {kwargs.get('temperature', 'default')}")
+            # self.logger.info(f"Max Tokens: {kwargs.get('max_tokens', 'default')}")
+            # self.logger.info(f"Prompt Length: {len(prompt)} characters")
+            # self.logger.info(f"Prompt Preview: {prompt[:200]}...")
+            # self.logger.info(f"Full Prompt:")
+            # self.logger.info(prompt)
+            # self.logger.info(f"=== END INPUT PROMPT ===")
+            
             # Make API call
             self.logger.debug(f"Making Groq API call with model: {params['model']}")
             start_time = time.time()
@@ -83,6 +94,14 @@ class GroqAdapter(BaseLLM):
             # Extract response data
             choice = response.choices[0]
             content = choice.message.content
+            
+            # Log the output response for debugging
+            # self.logger.info(f"=== GROQ OUTPUT RESPONSE ===")
+            # self.logger.info(f"Response Length: {len(content)} characters")
+            # self.logger.info(f"Response Preview: {content[:200]}...")
+            # self.logger.info(f"Full Response:")
+            # self.logger.info(content)
+            # self.logger.info(f"=== END OUTPUT RESPONSE ===")
             
             # Build usage info
             usage = None

@@ -3,7 +3,7 @@ import json
 from typing import Dict, List, Optional, Any
 from poet.models.poem import LLMPoem
 from poet.models.prosody import ProsodyValidationResult, BaitValidationResult
-from poet.prompts.prompt_manager import PromptManager
+from poet.prompts import get_global_prompt_manager
 from poet.llm.base_llm import BaseLLM
 from poet.utils.bohour.arudi_style import get_arudi_style
 
@@ -97,7 +97,7 @@ class ProsodyEvaluator:
     
     def __init__(self, llm_provider: Optional[BaseLLM] = None):
         """Initialize ProsodyEvaluator"""
-        self.prompt_manager = PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.llm = llm_provider
     
     def validate_poem(self, poem: LLMPoem, bahr: str) -> LLMPoem:

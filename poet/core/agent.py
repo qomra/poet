@@ -5,6 +5,7 @@ import logging
 from .pipeline import PipelineBuilder, PipelineEngine
 from .node import Node
 from pathlib import Path
+from poet.prompts import get_global_prompt_manager
 
 
 class DynamicAgent:
@@ -18,7 +19,8 @@ class DynamicAgent:
     def __init__(self, config: Dict[str, Any], llm, prompt_manager=None):
         self.config = config
         self.llm = llm
-        self.prompt_manager = prompt_manager
+        # Use global prompt manager instead of instance-specific one
+        self.prompt_manager = get_global_prompt_manager()
         self.logger = logging.getLogger(self.__class__.__name__)
         
         # Create pipeline builder and register all available nodes
@@ -127,6 +129,7 @@ class DynamicAgent:
                 self.logger.info("Completing harmony capture and generating reasoning")
                 harmony_config = self.config.get("agent", {}).get("compilers", {}).get("harmony", {})
                 output_dir = Path(harmony_config.get("output_dir", "outputs/harmony"))
+                save_output = harmony_config.get("save_output", True)
                 
                 # Get final poem and quality assessment from result
                 final_poem = result.get('poem')
@@ -136,12 +139,19 @@ class DynamicAgent:
                     llm=self.llm,
                     final_poem=final_poem,
                     quality_assessment=quality_assessment,
-                    output_dir=output_dir
+                    output_dir=output_dir if save_output else None
                 )
                 
                 if harmony_reasoning:
-                    result['harmony_reasoning'] = harmony_reasoning
-                    self.logger.info(f"Harmony reasoning generated and saved to {output_dir}")
+                    # Store both structured data and conversation string
+                    result['harmony_reasoning'] = harmony_reasoning.get('conversation_string', '')
+                    result['harmony_structured_data'] = harmony_reasoning.get('structured_data', {})
+                    result['harmony_execution_id'] = harmony_reasoning.get('execution_id', '')
+                    
+                    if save_output:
+                        self.logger.info(f"Harmony reasoning generated and saved to {output_dir}")
+                    else:
+                        self.logger.info("Harmony reasoning generated (not saved to files)")
                 else:
                     self.logger.warning("Failed to generate harmony reasoning")
             
@@ -155,12 +165,13 @@ class DynamicAgent:
                     from poet.logging.integration import HarmonyIntegration
                     harmony_config = self.config.get("agent", {}).get("compilers", {}).get("harmony", {})
                     output_dir = Path(harmony_config.get("output_dir", "outputs/harmony"))
+                    save_output = harmony_config.get("save_output", True)
                     
                     HarmonyIntegration.complete_and_reason(
                         llm=self.llm,
                         final_poem=None,
                         quality_assessment={'error': str(e)},
-                        output_dir=output_dir
+                        output_dir=output_dir if save_output else None
                     )
                 except Exception as harmony_error:
                     self.logger.error(f"Failed to complete harmony capture on error: {harmony_error}")

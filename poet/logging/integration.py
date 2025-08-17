@@ -31,17 +31,22 @@ class HarmonyIntegration:
     def start_captured_execution(user_prompt: str, constraints: Dict[str, Any] = None):
         """Start a new captured execution"""
         capture = get_capture()
+        
+        # Convert Constraints object to dict if needed
+        if constraints is not None and hasattr(constraints, 'to_dict'):
+            constraints = constraints.to_dict()
+        
         return capture.start_execution(user_prompt, constraints)
     
     @staticmethod
     def complete_and_reason(llm: BaseLLM, final_poem: Any = None, 
                            quality_assessment: Any = None,
-                           output_dir: Path = None) -> str:
+                           output_dir: Path = None) -> Dict[str, Any]:
         """
         Complete execution and generate Harmony reasoning
         
         Returns:
-            Generated Harmony-formatted reasoning
+            Dictionary containing both structured data and conversation string
         """
         capture = get_capture()
         capture.complete_execution(final_poem, quality_assessment)
@@ -49,7 +54,7 @@ class HarmonyIntegration:
         # Get the execution data
         execution = capture.get_execution()
         if not execution:
-            return ""
+            return {}
         
         # Save raw execution data
         if output_dir:
@@ -60,7 +65,11 @@ class HarmonyIntegration:
         # Generate structured Harmony data
         reasoner = HarmonyCompiler(llm)
         try:
-            structured_data = reasoner.generate_structured_harmony(execution)
+            # Serialize the execution object to ensure all Constraints objects are converted to dictionaries
+            execution_dict = execution.to_dict()
+            structured_data = reasoner.generate_structured_harmony(execution_dict)
+            
+            # Save structured data
             if output_dir:
                 structured_file = output_dir / f"{execution.execution_id}_structured.json"
                 import json
@@ -74,8 +83,14 @@ class HarmonyIntegration:
                 harmony_file = output_dir / f"{execution.execution_id}_harmony.txt"
                 reasoner.save_harmony_reasoning(str(conversation), harmony_file)
             
-            return str(conversation)
+            # Return both structured data and conversation string
+            return {
+                'structured_data': structured_data,
+                'conversation_string': str(conversation),
+                'execution_id': execution.execution_id
+            }
+            
         except Exception as e:
             print(f"Warning: Failed to generate harmony data: {e}")
-            return ""
+            return {}
 

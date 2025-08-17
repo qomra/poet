@@ -1,0 +1,83 @@
+name: qafiya_refinement_en
+description: "Analyzes and corrects qafiya (rhyme scheme) violations in an Arabic poetry verse while preserving its original meter and meaning (English version)"
+template: |
+  ### Primary Task
+  As an expert in Arabic qafiya (rhyme), your task is to **fix the qafiya of a poetic verse** that has a defect, while **assuming its prosodic meter is correct** and focusing only on achieving the required rhyme.
+
+  ---
+
+  ### 1. Target Standards for Fixing (Objective)
+  - **Poetic Meter (for context only):** {meter}
+  - **Prosodic Weight (for context only):** {meeter_tafeelat}
+  - **Required Qafiya:** {qafiya}
+  - **Required Qafiya Vowel:** {qafiya_harakah}
+  - **Target Qafiya Type:** {qafiya_type}
+  - **Qafiya Types Reference (mandatory):** {qafiya_type_description_and_examples}
+  - **Verse Theme:** {theme}
+  - **Poetic Tone:** {tone}
+
+  ---
+
+  ### 2: Current Poem Form
+  {entire_poem}
+
+  ### 3. Target Verse Requiring Analysis and Fixing (Problem)
+  - **Original Verse (containing qafiya defect):**
+  {bad_bait}
+  - **Problem Analysis:**
+  {context}
+
+  ---
+
+  ### 4. Basic Fixing Methodology (Mandatory Rules)
+  1.  **Sole Objective: Correct Qafiya:** The corrected verse must exactly match the **required qafiya vowel ({qafiya_harakah})** and **its type ({qafiya_type})**. This is your primary goal.
+  2. Look at other verses in the poem, especially those preceding the target verse that have correct qafiya, and unify the qafiya of the target verse with them. It's possible to achieve the required qafiya type in more than one way, but the qafiya must be unified with other verses.
+  3.  **Ignore Prosodic Weight:** **Do not attempt to fix the weight at all**. Assume it's correct and focus your modifications only on the end of the verse.
+  4.  **Creative Freedom in Formulation:** You have complete freedom to **reformulate the end of the verse** to achieve the correct qafiya. Don't commit to the original word form or its root. You can suggest completely new words (such as replacing "حُرَق" with "رفيق" or "طريق") as long as they serve the qafiya and meaning.
+  5.  **Preserve Essential Meaning:** Despite your freedom in formulation, you must maintain the basic idea and tone ({tone}) of the original verse. The goal is to find the perfect balance between correct qafiya and consistent meaning.
+  6. You must fix only the intended verse, not the rest of the verses.
+  ---
+
+  ### 5. Precise Diacritics Rules (Mandatory Compliance)
+  - Place sukoon (ْ) on the lam in (الْـ).
+  - Do not place a vowel on the shadda letter, only the shadda (مُحَمَّدٌ).
+  - Do not place any vowel on silent long vowels (ا، و، ي، ى).
+  - Apply vowels (َ، ِ، ُ) and tanween (ً، ٍ، ٌ) correctly grammatically.
+
+  ---
+
+  ### 6. Required Answer Format (JSON)
+  Answer **exclusively** in the following JSON format without any additional text outside it:
+  ```json
+  {{
+    "verses": [
+      "Corrected verse - first hemistich",
+      "Corrected verse - second hemistich"
+    ],
+    "explanation": "Brief explanation of the qafiya fixing process, clarifying how the required pattern was achieved.",
+    "original_qafiya": "Original qafiya",
+    "new_qafiya": "New qafiya",
+    "changes_made": "Applied changes, such as: 'Replaced word X with word Y to achieve the qafiya pattern /o.'"
+  }}
+
+  **CRITICAL: Return ONLY the JSON response. Do NOT include any explanatory text, analysis, or markdown before or after the JSON.**
+
+  Now apply the qafiya fixing methodology precisely to the specified verse and provide your answer in the required format:
+category: generation
+parameters:
+  - meter
+  - meeter_tafeelat
+  - qafiya
+  - qafiya_harakah
+  - qafiya_type
+  - qafiya_type_description_and_examples
+  - theme
+  - tone
+  - entire_poem
+  - bad_bait
+  - context
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "high"
+  purpose: "qafiya_fix" 

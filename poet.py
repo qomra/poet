@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from poet.core import Agent
 from poet.interface.cli_interface import CLIInterface
+from poet.interface.dataset_interface import DatasetInterface
 from poet.llm.llm_factory import get_real_llm_from_env
 from poet.llm.base_llm import LLMConfig
 from poet.llm.groq_adapter import GroqAdapter
@@ -98,7 +99,7 @@ def create_llm(config: Dict[str, Any]) -> Any:
         timeout=llm_config.get("timeout", 320)
     )
     
-    # Create appropriate adapter
+    # Create appropriate LLM adapter
     if provider == "groq":
         return GroqAdapter(llm_config_obj)
     elif provider == "openai":
@@ -106,24 +107,38 @@ def create_llm(config: Dict[str, Any]) -> Any:
     elif provider == "anthropic":
         return AnthropicAdapter(llm_config_obj)
     else:
-        print(f"Error: Unknown LLM provider: {provider}")
+        print(f"Error: Unsupported LLM provider: {provider}")
         sys.exit(1)
 
-def create_interface(config: Dict[str, Any], agent: Agent) -> CLIInterface:
+def create_interface(config: Dict[str, Any], agent: Agent) -> Any:
     """Create interface based on configuration."""
     interface_config = config.get("interface", {})
     interface_type = interface_config.get("type", "cli")
     
     if interface_type == "cli":
         return CLIInterface(agent)
+    elif interface_type == "dataset":
+        dataset_path = interface_config.get("dataset_path")
+        output_path = interface_config.get("output_path")
+        if not dataset_path or not output_path:
+            raise ValueError("Dataset interface requires dataset_path and output_path")
+        return DatasetInterface(agent, dataset_path, output_path)
     else:
-        print(f"Error: Unknown interface type: {interface_type}")
-        sys.exit(1)
+        raise ValueError(f"Unknown interface type: {interface_type}")
 
 def run_experiment(config: Dict[str, Any], user_prompt: str = None):
     """Run the poetry generation experiment."""
     print("🎭 Initializing Poet - Arabic Poetry Generation System")
     print("=" * 60)
+    
+    # Get language from config (default to Arabic)
+    language = config.get("language", "arabic")
+    print(f"🌍 Language: {language}")
+    
+    # Initialize global prompt manager with the specified language
+    from poet.prompts import initialize_global_prompt_manager
+    initialize_global_prompt_manager(default_language=language)
+    print(f"✅ Global prompt manager initialized with language: {language}")
     
     # Create LLM
     print("🤖 Creating LLM instance...")
@@ -177,6 +192,12 @@ Examples:
   # Run with config and user prompt
   python poet.py -c config/simple_generation_refinement.yaml -p "Write a poem about nature"
   
+  # Run with dataset processing
+  python poet.py -c config/simple_generation_refinement_dataset.yaml
+  
+  # Run with English prompts (specify in config file)
+  python poet.py -c config/simple_generation_refinement_english.yaml
+  
   # Run with default config
   python poet.py
         """
@@ -185,8 +206,8 @@ Examples:
     parser.add_argument(
         "-c", "--config",
         type=str,
-        default="config/simple_generation_refinement.yaml",
-        help="Path to configuration file (default: config/simple_generation_refinement.yaml)"
+        default="config/simple_generation_refinement_dataset.yaml",
+        help="Path to configuration file (default: config/simple_generation_refinement_dataset.yaml)"
     )
     
     parser.add_argument(

@@ -55,7 +55,6 @@ class PipelineEngine:
                 from poet.logging.capture_middleware import capture_component
                 # Wrap the node immediately after creation, before adding to pipeline
                 node = capture_component(node, node_class.__name__)
-                self.logger.info(f"Wrapped {node_class.__name__} with capture middleware")
             
             self.nodes.append(node)
             self.logger.info(f"Added node: {node.name}")

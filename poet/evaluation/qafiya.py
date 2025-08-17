@@ -1,13 +1,13 @@
-# poet/evaluation/qafiya_evaluator.py
+# poet/evaluation/qafiya.py
 
-import json
 import logging
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from poet.models.poem import LLMPoem
-from poet.models.qafiya import QafiyaBaitResult, QafiyaValidationResult
+from poet.prompts import get_global_prompt_manager
 from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
-
+from poet.core.node import Node
+from poet.models.qafiya import QafiyaBaitResult, QafiyaValidationResult
+import json
 
 
 class QafiyaValidationError(Exception):
@@ -23,9 +23,9 @@ class QafiyaEvaluator:
     and identifies any misaligned baits according to classical Arabic qafiya rules.
     """
     
-    def __init__(self, llm_provider: BaseLLM, prompt_manager: Optional[PromptManager] = None):
+    def __init__(self, llm_provider: BaseLLM, **kwargs):
         self.llm = llm_provider
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.logger = logging.getLogger(__name__)
     
     def evaluate_qafiya(self, poem: LLMPoem, expected_qafiya: Optional[str] = None, 

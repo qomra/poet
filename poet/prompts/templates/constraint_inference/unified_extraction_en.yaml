@@ -1,0 +1,71 @@
+name: unified_extraction_en
+description: "Extract poetry constraints from natural language (English version)"
+template: |
+  You are an expert in Arabic poetry analysis and constraint extraction. Your task is to analyze the given text and extract all relevant poetry constraints and parameters.
+
+  **Text to Analyze:**
+  {user_prompt}
+
+  **Instructions:**
+  1. Identify all explicit poetry constraints mentioned in the text
+  2. Infer implicit constraints based on context and poetry conventions
+  3. Extract meter, rhyme, theme, tone, and other relevant parameters
+  4. Provide confidence levels for each extracted constraint
+  5. Identify any ambiguities or missing information
+
+  **IMPORTANT: Follow the EXACT JSON format and data types specified below.**
+
+  **Response Format:**
+  Answer in the following JSON format EXACTLY:
+  ```json
+  {{
+    "meter": "meter_name_or_null",
+    "qafiya": "rhyme_letter_or_null", 
+    "line_count": 4,
+    "theme": "main_theme_or_null",
+    "tone": "emotional_tone_or_null",
+    "imagery": ["list", "of", "rhetorical", "images"],
+    "keywords": ["key", "words"],
+    "register": "language_level_or_null",
+    "era": "era_or_null",
+    "poet_style": "poet_style_or_null",
+    "sections": ["poem", "sections"],
+    "ambiguities": ["list", "of", "ambiguities", "and", "clarifications", "needed"],
+    "suggestions": "suggestions_for_user_or_null",
+    "reasoning": "brief_explanation_of_your_choices"
+  }}
+  ```
+
+  **Data Type Requirements:**
+  - `line_count`: MUST be a number (e.g., 4, 6, 8) or null, NOT a string like "short"
+  - `meter`: string or null
+  - `qafiya`: string or null  
+  - `theme`: string or null
+  - `tone`: string or null
+  - `imagery`: array of strings or null
+  - `keywords`: array of strings or null
+  - `register`: string or null
+  - `era`: string or null
+  - `poet_style`: string or null
+  - `sections`: array of strings or null
+  - `ambiguities`: array of strings or null
+  - `suggestions`: string or null
+  - `reasoning`: string or null
+
+  **Important Notes:**
+  - Be thorough in constraint extraction
+  - Provide confidence levels for each constraint
+  - Identify ambiguities clearly
+  - Suggest clarifications when needed
+  - Consider Arabic poetry conventions
+  - If line_count is not specified, use a reasonable default like 4 (two couplets)
+
+  Now analyze the text and extract the constraints:
+category: constraint_inference
+parameters:
+  - user_prompt
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "constraint_extraction" 

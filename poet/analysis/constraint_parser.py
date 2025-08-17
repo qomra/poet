@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Optional, Dict, Any
 from poet.models.constraints import Constraints
-from poet.prompts.prompt_manager import PromptManager
+from poet.prompts import get_global_prompt_manager
 from poet.llm.base_llm import BaseLLM
 from poet.core.node import Node
 
@@ -23,10 +23,11 @@ class ConstraintParser(Node):
     clarification requests when needed.
     """
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+    def __init__(self, llm: BaseLLM, **kwargs):
         super().__init__(**kwargs)
         self.llm = llm
-        self.prompt_manager = prompt_manager or PromptManager()
+        # Use global prompt manager instead of creating new instance
+        self.prompt_manager = get_global_prompt_manager()
     
     def parse_constraints(self, user_prompt: str) -> Constraints:
         """
@@ -69,26 +70,58 @@ class ConstraintParser(Node):
     
     def _parse_llm_response(self, response: str) -> Dict[str, Any]:
         """
-        Parse the structured JSON response from the LLM.
+        Parse LLM response to extract JSON constraints.
         
         Args:
-            response: Raw LLM response containing JSON
+            response: Raw LLM response
             
         Returns:
-            Parsed constraints dictionary
+            Parsed constraints data
             
         Raises:
             ConstraintParsingError: If JSON parsing fails
         """
         try:
-            # Extract JSON from response (handle markdown code blocks)
-            json_start = response.find('{')
-            json_end = response.rfind('}') + 1
+            # Look for JSON code blocks first (most reliable)
+            import re
             
-            if json_start == -1 or json_end == 0:
-                raise ValueError("No JSON found in response")
+            # Pattern to match JSON code blocks
+            json_block_pattern = r'```(?:json)?\s*\n(.*?)\n```'
+            json_blocks = re.findall(json_block_pattern, response, re.DOTALL)
             
-            json_str = response[json_start:json_end]
+            if json_blocks:
+                # Use the first JSON block found
+                json_str = json_blocks[0].strip()
+                self.logger.debug(f"Found JSON in code block: {json_str[:100]}...")
+            else:
+                # Fallback: extract JSON from response (handle markdown code blocks)
+                json_start = response.find('{')
+                json_end = response.rfind('}') + 1
+                
+                if json_start == -1 or json_end == 0:
+                    raise ValueError("No JSON found in response")
+                
+                json_str = response[json_start:json_end]
+                self.logger.debug(f"Extracted JSON from response: {json_str[:100]}...")
+            
+            # Clean up the JSON string
+            json_str = json_str.strip()
+            
+            # Remove any trailing text after the JSON
+            # Find the last complete JSON object
+            brace_count = 0
+            last_complete_end = -1
+            
+            for i, char in enumerate(json_str):
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        last_complete_end = i + 1
+            
+            if last_complete_end > 0:
+                json_str = json_str[:last_complete_end]
             
             # Parse JSON
             data = json.loads(json_str)
@@ -100,6 +133,7 @@ class ConstraintParser(Node):
             
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse JSON response: {e}")
+            self.logger.error(f"Raw JSON string: {json_str}")
             raise ConstraintParsingError(f"Invalid JSON response: {e}")
         except ValueError as e:
             self.logger.error(f"Invalid response format: {e}")
@@ -264,7 +298,7 @@ class ConstraintParser(Node):
         """
         # Set up context
         self.llm = context.get('llm')
-        self.prompt_manager = context.get('prompt_manager') or PromptManager()
+        self.prompt_manager = context.get('prompt_manager') or get_global_prompt_manager()
         
         if not self.llm:
             raise ValueError("LLM not provided in context")

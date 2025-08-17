@@ -1,12 +1,12 @@
-# poet/planning/qafiya_selector.py
+# poet/analysis/qafiya_selector.py
 
-import json
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from poet.models.constraints import Constraints, QafiyaType, QafiyaTypeDescriptionAndExamples
-from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
+from poet.prompts import get_global_prompt_manager
+from poet.llm.base_llm import BaseLLM   
 from poet.core.node import Node
+import json
 
 
 
@@ -23,10 +23,10 @@ class QafiyaSelector(Node):
     qafiya letter, harakah, type, and pattern for the requested poem.
     """
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+    def __init__(self, llm: BaseLLM, **kwargs):
         super().__init__(**kwargs)
         self.llm = llm
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
     
     def select_qafiya(self, constraints: Constraints, original_prompt: str) -> Constraints:
         """
@@ -106,6 +106,7 @@ class QafiyaSelector(Node):
                 existing_type_description_and_examples=constraints.qafiya_type_description_and_examples or "غير محدد",
                 missing_components=", ".join(missing_components)
             )
+            
             # Get LLM response
             response = self.llm.generate(formatted_prompt)
 

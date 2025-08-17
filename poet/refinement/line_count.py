@@ -1,22 +1,22 @@
-# poet/refinement/line_count_refiner.py
+# poet/refinement/line_count.py
 
 import logging
-from typing import List, Optional, Dict, Any
-from poet.refinement.base import BaseRefiner
+from typing import Optional, Dict, Any, List
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
-from poet.models.quality import QualityAssessment
+from poet.prompts import get_global_prompt_manager
 from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
+from poet.core.node import Node
+from poet.models.quality import QualityAssessment
 
 
-class LineCountRefiner(BaseRefiner):
-    """Fixes poems with incorrect number of lines"""
+class LineCountRefiner(Node):
+    """Fixes poems with incorrect number of lines"""    
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+    def __init__(self, llm: BaseLLM, **kwargs):
         super().__init__(**kwargs)
         self.llm = llm
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.logger.setLevel(logging.INFO)
     
     @property

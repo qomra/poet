@@ -67,6 +67,14 @@ class CapturedCall:
             if hasattr(value, '__class__') and 'logging' in str(value.__class__.__module__):
                 return f"<logging_object: {type(value).__name__}>"
             
+            # Handle Constraints objects specifically
+            if hasattr(value, '__class__') and 'Constraints' in str(value.__class__.__name__):
+                if hasattr(value, 'to_dict'):
+                    result = value.to_dict()
+                    return result
+                else:
+                    return str(value)
+            
             if hasattr(value, 'to_dict'):
                 return value.to_dict()
             elif hasattr(value, '__dict__'):
@@ -79,6 +87,7 @@ class CapturedCall:
             else:
                 return value
         except Exception as e:
+            print(f"❌ CapturedCall: Error serializing {type(value).__name__}: {str(e)}")
             return f"<serialization_error: {str(e)}>"
 
 @dataclass
@@ -120,11 +129,12 @@ class PipelineExecution:
         self.quality_assessment = quality_assessment
     
     def to_dict(self) -> Dict[str, Any]:
+            
         return {
             "execution_id": self.execution_id,
             "started_at": self.started_at.isoformat(),
             "user_prompt": self.user_prompt,
-            "initial_constraints": self.initial_constraints,
+            "initial_constraints": self._serialize_value(self.initial_constraints),
             "calls": [call.to_dict() for call in self.calls],
             "final_poem": self._serialize_value(self.final_poem),
             "quality_assessment": self._serialize_value(self.quality_assessment),
@@ -207,7 +217,6 @@ class ExecutionCapture:
         finally:
             call.duration_ms = int((datetime.now() - start_time).total_seconds() * 1000)
             self.current_execution.add_call(call)
-            print(f"🔍 Added call to execution: {component_name}.{method_name} (total calls: {len(self.current_execution.calls)})")
             self.current_call = None
     
     def capture_llm_details(self, provider: str, model: str, 
@@ -244,13 +253,41 @@ class ExecutionCapture:
         for i, call in enumerate(self.current_execution.calls):
             print(f"  Call {i+1}: {call.component_name}.{call.method_name}")
         
-        json_str = json.dumps(self.current_execution.to_dict(), 
-                             indent=2, ensure_ascii=False)
+        # Debug: Check what's in the execution data
+        execution_dict = self.current_execution.to_dict()
+        print(f"🔍 Execution dict keys: {list(execution_dict.keys())}")
         
-        if output_file:
-            output_file.write_text(json_str, encoding='utf-8')
+        # Check for Constraints objects in the data
+        def find_constraints_objects(obj, path=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    current_path = f"{path}.{k}" if path else k
+                    if hasattr(v, '__class__') and 'Constraints' in str(v.__class__):
+                        print(f"❌ Found Constraints object at {current_path}: {type(v)}")
+                    elif isinstance(v, (dict, list)):
+                        find_constraints_objects(v, current_path)
+            elif isinstance(obj, list):
+                for i, v in enumerate(obj):
+                    current_path = f"{path}[{i}]"
+                    if hasattr(v, '__class__') and 'Constraints' in str(v.__class__):
+                        print(f"❌ Found Constraints object at {current_path}: {type(v)}")
+                    elif isinstance(v, (dict, list)):
+                        find_constraints_objects(v, current_path)
         
-        return json_str
+        print("🔍 Searching for Constraints objects in execution data...")
+        find_constraints_objects(execution_dict)
+        
+        try:
+            json_str = json.dumps(execution_dict, 
+                                 indent=2, ensure_ascii=False)
+            return json_str
+        except Exception as e:
+            print(f"❌ Failed to serialize execution to JSON: {e}")
+            print(f"❌ Error type: {type(e)}")
+            # Try to identify the problematic object
+            import traceback
+            traceback.print_exc()
+            return f"{{'error': 'Serialization failed: {str(e)}'}}"
 
 # Global capture instance (singleton)
 _capture = ExecutionCapture()

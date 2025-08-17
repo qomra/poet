@@ -10,7 +10,8 @@ from poet.models.constraints import Constraints
 from poet.models.search import SearchQuery, QueryGenerationResult, EvaluatedResult, ResultEvaluationResult
 from poet.data.search_provider import SearchProviderFactory, SearchResult
 from poet.data.corpus_manager import CorpusManager, PoemRecord, SearchCriteria
-from poet.prompts.prompt_manager import PromptManager
+from poet.prompts import get_global_prompt_manager
+from poet.core.node import Node 
 
 
 @dataclass
@@ -54,7 +55,7 @@ class WebKnowledgeRetriever(KnowledgeRetriever):
         super().__init__()
         self.llm = llm_provider
         self.search_provider = SearchProviderFactory.create_provider(search_provider_type, search_provider_config)
-        self.prompt_manager = PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.logger = logging.getLogger(__name__)
     
     def search(self, constraints: Constraints, 

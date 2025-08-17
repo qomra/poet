@@ -69,9 +69,7 @@ class PoemEvaluator(Node):
         """
         # Ensure validators are initialized
         self._ensure_validators_initialized()
-        
-        logger.info(f"Starting poem evaluation with {len(evaluations)} evaluation types")
-        
+                
         # Initialize quality components
         line_count_issues = []
         prosody_issues = []

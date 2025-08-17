@@ -1,0 +1,81 @@
+name: prosody_refinement_en
+description: "Refine Arabic poem prosody and meter (English version)"
+template: |
+  You are an expert in Arabic prosody (عروض) and poetry refinement. Your task is to fix the prosody violations in the given Arabic poem.
+
+  **Poem to Refine:**
+  {existing_verses}
+
+  **Expected Meter:**
+  {meter}
+
+  **Meter Pattern (Taf'eelat):**
+  {meeter_tafeelat}
+
+  **Expected Rhyme:**
+  {qafiya}
+
+  **Rhyme Type:**
+  {qafiya_type}
+
+  **Rhyme Type Description and Examples:**
+  {qafiya_type_description_and_examples}
+
+  **Rhyme Vowel:**
+  {qafiya_harakah}
+
+  **Theme:**
+  {theme}
+
+  **Tone:**
+  {tone}
+
+  **Context:**
+  {context}
+
+  **Instructions:**
+  1. Analyze the prosody violations in the existing verses
+  2. Fix the meter to follow the expected pattern
+  3. Maintain the same meaning and theme
+  4. Ensure proper rhyme consistency
+  5. Apply correct Arabic diacritics
+
+  **Response Format:**
+  Answer in the following JSON format:
+  ```json
+  {{
+    "verses": [
+      "refined_first_verse",
+      "refined_second_verse"
+    ],
+    "changes_made": "description_of_prosody_fixes",
+    "meter_compliance": "explanation_of_meter_fixes",
+    "rhyme_compliance": "explanation_of_rhyme_fixes"
+  }}
+  ```
+
+  **Important Notes:**
+  - Maintain the original meaning and theme
+  - Fix only the prosody violations
+  - Ensure the meter follows the expected pattern
+  - Keep the rhyme consistent
+  - Apply proper diacritics
+
+  Now refine the poem's prosody:
+category: refinement
+parameters:
+  - existing_verses
+  - meter
+  - meeter_tafeelat
+  - qafiya
+  - qafiya_type
+  - qafiya_type_description_and_examples
+  - qafiya_harakah
+  - theme
+  - tone
+  - context
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "prosody_refinement" 

@@ -1,16 +1,16 @@
-# poet/refinement/tashkeel_refiner.py
+# poet/refinement/tashkeel.py
 
 import logging
-from poet.refinement.base import BaseRefiner
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from poet.models.poem import LLMPoem
-from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
-from poet.models.quality import QualityAssessment
 from poet.models.constraints import Constraints
+from poet.prompts import get_global_prompt_manager
+from poet.llm.base_llm import BaseLLM
+from poet.core.node import Node
+from poet.models.quality import QualityAssessment
 
 
-class TashkeelRefiner(BaseRefiner):
+class TashkeelRefiner(Node):
     """
     Applies Arabic diacritics (tashkeel) to poem verses using LLM.
     
@@ -18,10 +18,10 @@ class TashkeelRefiner(BaseRefiner):
     which are essential for prosody and qafiya validation.
     """
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+    def __init__(self, llm: BaseLLM, **kwargs):
         super().__init__(**kwargs)
         self.llm = llm
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.logger.setLevel(logging.INFO)
     
     @property

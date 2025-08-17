@@ -59,7 +59,6 @@ class CaptureMiddleware:
         """Wrap synchronous method with capture"""
         @functools.wraps(method)
         def wrapper(*args, **kwargs):
-            print(f"🔍 CaptureMiddleware: Intercepting {self.component_name}.{method_name}")
             with self.capture.capture_call(
                 component_name=self.component_name,
                 method_name=method_name,
@@ -76,7 +75,6 @@ class CaptureMiddleware:
         """Wrap asynchronous method with capture"""
         @functools.wraps(method)
         async def wrapper(*args, **kwargs):
-            print(f"🔍 CaptureMiddleware: Intercepting {self.component_name}.{method_name} (async)")
             with self.capture.capture_call(
                 component_name=self.component_name,
                 method_name=method_name,

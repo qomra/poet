@@ -5,7 +5,7 @@ import logging
 from typing import Optional, Dict, Any, List
 from poet.models.constraints import Constraints
 from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
+from poet.prompts import get_global_prompt_manager
 from poet.data.bohour_meters import BohourMetersManager
 from poet.core.node import Node
 
@@ -24,10 +24,10 @@ class BahrSelector(Node):
     bahr name, format it correctly, and suggest sub-bahrs if applicable.
     """
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+    def __init__(self, llm: BaseLLM, **kwargs):
         super().__init__(**kwargs)
         self.llm = llm
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.meters_manager = BohourMetersManager()
     
     def select_bahr(self, constraints: Constraints, original_prompt: str) -> Constraints:

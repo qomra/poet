@@ -1,0 +1,64 @@
+name: tashkeel_refinement_en
+description: "Refine Arabic poem diacritics (tashkeel) (English version)"
+template: |
+  You are an expert in Arabic poetry and diacritics (tashkeel) refinement. Your task is to fix the diacritics in the given Arabic poem.
+
+  **Poem to Refine:**
+  {existing_verses}
+
+  **Theme:**
+  {theme}
+
+  **Tone:**
+  {tone}
+
+  **Context:**
+  {context}
+
+  **Instructions:**
+  1. Analyze the diacritics in the existing verses
+  2. Fix any missing or incorrect diacritics
+  3. Maintain the same meaning and theme
+  4. Ensure proper meter and rhyme consistency
+  5. Apply correct Arabic diacritics
+
+  **Response Format:**
+  Answer in the following JSON format:
+  ```json
+  {{
+    "verses": [
+      "refined_first_verse",
+      "refined_second_verse"
+    ],
+    "changes_made": "description_of_diacritics_fixes",
+    "diacritics_compliance": "explanation_of_diacritics_fixes",
+    "meaning_preserved": "explanation_of_meaning_preservation"
+  }}
+  ```
+
+  **Diacritics Rules:**
+  - Place sukoon (ْ) on the lam in al- (الْقَلْبِ)
+  - Do not place vowel on shadda, shadda only (مُحَمَّدٌ)
+  - Do not place anything on silent long vowels (ا، و، ي، ى)
+  - Apply appropriate vowels (َ، ِ، ُ) according to grammatical rules
+  - Apply tanween (ً، ٍ، ٌ) where required
+
+  **Important Notes:**
+  - Maintain the original meaning and theme
+  - Fix only the diacritics issues
+  - Ensure the meter and rhyme remain consistent
+  - Apply proper diacritics according to rules
+  - Preserve the poetic structure
+
+  Now refine the poem's diacritics:
+category: refinement
+parameters:
+  - existing_verses
+  - theme
+  - tone
+  - context
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "diacritics_refinement" 

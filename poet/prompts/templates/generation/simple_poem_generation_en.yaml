@@ -1,0 +1,57 @@
+name: simple_poem_generation_en
+description: "Generate simple Arabic poetry following specified prosody constraints (English version)"
+template: |
+  You are an expert Arabic poet proficient in prosody and rhyme. Your task is to create a simple Arabic poem that follows the specified constraints with Arabic diacritics.
+  
+  **Required Constraints:**
+  - Meter: {meter}
+  - Rhyme: {qafiya}
+  - Number of couplets: {line_count} (each couplet contains two hemistichs)
+  
+  **Important Instructions:**
+  - Focus on adhering to the specified meter and rhyme
+  - Use classical Arabic language
+  - Ensure each couplet follows the same meter
+  - Ensure all couplets end with the same rhyme
+  - Apply Arabic diacritics to all verses
+  - Ensure the required number of couplets is {line_count} (i.e., {verse_count} hemistichs)
+  - Each couplet must contain two hemistichs (first and second)
+  
+  **CRITICAL: Return ONLY the JSON response. Do NOT include any explanatory text, analysis, or markdown before or after the JSON.**
+  
+  **Required Response Format:**
+  Answer in the following format exactly:
+  ```json
+  {{
+    "verses": [
+      "قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ",
+      "بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ",
+      "فَتُوْضِحَ فَالْمِقْرَاةِ لَمْ يَعْفُ رَسْمُهَا",
+      "لِمَا نَسَجَتْهَا مِنْ جَنُوبٍ وَشَمْأَلِ"
+    ]
+  }}
+  ```
+  
+  **Important Note:** If you are asked for one couplet, you must provide two hemistichs (first and second). If you are asked for two couplets, you must provide four hemistichs, and so on.
+  
+  **REMEMBER: Return ONLY the JSON object, nothing else. No explanations, no analysis, no additional text.**
+  
+  **Required Diacritics Rules:**
+  - Place sukoon (ْ) on the lam in al- (الْقَلْبِ)
+  - Do not place vowel on shadda, shadda only (مُحَمَّدٌ)
+  - Do not place anything on silent long vowels (ا، و، ي، ى)
+  - Apply appropriate vowels (َ، ِ، ُ) according to grammatical rules and context
+  - Apply tanween (ً، ٍ، ٌ) where required
+  
+  Now create the required poem:
+category: generation
+parameters:
+  - meter
+  - qafiya
+  - line_count
+  - verse_count
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "prosody_compliance" 

@@ -1,22 +1,22 @@
-# poet/refinement/prosody_refiner.py
+# poet/refinement/prosody.py
 
 import logging
-from typing import List, Optional, Dict, Any
-from poet.refinement.base import BaseRefiner
+from typing import Optional, Dict, Any, List
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
-from poet.models.quality import QualityAssessment
+from poet.prompts import get_global_prompt_manager
 from poet.llm.base_llm import BaseLLM
-from poet.prompts.prompt_manager import PromptManager
+from poet.core.node import Node
+from poet.models.quality import QualityAssessment
 
 
-class ProsodyRefiner(BaseRefiner):
+class ProsodyRefiner(Node):
     """Fixes meter violations in verses"""
     
-    def __init__(self, llm: BaseLLM, prompt_manager: Optional[PromptManager] = None, **kwargs):
+    def __init__(self, llm: BaseLLM, **kwargs):
         super().__init__(**kwargs)
         self.llm = llm
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_global_prompt_manager()
         self.logger.setLevel(logging.INFO)
     
     @property
@@ -115,28 +115,54 @@ class ProsodyRefiner(BaseRefiner):
     def _parse_verses_from_response(self, response: str) -> List[str]:
         """Parse verses from LLM response"""
         try:
-            # Extract JSON from response
+            # Debug: Log the raw response
+            self.logger.debug(f"Raw LLM response: {response[:500]}...")
+            
+            # Extract JSON from response using robust parsing
             import json
-            json_start = response.find('{')
-            json_end = response.rfind('}') + 1
+            import re
             
-            if json_start == -1 or json_end == 0:
-                # Fallback: split by newlines
-                return [line.strip() for line in response.split('\n') if line.strip()]
+            # First try to find JSON code blocks (most reliable)
+            json_block_pattern = r'```(?:json)?\s*\n(.*?)\n```'
+            json_blocks = re.findall(json_block_pattern, response, re.DOTALL)
             
-            json_str = response[json_start:json_end]
+            if json_blocks:
+                # Use the first JSON block found
+                json_str = json_blocks[0]
+                self.logger.debug(f"Found JSON in code block: {json_str[:200]}...")
+            else:
+                # Fallback: find first { and last } if no code block
+                json_start = response.find('{')
+                json_end = response.rfind('}') + 1
+                
+                if json_start == -1 or json_end == 0 or json_end <= json_start:
+                    self.logger.warning("No JSON found in response, falling back to line splitting")
+                    # No valid JSON found, fallback to line splitting
+                    return [line.strip() for line in response.split('\n') if line.strip()]
+                
+                json_str = response[json_start:json_end]
+                self.logger.debug(f"Extracted JSON from response: {json_str[:200]}...")
+            
+            # Parse the JSON
             data = json.loads(json_str)
             
             if 'verses' in data:
+                self.logger.debug(f"Successfully parsed {len(data['verses'])} verses from JSON")
                 return data['verses']
             else:
+                self.logger.warning("JSON parsed but no 'verses' field found")
                 # Fallback: split by newlines
                 return [line.strip() for line in response.split('\n') if line.strip()]
                 
+        except json.JSONDecodeError as e:
+            self.logger.error(f"JSON decode error: {e}")
+            self.logger.error(f"Attempted to parse: {json_str[:200] if 'json_str' in locals() else 'N/A'}")
+            # Fallback: split by newlines
+            return [line.strip() for line in response.split('\n') if line.strip()]
         except Exception as e:
             self.logger.error(f"Failed to parse verses from response: {e}")
             # Fallback: split by newlines
-            return [line.strip() for line in response.split('\n') if line.strip()] 
+            return [line.strip() for line in response.split('\n') if line.strip()]
     
     def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """

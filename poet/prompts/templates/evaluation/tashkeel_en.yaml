@@ -1,0 +1,67 @@
+name: tashkeel_en
+description: "Validate Arabic poem diacritics (tashkeel) (English version)"
+template: |
+  You are an expert in Arabic poetry and diacritics (tashkeel). Your task is to validate the diacritics of the given Arabic poem.
+
+  **Poem to Validate:**
+  {poem_text}
+
+  **Instructions:**
+  1. Analyze each verse of the poem
+  2. Check if the diacritics are properly applied
+  3. Identify any missing or incorrect diacritics
+  4. Provide detailed feedback on each verse
+
+  **Response Format:**
+  Answer in the following JSON format:
+  ```json
+  {{
+    "overall_valid": true,
+    "total_verses": 4,
+    "valid_verses": 4,
+    "invalid_verses": 0,
+    "verse_results": [
+      {{
+        "verse_text": "first_verse_text",
+        "is_valid": true,
+        "diacritics_applied": true,
+        "error_details": null,
+        "diacritics_analysis": "explanation_of_diacritics_compliance"
+      }},
+      {{
+        "verse_text": "second_verse_text",
+        "is_valid": true,
+        "diacritics_applied": true,
+        "error_details": null,
+        "diacritics_analysis": "explanation_of_diacritics_compliance"
+      }}
+    ],
+    "validation_summary": "summary_of_diacritics_validation_results",
+    "completeness_score": 0.95,
+    "accuracy_score": 0.95
+  }}
+  ```
+
+  **Validation Criteria:**
+  - All verses should have proper diacritics
+  - Vowels should be correctly placed
+  - Sukoon should be applied where appropriate
+  - Tanween should be used correctly
+  - Shadda should be properly applied
+
+  **Diacritics Rules:**
+  - Place sukoon (ْ) on the lam in al- (الْقَلْبِ)
+  - Do not place vowel on shadda, shadda only (مُحَمَّدٌ)
+  - Do not place anything on silent long vowels (ا، و، ي، ى)
+  - Apply appropriate vowels (َ، ِ، ُ) according to grammatical rules
+  - Apply tanween (ً، ٍ، ٌ) where required
+
+  Now validate the poem's diacritics:
+category: evaluation
+parameters:
+  - poem_text
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "diacritics_validation" 

@@ -1,0 +1,60 @@
+name: bahr_selection_en
+description: "Select appropriate Arabic poetic meter (English version)"
+template: |
+  You are an expert in Arabic prosody (عروض) and poetry. Your task is to analyze the given text and select the most appropriate Arabic poetic meter (بحر) from the available options.
+
+  **Available Meters:**
+  {available_meters}
+
+  **Text to Analyze:**
+  {original_prompt}
+
+  **Context Information:**
+  - Current Meter: {current_meter}
+  - Theme: {theme}
+  - Tone: {tone}
+  - Line Count: {line_count}
+  - Missing Components: {missing_components}
+
+  **Instructions:**
+  1. Analyze the text's rhythm and structure
+  2. Consider the theme, tone, and line count
+  3. Select the most appropriate meter from the available options
+  4. Provide your reasoning for the selection
+
+  **CRITICAL: Return ONLY the JSON response. Do NOT include any explanatory text, analysis, or markdown before or after the JSON.**
+
+  **Response Format:**
+  Return ONLY this JSON format:
+  ```json
+  {{
+    "meter_name": "selected_meter_name",
+    "reasoning": "explanation of why this meter is most appropriate",
+    "confidence": 0.95,
+    "alternative_meters": ["other_suitable_meters"],
+    "notes": "additional observations about the text and meter compatibility"
+  }}
+  ```
+
+  **Important Notes:**
+  - The selected meter should enhance the poem's theme and tone
+  - Consider the text's natural rhythm
+  - Ensure the meter choice aligns with the intended style
+  - Provide clear reasoning for your selection
+  - **IMPORTANT: Return ONLY the JSON object, nothing else**
+
+  Now analyze the text and select the appropriate meter:
+category: analysis
+parameters:
+  - original_prompt
+  - available_meters
+  - current_meter
+  - theme
+  - tone
+  - line_count
+  - missing_components
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "meter_selection" 

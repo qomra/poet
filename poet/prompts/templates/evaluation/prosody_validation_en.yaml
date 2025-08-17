@@ -1,0 +1,59 @@
+name: prosody_validation_en
+description: "Validate Arabic poem prosody and meter (English version)"
+template: |
+  You are an expert in Arabic prosody (عروض). Your task is to analyze a single couplet and validate its prosodic weight.
+
+  **Couplet to Analyze:**
+  {bait_text}
+
+  **Required Meter:**
+  {bahr_name}
+
+  **Required Meter Pattern:**
+  {bahr_pattern}
+
+  **Zehaf and Elal Information:**
+  {zehaf_elal_info}
+
+  **Instructions:**
+  1. Analyze the couplet into sadr and ajuz (before and after #)
+  2. Identify the prosodic pattern for each part
+  3. Compare with the required meter pattern
+  4. Check weight compliance considering allowed zehafs and elals
+  5. If the couplet is correct, answer with `"is_valid": true`
+  6. If the couplet is incorrect, answer with `"is_valid": false` with problem description
+
+  **Examples:**
+  - Correct couplet on Taweel meter: "قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ#بِسَقْطِ اللّوَى بَيْنَ الدّخُولِ فَحَوْمَلِ" ✓
+  - Incorrect couplet on Taweel meter: "هذا بيت لا يتبع وزن الطويل" ✗
+  
+  **Important Notes:**
+  - Zehaf: change in tafeela (like deleting a letter or adding sukun)
+  - Elal: change in the last tafeela of sadr or ajuz
+  - Ensure changes match allowed zehafs and elals for the meter
+
+  **Very Important: You must answer in JSON format only, do not write any other text.**
+
+  Answer in exactly this format:
+  ```json
+  {{
+    "is_valid": true,
+    "pattern": "فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ#فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ",
+    "error_details": null
+  }}
+  ```
+
+  If the couplet is incorrect, write error details in `error_details` in Arabic.
+
+  **Remember: Do not write any explanation or text before or after JSON. Answer with JSON only.**
+category: evaluation
+parameters:
+  - bait_text
+  - bahr_name
+  - bahr_pattern
+  - zehaf_elal_info
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "single_bait_prosody_validation" 

@@ -171,7 +171,6 @@ def main():
             print(f"Using all {len(gemini_entries)} entries (less than requested {n_samples})")
         
         # Create analysis prompt
-        print("Creating analysis prompt...")
         analysis_prompt = create_analysis_prompt(gemini_entries)
         
         # Save to file

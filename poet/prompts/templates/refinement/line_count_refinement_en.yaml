@@ -1,0 +1,66 @@
+name: line_count_refinement_en
+description: "Refine Arabic poem line count (English version)"
+template: |
+  You are an expert in Arabic poetry and structure refinement. Your task is to adjust the line count of the given Arabic poem to match the required number of couplets.
+
+  **Poem to Refine:**
+  {existing_verses}
+
+  **Required Line Count:**
+  {required_line_count}
+
+  **Current Line Count:**
+  {current_line_count}
+
+  **Theme:**
+  {theme}
+
+  **Tone:**
+  {tone}
+
+  **Context:**
+  {context}
+
+  **Instructions:**
+  1. Analyze the current poem structure
+  2. Add or remove lines to match the required count
+  3. Maintain the same theme and tone
+  4. Ensure proper meter and rhyme consistency
+  5. Apply correct Arabic diacritics
+
+  **Response Format:**
+  Answer in the following JSON format:
+  ```json
+  {{
+    "verses": [
+      "refined_first_verse",
+      "refined_second_verse",
+      "additional_verses_if_needed"
+    ],
+    "changes_made": "description_of_line_count_adjustments",
+    "structure_compliance": "explanation_of_structure_fixes",
+    "meaning_preserved": "explanation_of_meaning_preservation"
+  }}
+  ```
+
+  **Important Notes:**
+  - Maintain the original meaning and theme
+  - Adjust only the line count as required
+  - Ensure the meter and rhyme remain consistent
+  - Each couplet should contain two hemistichs
+  - Apply proper diacritics
+
+  Now refine the poem's line count:
+category: refinement
+parameters:
+  - existing_verses
+  - required_line_count
+  - current_line_count
+  - theme
+  - tone
+  - context
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "line_count_refinement" 

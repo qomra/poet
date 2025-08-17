@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.static('.'));
 
 // Data file path
-const DATA_FILE = 'diwan.json';
+const DATA_FILE = 'diwanai.json';
 
 // Load data from JSON file
 async function loadData() {

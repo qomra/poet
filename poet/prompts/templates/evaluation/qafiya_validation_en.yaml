@@ -1,0 +1,45 @@
+name: qafiya_validation_en
+description: "Validate Arabic poem rhyme (qafiya) consistency (English version)"
+template: |
+  You are an expert in Arabic poetry. Your task is simple: analyze a single couplet and validate its rhyme.
+
+  **Couplet to Analyze:**
+  {verses}
+
+  **Rhyme:**
+  - **Required Rhyme:** {qafiya}
+  - **Required Rhyme Vowel:** {qafiya_harakah}
+  - **Target Rhyme Type:** {qafiya_type}
+  - **Rhyme Type Description and Examples (Required Reference):** {qafiya_type_description_and_examples}
+
+  **Instructions:**
+  1. Focus only on the ajuz (second part after #)
+  2. Check that the ajuz ends with the required letter and vowel
+  3. Check the required rhyme type (number of vowels between consonants)
+  4. If the couplet is correct, answer with `"is_valid": true`
+  5. If the couplet is incorrect, answer with `"is_valid": false` with problem description
+
+  **Examples:**
+  - Rhyme "قِ" (qaf kasr, mutawatir): ajuz must end with "قِ" with one vowel between two consonants ✓
+  - Rhyme "عُ" (ain damma, mutawatir): ajuz must end with "عُ" with one vowel between two consonants ✓
+  - Rhyme "رَ" (ra fatha, mutawatir): ajuz must end with "رَ" with one vowel between two consonants ✓
+
+  Answer in this format:
+  ```json
+  {{
+    "is_valid": true,
+    "issue": null
+  }}
+  ```
+category: evaluation
+parameters:
+  - verses
+  - qafiya
+  - qafiya_harakah
+  - qafiya_type
+  - qafiya_type_description_and_examples
+metadata:
+  version: "3.1"
+  language: "english"
+  complexity: "simple"
+  focus: "single_bait_qafiya_validation" 

@@ -273,7 +273,6 @@ def main():
             print("All Gemini poems already exist in the file")
     else:
         # No existing file or no content - create new file with all Gemini poems
-        print("Creating new file with all Gemini-2.5-pro poems...")
         with open(args.output_file, 'w', encoding='utf-8') as f:
             json.dump(gemini_poems, f, ensure_ascii=False, indent=2)
         print(f"Wrote {len(gemini_poems)} Gemini-2.5-pro poems to {args.output_file}")
