@@ -62,7 +62,6 @@ class RefinerChain(Node):
             iteration_refinements = []
             for refiner in self.refiners:
                 if refiner.should_refine(evaluated_poem.quality):
-                    self.logger.info(f"Applying {refiner.name}")
                     
                     before_poem = current_poem
                     refined_poem = await refiner.refine(current_poem, constraints, evaluated_poem.quality)
@@ -238,7 +237,6 @@ class RefinerChain(Node):
             for refiner_name in refiner_config:
                 refiner = self._create_refiner(refiner_name, context)
                 if refiner:
-                    self.logger.info(f"Successfully created refiner: {refiner_name}, type: {type(refiner)}")
                     self.refiners.append(refiner)
                 else:
                     self.logger.warning(f"Failed to create refiner: {refiner_name}")
@@ -255,8 +253,6 @@ class RefinerChain(Node):
                 # Filter out None values
                 self.refiners = [r for r in self.refiners if r is not None]
         
-        self.logger.info(f"Final refiners list: {[type(r) for r in self.refiners]}")
-
         # Extract required data
         poem = input_data.get('poem')
         constraints = input_data.get('constraints')
@@ -282,6 +278,7 @@ class RefinerChain(Node):
         refiners_used = []
         
         for iteration in range(self.max_iterations):
+            self.logger.info(f"Starting refinement iteration {iteration + 1}/{self.max_iterations}")
             
             # Check if poem already has quality assessment or need to evaluate
             if hasattr(current_poem, 'quality') and current_poem.quality:
@@ -308,7 +305,6 @@ class RefinerChain(Node):
             iteration_refinements = 0
             for refiner in self.refiners:
                 if refiner.should_refine(evaluated_poem.quality):
-                    self.logger.info(f"Applying {refiner.name}")
                     
                     # Add evaluation to input data for the refiner
                     refiner_input = {

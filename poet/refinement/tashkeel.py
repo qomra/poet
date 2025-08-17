@@ -201,7 +201,6 @@ class TashkeelRefiner(Node):
         try:
             refined_poem = self._apply_sync_refinement(poem, constraints, evaluation)
             
-            self.logger.info(f"{self.name}: Tashkeel refinement applied successfully")
             return {
                 'poem': refined_poem,
                 'refined': True,
