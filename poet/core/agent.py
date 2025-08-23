@@ -38,7 +38,7 @@ class DynamicAgent:
             from poet.analysis.qafiya_selector import QafiyaSelector
             from poet.analysis.bahr_selector import BahrSelector
             from poet.generation.poem_generator import SimplePoemGenerator
-
+            from poet.data.enricher import DataEnricher
             from poet.refinement.refiner_chain import RefinerChain
             from poet.evaluation.poem import PoemEvaluator
             
@@ -46,8 +46,8 @@ class DynamicAgent:
             self.pipeline_builder.register_node("constraints_parser", ConstraintParser)
             self.pipeline_builder.register_node("qafiya_selector", QafiyaSelector)
             self.pipeline_builder.register_node("bahr_selector", BahrSelector)
+            self.pipeline_builder.register_node("data_enrichment", DataEnricher)
             self.pipeline_builder.register_node("generation", SimplePoemGenerator)
-
             self.pipeline_builder.register_node("refiner_chain", RefinerChain)
             self.pipeline_builder.register_node("evaluation", PoemEvaluator)
             

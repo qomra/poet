@@ -8,6 +8,13 @@ template: |
   - Rhyme: {qafiya}
   - Number of couplets: {line_count} (each couplet contains two hemistichs)
   
+  **Examples from Arabic Poetry:**
+  Here are some examples that follow the same required criteria for reference:
+  
+  {examples_data}
+  
+  **Note:** Use these examples as a guide to understand the required meter and rhyme patterns, not for direct copying.
+  
   **Important Instructions:**
   - Focus on adhering to the specified meter and rhyme
   - Use classical Arabic language
@@ -16,6 +23,7 @@ template: |
   - Apply Arabic diacritics to all verses
   - Ensure the required number of couplets is {line_count} (i.e., {verse_count} hemistichs)
   - Each couplet must contain two hemistichs (first and second)
+  - Follow the meter and rhyme pattern shown in the examples above
   
   **CRITICAL: Return ONLY the JSON response. Do NOT include any explanatory text, analysis, or markdown before or after the JSON.**
   
@@ -50,8 +58,10 @@ parameters:
   - qafiya
   - line_count
   - verse_count
+  - examples_data
+  - has_examples
 metadata:
-  version: "1.0"
+  version: "1.4"
   language: "english"
   complexity: "medium"
   focus: "prosody_compliance" 

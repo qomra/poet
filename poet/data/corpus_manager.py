@@ -320,6 +320,8 @@ class CorpusManager:
                         meter_matches.update(poem_indices)
                 candidates &= meter_matches
             
+            print(f"Length of candidates: {len(candidates)}")
+            
             if criteria.theme:
                 theme_matches = set()
                 theme_key = criteria.theme.strip().lower()
@@ -328,6 +330,8 @@ class CorpusManager:
                         theme_matches.update(poem_indices)
                 candidates &= theme_matches
             
+            print(f"Length of candidates: {len(candidates)}")
+            
             if criteria.qafiya:
                 qafiya_matches = set()
                 qafiya_key = criteria.qafiya.strip().lower()
@@ -335,6 +339,8 @@ class CorpusManager:
                     if qafiya_key in indexed_qafiya:
                         qafiya_matches.update(poem_indices)
                 candidates &= qafiya_matches
+            
+            print(f"Length of candidates: {len(candidates)}")
             
             if criteria.poet_name:
                 poet_matches = set()
@@ -536,3 +542,5 @@ class CorpusManager:
         """Get the raw HuggingFace dataset"""
         self.load_corpus()
         return self._dataset
+    
+    

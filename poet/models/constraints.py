@@ -1,9 +1,12 @@
 # poet/models/constraints.py
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, TYPE_CHECKING
 from enum import Enum
 
+# Import DataExample types only for type checking to avoid circular imports
+if TYPE_CHECKING:
+    from poet.models.search import CorpusExample, WebExample
 
 class QafiyaType(Enum):
     """Types of Arabic qafiya (rhyme) patterns"""
@@ -15,16 +18,21 @@ class QafiyaType(Enum):
 
 class QafiyaTypeDescriptionAndExamples(Enum):
     """
-    Detailed descriptions and examples of Arabic qafiya types.
-
-    Each member contains a single string describing the qafiya pattern, where '/'
-    represents a vowel (haraka) and 'o' represents a cessation (sukun).
+    Types of Arabic qafiya (rhyme) patterns with detailed descriptions and examples
     """
-    MUTAKAASIS = "////o - Mutakaathis (المُتَكاثِس): A succession of four voweled letters followed by a sukun. This is the most complex and rarest type, suggesting a 'piling up' of vowels. Examples: الزَمانُ صَدَعَكَ, الإلَهُ فَجَبَرَ"
-    MUTARAKIB = "///o - Mutarakib (المُتراكِب): A succession of three voweled letters followed by a sukun. Its name means 'compounded,' and it creates a flowing, consecutive rhythm. Examples: سَمَرُ, فَتَنُ, نَظَمُ, هَزَلُ"
-    MUTADAARIK = "//o - Mutadaarik (المُتدارِك): A succession of two voweled letters followed by a sukun. Meaning 'the one that follows,' it's a very common and balanced qafiya type. Examples: مُنْتَهِي, مٌقْتَفِي, نَاظِمِ, رَاسِمُ"
-    MUTAWATIR = "/o - Mutawatir (المُتواتِر): A single voweled letter followed by a sukun. Its name means 'alternating,' and it is one of the most frequent and simple qafiya patterns, creating a crisp ending. Examples: جَميلُ, كَريمُ, جَمالُ, جَمانُ"
-    MUTARADIF = "oo - Mutaradif (المُترادِف): Two consecutive sukuns at the end of the verse. This pattern creates an abrupt stop and often occurs when a long vowel precedes the final consonant. Examples: دِينْ, عَيْنْ, حينْ, أَيْنْ"
+    MUTAWATIR = "قافیة - Mutawatir (المُتواتِر): One vowel between the last two consonants. This creates a melodic ending. Examples: رَبَبْ, شَجَنْ, حَیاةْ, وَطَنْ"
+    MUTARAKIB = "قافیة - Mutarakib (المُتراكِب): Three vowels between the last two consonants. This pattern is more complex and creates flowing endings. Examples: عَزیزانْ, حَبیبانْ, خَضِرُونْ, قادِمُونْ"
+    MUTADAARIK = "قافیة - Mutadaarik (المُتدارِك): Two vowels between the last two consonants. This pattern offers moderate complexity. Examples: مَکانُهْ, سَماؤُهْ, حِکایَتْ, کِتابَتْ"
+    MUTAKAASIS = "قافیة - Mutakaasis (المُتكاوِس): Four vowels between the last two consonants. This is the most complex pattern with flowing, cascading endings. Examples: العُذیوبَهْ, المحبوبَهْ, العجیبَهْ, الحکیمَهْ"
+    MUTARADIF = "oo - Mutaradif (المُترادِف): Two consecutive sukuns at the end of the verse. This pattern creates an abrupt stop and often occurs when a long vowel precedes the final consonant. Examples: دِینْ, عَیْنْ, حینْ, أَیْنْ"
+
+
+@dataclass
+class ExampleData:
+    """Type-safe structure for example data containing retrieved poems"""
+    corpus_examples: List['CorpusExample'] = field(default_factory=list)
+    web_examples: List['WebExample'] = field(default_factory=list)
+    retrieval_metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -67,6 +75,9 @@ class Constraints:
     llm_reasoning: Optional[str] = field(default=None, init=False)
     original_prompt: Optional[str] = field(default=None)
     
+    # Data enrichment - retrieved examples from corpus and web search
+    example_data: Optional[ExampleData] = field(default=None, init=False)
+    
     def __post_init__(self):
         """Basic validation after initialization"""
         # Strip whitespace from string fields
@@ -91,6 +102,59 @@ class Constraints:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert constraints to dictionary"""
+        # Serialize example_data with proper DataExample handling
+        serialized_example_data = None
+        if self.example_data:
+            serialized_example_data = {}
+            
+            # Serialize corpus examples
+            corpus_examples = self.example_data.corpus_examples
+            if corpus_examples:
+                serialized_corpus = []
+                for example in corpus_examples:
+                    if hasattr(example, '__dict__'):
+                        # It's a DataExample object, convert to dict
+                        example_dict = {
+                            'search_criteria': example.search_criteria,
+                            'metadata': example.metadata,
+                            'title': example.title,
+                            'verses': example.verses,
+                            'meter': example.meter,
+                            'qafiya': example.qafiya,
+                            'theme': example.theme,
+                            'poet_name': example.poet_name,
+                            'poet_era': example.poet_era
+                        }
+                        serialized_corpus.append(example_dict)
+                    else:
+                        # Already a dict
+                        serialized_corpus.append(example)
+                serialized_example_data["corpus_examples"] = serialized_corpus
+            
+            # Serialize web examples  
+            web_examples = self.example_data.web_examples
+            if web_examples:
+                serialized_web = []
+                for example in web_examples:
+                    if hasattr(example, '__dict__'):
+                        # It's a DataExample object, convert to dict
+                        example_dict = {
+                            'search_criteria': example.search_criteria,
+                            'metadata': example.metadata,
+                            'title': example.title,
+                            'content': example.content,
+                            'url': example.url,
+                            'relevance_score': example.relevance_score
+                        }
+                        serialized_web.append(example_dict)
+                    else:
+                        # Already a dict
+                        serialized_web.append(example)
+                serialized_example_data["web_examples"] = serialized_web
+            
+            # Copy over other metadata
+            serialized_example_data["retrieval_metadata"] = self.example_data.retrieval_metadata
+        
         return {
             "meter": self.meter,
             "meeter_tafeelat": self.meeter_tafeelat,
@@ -110,7 +174,8 @@ class Constraints:
             "ambiguities": self.ambiguities,
             "llm_suggestions": self.llm_suggestions,
             "llm_reasoning": self.llm_reasoning,
-            "original_prompt": self.original_prompt
+            "original_prompt": self.original_prompt,
+            "example_data": serialized_example_data
         }
     
     @classmethod
@@ -128,7 +193,8 @@ class Constraints:
                         qafiya_type = qtype
                         break
         
-        return cls(
+        # Create constraints with init=True fields only
+        constraints = cls(
             meter=data.get("meter"),
             meeter_tafeelat=data.get("meeter_tafeelat"),
             qafiya=data.get("qafiya"),
@@ -146,6 +212,75 @@ class Constraints:
             ambiguities=data.get("ambiguities", []),
             original_prompt=data.get("original_prompt")
         )
+        
+        # Set init=False fields after initialization
+        constraints.llm_suggestions = data.get("llm_suggestions")
+        constraints.llm_reasoning = data.get("llm_reasoning")
+        
+        # Reconstruct example_data with proper DataExample objects
+        example_data_dict = data.get("example_data")
+        if example_data_dict:
+            from poet.models.search import CorpusExample, WebExample
+            
+            reconstructed_example_data = ExampleData(
+                corpus_examples=[],
+                web_examples=[],
+                retrieval_metadata={}
+            )
+            
+            # Reconstruct corpus examples
+            corpus_examples = example_data_dict.get("corpus_examples", [])
+            if corpus_examples:
+                reconstructed_corpus = []
+                for example_dict in corpus_examples:
+                    if isinstance(example_dict, dict):
+                        # Reconstruct CorpusExample from dict
+                        corpus_example = CorpusExample(
+                            search_criteria=example_dict.get("search_criteria", []),
+                            metadata=example_dict.get("metadata", {}),
+                            title=example_dict.get("title", ""),
+                            verses=example_dict.get("verses", ""),
+                            meter=example_dict.get("meter", ""),
+                            qafiya=example_dict.get("qafiya", ""),
+                            theme=example_dict.get("theme", ""),
+                            poet_name=example_dict.get("poet_name", ""),
+                            poet_era=example_dict.get("poet_era", "")
+                        )
+                        reconstructed_corpus.append(corpus_example)
+                    else:
+                        # Already a CorpusExample object
+                        reconstructed_corpus.append(example_dict)
+                reconstructed_example_data.corpus_examples = reconstructed_corpus
+            
+            # Reconstruct web examples
+            web_examples = example_data_dict.get("web_examples", [])
+            if web_examples:
+                reconstructed_web = []
+                for example_dict in web_examples:
+                    if isinstance(example_dict, dict):
+                        # Reconstruct WebExample from dict
+                        web_example = WebExample(
+                            search_criteria=example_dict.get("search_criteria", []),
+                            metadata=example_dict.get("metadata", {}),
+                            title=example_dict.get("title", ""),
+                            content=example_dict.get("content", ""),
+                            url=example_dict.get("url", ""),
+                            relevance_score=example_dict.get("relevance_score")
+                        )
+                        reconstructed_web.append(web_example)
+                    else:
+                        # Already a WebExample object
+                        reconstructed_web.append(example_dict)
+                reconstructed_example_data.web_examples = reconstructed_web
+            
+            # Copy over other metadata
+            reconstructed_example_data.retrieval_metadata = example_data_dict.get("retrieval_metadata", {})
+            
+            constraints.example_data = reconstructed_example_data
+        else:
+            constraints.example_data = data.get("example_data")
+        
+        return constraints
     
 
     

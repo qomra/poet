@@ -43,6 +43,14 @@ agent:
     - constraints_parser
     - qafiya_selector
     - bahr_selector
+    - data_enrichment:
+        sources:
+          - type: corpus
+            local_knowledge_path: "dataset"
+            top_k: 10
+            search_criteria:
+              - meter
+              - qafiya
     - generation
     - evaluation:
         metrics:

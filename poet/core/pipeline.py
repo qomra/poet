@@ -37,8 +37,14 @@ class PipelineEngine:
             self.logger.info(f"Adding node {node_class.__name__}, harmony_capture_enabled: {harmony_enabled}")
             
             # Handle different node types with their specific requirements
-            if node_class.__name__ == 'RefinerChain' :
+            if node_class.__name__ == 'RefinerChain':
                 # RefinerChain only needs llm and config
+                if node_config:
+                    node = node_class(llm=llm, **node_config)
+                else:
+                    node = node_class(llm=llm)
+            elif node_class.__name__ == 'DataEnricher':
+                # DataEnricher needs llm and config but not prompt_manager
                 if node_config:
                     node = node_class(llm=llm, **node_config)
                 else:

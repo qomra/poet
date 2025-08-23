@@ -73,6 +73,25 @@ class SimplePoemGenerator(BasePoemGenerator, Node):
     def generate_poem(self, constraints: Constraints) -> LLMPoem:
         """Generate a poem based on the given constraints."""
         try:
+            # Prepare examples data if available - let template handle formatting
+            examples_data = ""
+            has_examples = ""
+            
+            if constraints.example_data:
+                examples_list = []
+                
+                # Add corpus examples
+                for example in constraints.example_data.corpus_examples:  
+                    examples_list.append(example.get_formatted_content())
+                
+                # Add web examples
+                for example in constraints.example_data.web_examples:  
+                    examples_list.append(example.get_formatted_content())
+                
+                if examples_list:
+                    examples_data = "\n---\n".join(examples_list)
+                    has_examples = "yes"
+                    
             # Format the prompt
             formatted_prompt = self.prompt_manager.format_prompt(
                 'simple_poem_generation',
@@ -91,7 +110,9 @@ class SimplePoemGenerator(BasePoemGenerator, Node):
                 sections=constraints.sections or [],
                 register=constraints.register or "فصيح",
                 era=constraints.era or "كلاسيكي",
-                poet_style=constraints.poet_style or "غير محدد"
+                poet_style=constraints.poet_style or "غير محدد",
+                examples_data=examples_data,
+                has_examples=has_examples
             )
             
             # Try multiple times to generate a valid poem
