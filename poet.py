@@ -120,9 +120,10 @@ def create_interface(config: Dict[str, Any], agent: Agent) -> Any:
     elif interface_type == "dataset":
         dataset_path = interface_config.get("dataset_path")
         output_path = interface_config.get("output_path")
+        n_per_instance = interface_config.get("n_per_instance")
         if not dataset_path or not output_path:
             raise ValueError("Dataset interface requires dataset_path and output_path")
-        return DatasetInterface(agent, dataset_path, output_path)
+        return DatasetInterface(agent, dataset_path, output_path, n_per_instance)
     else:
         raise ValueError(f"Unknown interface type: {interface_type}")
 

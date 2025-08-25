@@ -38,7 +38,7 @@ class PoemRecord:
             title=data.get('poem title', ''),
             meter=data.get('poem meter', ''),
             verses=data.get('poem verses', ''),
-            qafiya=data.get('poem qafiya', ''),
+            qafiya=data.get('rhyme', ''),
             theme=data.get('poem theme', ''),
             url=data.get('poem url', ''),
             poet_name=data.get('poet name', ''),
@@ -68,40 +68,28 @@ class PoemRecord:
             return False
         return qafiya.strip().lower() in self.qafiya.strip().lower()
     
-    def matches_poet(self, poet_name: str) -> bool:
-        """Check if poem is by the specified poet"""
-        if not poet_name or not self.poet_name:
+    def matches_poet(self, poet: str) -> bool:
+        """Check if poem matches the specified poet"""
+        if not poet or not self.poet_name:
             return False
-        return poet_name.strip().lower() in self.poet_name.strip().lower()
+        return poet.strip().lower() in self.poet_name.strip().lower()
     
-    def get_verse_count(self) -> int:
-        """Get number of verses in the poem"""
-        if not self.verses:
-            return 0
-        
-        # Handle both string (with newlines) and list formats
-        if isinstance(self.verses, str):
-            verses_list = self.verses.split('\n')
-        else:
-            verses_list = self.verses
-            
-        return len([v for v in verses_list if v and str(v).strip()])
+    def matches_era(self, era: str) -> bool:
+        """Check if poem matches the specified era"""
+        if not era or not self.poet_era:
+            return False
+        return era.strip().lower() in self.poet_era.strip().lower()
 
 @dataclass
 class SearchCriteria:
-    """Search criteria for corpus queries"""
+    """Search criteria for finding poems"""
     meter: Optional[str] = None
     theme: Optional[str] = None
     qafiya: Optional[str] = None
-    poet_name: Optional[str] = None
-    poet_era: Optional[str] = None
-    poet_location: Optional[str] = None
-    language_type: Optional[str] = None
-    min_verses: Optional[int] = None
-    max_verses: Optional[int] = None
-    keywords: Optional[List[str]] = None
+    poet: Optional[str] = None
+    era: Optional[str] = None
     search_mode: str = "AND"  # "AND" or "OR"
-    
+
 class CorpusManager:
     """
     Manages access to the ashaar poetry corpus using HuggingFace datasets.
@@ -110,7 +98,21 @@ class CorpusManager:
     based on various criteria like meter, theme, poet, etc.
     """
     
+    # Class-level cache to prevent reloading the same dataset
+    _instances: Dict[str, 'CorpusManager'] = {}
+    
+    def __new__(cls, local_knowledge_path: str):
+        """Singleton pattern to prevent reloading the same dataset"""
+        path_key = str(Path(local_knowledge_path).resolve())
+        if path_key not in cls._instances:
+            cls._instances[path_key] = super().__new__(cls)
+        return cls._instances[path_key]
+    
     def __init__(self, local_knowledge_path: str):
+        # Only initialize if this is a new instance
+        if hasattr(self, '_initialized'):
+            return
+            
         if not DATASETS_AVAILABLE:
             raise ImportError("datasets library is required. Install with: pip install datasets")
         
@@ -133,6 +135,7 @@ class CorpusManager:
         # Statistics
         self._stats: Dict[str, Any] = {}
         
+        self._initialized = True
         self.logger.info(f"Initialized CorpusManager with local knowledge path: {local_knowledge_path}")
     
     def load_corpus(self, force_reload: bool = False) -> None:
@@ -143,6 +146,7 @@ class CorpusManager:
             force_reload: Force reload even if already loaded
         """
         if self._loaded and not force_reload:
+            self.logger.debug("Corpus already loaded, skipping reload")
             return
         
         self.logger.info(f"Loading ashaar dataset from {self.dataset_path}...")
@@ -288,24 +292,24 @@ class CorpusManager:
                         qafiya_matches.update(poem_indices)
                 candidates.update(qafiya_matches)
             
-            if criteria.poet_name:
+            if criteria.poet:
                 poet_matches = set()
-                poet_key = criteria.poet_name.strip().lower()
+                poet_key = criteria.poet.strip().lower()
                 for indexed_poet, poem_indices in self._poet_index.items():
                     if poet_key in indexed_poet:
                         poet_matches.update(poem_indices)
                 candidates.update(poet_matches)
             
-            if criteria.poet_era:
+            if criteria.era:
                 era_matches = set()
-                era_key = criteria.poet_era.strip().lower()
+                era_key = criteria.era.strip().lower()
                 for indexed_era, poem_indices in self._era_index.items():
                     if era_key in indexed_era:
                         era_matches.update(poem_indices)
                 candidates.update(era_matches)
             
             # If no indexed criteria provided, return all poems
-            if not candidates and not any([criteria.meter, criteria.theme, criteria.qafiya, criteria.poet_name, criteria.poet_era]):
+            if not candidates and not any([criteria.meter, criteria.theme, criteria.qafiya, criteria.poet, criteria.era]):
                 candidates = set(range(len(self._poems)))
                 
         else:  # AND mode (default)
@@ -342,17 +346,17 @@ class CorpusManager:
             
             print(f"Length of candidates: {len(candidates)}")
             
-            if criteria.poet_name:
+            if criteria.poet:
                 poet_matches = set()
-                poet_key = criteria.poet_name.strip().lower()
+                poet_key = criteria.poet.strip().lower()
                 for indexed_poet, poem_indices in self._poet_index.items():
                     if poet_key in indexed_poet:
                         poet_matches.update(poem_indices)
                 candidates &= poet_matches
             
-            if criteria.poet_era:
+            if criteria.era:
                 era_matches = set()
-                era_key = criteria.poet_era.strip().lower()
+                era_key = criteria.era.strip().lower()
                 for indexed_era, poem_indices in self._era_index.items():
                     if era_key in indexed_era:
                         era_matches.update(poem_indices)
@@ -410,7 +414,7 @@ class CorpusManager:
     
     def find_by_poet(self, poet_name: str, limit: Optional[int] = None) -> List[PoemRecord]:
         """Find poems by poet"""
-        criteria = SearchCriteria(poet_name=poet_name)
+        criteria = SearchCriteria(poet=poet_name)
         return self.search(criteria, limit)
     
     def find_by_qafiya(self, qafiya: str, limit: Optional[int] = None) -> List[PoemRecord]:

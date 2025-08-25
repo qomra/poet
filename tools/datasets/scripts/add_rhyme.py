@@ -1,10 +1,12 @@
-from datasets import load_dataset
+from datasets import Dataset
 from collections import Counter
 from pyarabic.araby import strip_tashkeel
+import os
+import pandas as pd
+import glob
 
 def most_common_letter(letters):
     return Counter(letters).most_common(1)[0][0]
-
 
 def get_rhyme_letter(poem):
     # poem is a list of verses
@@ -17,13 +19,42 @@ def get_rhyme_letter(poem):
     # get the most common letter
     return most_common_letter(last_letters)
 
-import os
+# Get paths
 script_dir = os.path.dirname(os.path.abspath(__file__))
-dataset_path = os.path.join(script_dir, "..", "..", "..", "dataset", "ashaar_original")
+dataset_path = os.path.join(script_dir, "..", "..", "..", "dataset", "ashaar_original", "data")
 output_path = os.path.join(script_dir, "..", "..", "..", "dataset", "ashaar")
-dataset = load_dataset(dataset_path)["train"]
-print(dataset[0])
-# add new column to dataset
-dataset = dataset.map(lambda x: {"rhyme": get_rhyme_letter(x["poem verses"])})
-# save dataset
+
+print(f"Reading parquet files from: {dataset_path}")
+
+# Read all parquet files
+parquet_files = glob.glob(os.path.join(dataset_path, "*.parquet"))
+if not parquet_files:
+    print(f"No parquet files found in {dataset_path}")
+    exit(1)
+
+print(f"Found {len(parquet_files)} parquet files")
+
+# Load and combine all data
+all_data = []
+for i, file_path in enumerate(parquet_files):
+    print(f"Loading file {i+1}/{len(parquet_files)}: {os.path.basename(file_path)}")
+    df = pd.read_parquet(file_path)
+    all_data.append(df)
+
+# Combine all dataframes
+print("Combining all data...")
+combined_df = pd.concat(all_data, ignore_index=True)
+print(f"Total rows: {len(combined_df)}")
+
+# Add rhyme column
+print("Adding rhyme column...")
+combined_df['rhyme'] = combined_df['poem verses'].apply(get_rhyme_letter)
+
+# Convert to datasets Dataset
+print("Converting to datasets Dataset...")
+dataset = Dataset.from_pandas(combined_df)
+
+# Save using save_to_disk
+print(f"Saving dataset to: {output_path}")
 dataset.save_to_disk(output_path)
+print("Dataset saved successfully using save_to_disk!")

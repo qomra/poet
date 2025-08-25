@@ -13,11 +13,12 @@ from poet.models.poem import LLMPoem
 class DatasetInterface(BaseInterface):
     """Dataset processing interface for poetry generation experiments."""
     
-    def __init__(self, agent: Agent, dataset_path: str, output_path: str):
+    def __init__(self, agent: Agent, dataset_path: str, output_path: str, n_per_instance: Optional[int] = None):
         # Store the agent and paths
         self.agent = agent
         self.dataset_path = Path(dataset_path)
         self.output_path = Path(output_path)
+        self.n_per_instance = n_per_instance or 1  # Default to 1 generation per instance
         self.running = False
         self._setup_signal_handlers()
         
@@ -59,83 +60,97 @@ class DatasetInterface(BaseInterface):
         except Exception as e:
             self.logger.error(f"Failed to save output: {e}")
     
-    def _process_dataset_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
-        """Process a single dataset item and return results with flattened harmony."""
-        try:
-            # Extract prompt from the item
-            prompt_text = item['prompt']['text']
-            poem_id = item['poem_id']
-            
-            self.logger.info(f"Processing item {poem_id}: {prompt_text[:100]}...")
-            
-            # Run the pipeline
-            result = self.agent.run_pipeline(prompt_text)
-            
-            # Debug: log the result structure
-            self.logger.info(f"Pipeline result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
-            
-            # Extract harmony results if available
-            harmony_results = ""
-            if result.get('success'):
-                # Use the structured harmony data if available
-                if result.get('harmony_structured_data'):
-                    try:
-                        structured_data = result['harmony_structured_data']
-                        
-                        # Extract analysis channel messages from the structured data
-                        messages = structured_data.get('messages', [])
-                        analysis_messages = []
-                        
-                        for msg in messages:
-                            if msg.get('channel') == 'analysis' and msg.get('role') == 'assistant':
-                                content = msg.get('content', '')
-                                if content:
-                                    analysis_messages.append(content)
-                        
-                        if analysis_messages:
-                            harmony_results = "\n\n".join(analysis_messages)
-                        else:
-                            # Fallback to conversation string if no analysis messages found
-                            harmony_results = result.get('harmony_reasoning', "")
+    def _process_dataset_item(self, item: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Process a single dataset item and return multiple results with flattened harmony."""
+        results = []
+        poem_id = item['poem_id']
+        prompt_text = item['prompt']['text']
+        
+        self.logger.info(f"Processing item {poem_id}: {prompt_text[:100]}... (generating {self.n_per_instance} poems)")
+        
+        for generation_idx in range(self.n_per_instance):
+            try:
+                self.logger.info(f"  Generating poem {generation_idx + 1}/{self.n_per_instance} for item {poem_id}")
+                
+                # Run the pipeline
+                result = self.agent.run_pipeline(prompt_text)
+                
+                # Debug: log the result structure
+                self.logger.info(f"Pipeline result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
+                
+                # Extract harmony results if available
+                harmony_results = ""
+                if result.get('success'):
+                    # Use the structured harmony data if available
+                    if result.get('harmony_structured_data'):
+                        try:
+                            structured_data = result['harmony_structured_data']
                             
-                    except Exception as e:
-                        # Fallback to conversation string if structured data parsing fails
+                            # Extract analysis channel messages from the structured data
+                            messages = structured_data.get('messages', [])
+                            analysis_messages = []
+                            
+                            for msg in messages:
+                                if msg.get('channel') == 'analysis' and msg.get('role') == 'assistant':
+                                    content = msg.get('content', '')
+                                    if content:
+                                        analysis_messages.append(content)
+                            
+                            if analysis_messages:
+                                harmony_results = "\n\n".join(analysis_messages)
+                            else:
+                                # Fallback to conversation string if no analysis messages found
+                                harmony_results = result.get('harmony_reasoning', "")
+                                
+                        except Exception as e:
+                            # Fallback to conversation string if structured data parsing fails
+                            harmony_results = result.get('harmony_reasoning', "")
+                    else:
+                        # Fallback to conversation string if no structured data
                         harmony_results = result.get('harmony_reasoning', "")
-                else:
-                    # Fallback to conversation string if no structured data
-                    harmony_results = result.get('harmony_reasoning', "")
-            
-            # Create output item
-            output_item = {
-                'poem_id': poem_id,
-                'reference': item['reference'],
-                'prompt': item['prompt'],
-                'ai': {
-                    'text': "\n".join(result.get('poem').verses) if result.get('poem') else "",
-                    'provider': 'poet_system',
-                    'model': 'pipeline_generated',
-                    'thoughtMap': harmony_results
+                
+                # Create output item
+                output_item = {
+                    'poem_id': f"{poem_id}_gen_{generation_idx + 1}",
+                    'original_poem_id': poem_id,
+                    'generation_index': generation_idx + 1,
+                    'reference': item['reference'],
+                    'prompt': item['prompt'],
+                    'ai': {
+                        'text': "\n".join(result.get('poem').verses) if result.get('poem') else "",
+                        'provider': 'poet_system',
+                        'model': 'pipeline_generated',
+                        'thoughtMap': harmony_results
+                    }
                 }
-            }
-            
-            self.logger.info(f"Successfully processed item {poem_id}")
-            return output_item
-            
-        except Exception as e:
-            self.logger.error(f"Failed to process item {item.get('poem_id', 'unknown')}: {e}")
-            import traceback
-            self.logger.error(f"Traceback: {traceback.format_exc()}")
-            return {
-                'poem_id': item.get('poem_id', 'unknown'),
-                'reference': item.get('reference', {}),
-                'prompt': item.get('prompt', {}),
-                'ai': item.get('ai', {})
-            }
+                
+                results.append(output_item)
+                self.logger.info(f"  Successfully generated poem {generation_idx + 1}/{self.n_per_instance} for item {poem_id}")
+                
+            except Exception as e:
+                self.logger.error(f"Failed to generate poem {generation_idx + 1} for item {poem_id}: {e}")
+                import traceback
+                self.logger.error(f"Traceback: {traceback.format_exc()}")
+                
+                # Add error result
+                error_item = {
+                    'poem_id': f"{poem_id}_gen_{generation_idx + 1}_error",
+                    'original_poem_id': poem_id,
+                    'generation_index': generation_idx + 1,
+                    'reference': item.get('reference', {}),
+                    'prompt': item.get('prompt', {}),
+                    'ai': item.get('ai', {}),
+                    'error': str(e)
+                }
+                results.append(error_item)
+        
+        return results
     
     def run(self):
         """Run the dataset processing."""
         self.running = True
-        self.logger.info(f"Starting dataset processing for {self.total_items} items")
+        total_generations = self.total_items * self.n_per_instance
+        self.logger.info(f"Starting dataset processing for {self.total_items} items, generating {self.n_per_instance} poems per item (total: {total_generations} generations)")
         
         try:
             for i, item in enumerate(self.dataset):
@@ -143,22 +158,22 @@ class DatasetInterface(BaseInterface):
                     self.logger.info("Processing interrupted by user")
                     break
                 
-                # Process the item
-                result = self._process_dataset_item(item)
-                self.output_data.append(result)
+                # Process the item (generates multiple results)
+                results = self._process_dataset_item(item)
+                self.output_data.extend(results)
                 self.processed_count += 1
                 
-                # Save progress every 10 items
-                if self.processed_count % 10 == 0:
+                # Save progress every 5 items
+                if self.processed_count % 5 == 0:
                     self._save_output()
-                    self.logger.info(f"Progress: {self.processed_count}/{self.total_items} items processed")
+                    self.logger.info(f"Progress: {self.processed_count}/{self.total_items} items processed ({len(self.output_data)} total generations)")
                 
                 # Small delay to avoid overwhelming the API
                 time.sleep(1)
             
             # Final save
             self._save_output()
-            self.logger.info(f"Dataset processing completed. Processed {self.processed_count} items.")
+            self.logger.info(f"Dataset processing completed. Processed {self.processed_count} items, generated {len(self.output_data)} total poems.")
             
         except KeyboardInterrupt:
             self.logger.info("Processing interrupted by user")
@@ -184,9 +199,12 @@ class DatasetInterface(BaseInterface):
     
     def get_progress(self) -> Dict[str, Any]:
         """Get current processing progress."""
+        total_generations = self.total_items * self.n_per_instance
         return {
             'total_items': self.total_items,
             'processed_count': self.processed_count,
+            'total_generations': total_generations,
+            'generated_count': len(self.output_data),
             'progress_percentage': (self.processed_count / self.total_items * 100) if self.total_items > 0 else 0,
             'running': self.running
         }

@@ -47,7 +47,7 @@ agent:
         sources:
           - type: corpus
             local_knowledge_path: "dataset"
-            top_k: 10
+            top_k: 20
             search_criteria:
               - meter
               - qafiya
@@ -71,6 +71,7 @@ agent:
 experiment:
 interface:
   type: "dataset"
+  n_per_instance: 6
   name: "simple_generation_refinement"
   log_level: "INFO"
   dataset_path: "dataset/diwan.json"
