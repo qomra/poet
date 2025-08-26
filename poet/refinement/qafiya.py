@@ -116,7 +116,9 @@ class QafiyaRefiner(Node):
             generation_timestamp=poem.generation_timestamp
         )
         
-        self.logger.info("✅ Qafiya refinement completed")
+        self.logger.info(f"✅ Qafiya refinement completed")
+        self.logger.info(f"🔍 Original verses: {poem.verses}")
+        self.logger.info(f"🔍 Fixed verses: {refined_poem.verses}")
         return refined_poem
     
     def _create_entire_poem(self, poem_verses: list[str]) -> str:
@@ -155,13 +157,14 @@ class QafiyaRefiner(Node):
             tone=constraints.tone or "غير محدد",
             entire_poem=entire_poem,
             bad_bait=verse,
-            context=issue,
-            iteration=self.iteration or 1
+            context=issue
         )
 
         # Generate fixed verse
         response = self.llm.generate(formatted_prompt)
+        self.logger.info(f"🔍 LLM response for qafiya fix: {response[:500]}...")
         fixed_verses = self._parse_verses_from_response(response)
+        self.logger.info(f"🔍 Parsed fixed verses: {fixed_verses}")
 
         # Return the first fixed verse, or original if parsing failed
         return fixed_verses
@@ -212,25 +215,14 @@ class QafiyaRefiner(Node):
             self.logger.error(f"JSON decode error: {e}")
             self.logger.error(f"Attempted to parse: {json_str[:200] if 'json_str' in locals() else 'N/A'}")
             # Fallback: split by newlines
-            return [line.strip() for line in response.split('\n') if line.strip()]
+            lines = [line.strip() for line in response.split('\n') if line.strip()]
+            self.logger.info(f"Fallback parsing result: {lines}")
+            return lines
         except Exception as e:
             self.logger.error(f"Failed to parse verses from response: {e}")
             # Fallback: split by newlines
             return [line.strip() for line in response.split('\n') if line.strip()]
-    
-    def _generate_reasoning(self, input_data: Dict[str, Any], output_data: Dict[str, Any]) -> str:
-        """Generate natural reasoning for this refiner node."""
-        iteration_text = f" (Iteration {self.iteration})" if self.iteration else ""
-        refined = output_data.get('refined', False)
-        
-        if refined:
-            reasoning = f"I refined the poem's qafiya{iteration_text}."
-            reasoning += " I analyzed the rhyme issues and generated an improved version with better rhyme consistency."
-        else:
-            reasoning = f"I checked the poem's qafiya{iteration_text}."
-            reasoning += " The qafiya was already acceptable, so no refinement was needed."
-        
-        return reasoning
+
     
     def _summarize_input(self) -> str:
         """Summarize input data for harmony."""

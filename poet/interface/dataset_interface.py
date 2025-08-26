@@ -109,6 +109,23 @@ class DatasetInterface(BaseInterface):
                         # Fallback to conversation string if no structured data
                         harmony_results = result.get('harmony_reasoning', "")
                 
+                # Extract final poem from harmony data
+                final_poem_text = ""
+                if harmony_results:
+                    # Look for "Final Poem:" in the harmony results
+                    if "Final Poem:" in harmony_results:
+                        final_poem_start = harmony_results.find("Final Poem:") + len("Final Poem:")
+                        final_poem_end = harmony_results.find("\n\n", final_poem_start)
+                        if final_poem_end == -1:
+                            final_poem_end = len(harmony_results)
+                        final_poem_text = harmony_results[final_poem_start:final_poem_end].strip()
+                    else:
+                        # Fallback to the poem from result if no final poem found in harmony
+                        final_poem_text = "\n".join(result.get('poem').verses) if result.get('poem') else ""
+                else:
+                    # Fallback to the poem from result if no harmony results
+                    final_poem_text = "\n".join(result.get('poem').verses) if result.get('poem') else ""
+                
                 # Create output item
                 output_item = {
                     'poem_id': f"{poem_id}_gen_{generation_idx + 1}",
@@ -117,7 +134,7 @@ class DatasetInterface(BaseInterface):
                     'reference': item['reference'],
                     'prompt': item['prompt'],
                     'ai': {
-                        'text': "\n".join(result.get('poem').verses) if result.get('poem') else "",
+                        'text': final_poem_text,
                         'provider': 'poet_system',
                         'model': 'pipeline_generated',
                         'thoughtMap': harmony_results

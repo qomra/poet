@@ -19,14 +19,15 @@ template: |
 
   Answer in JSON format only:
 
+
   {{
-    "theme": "extracted theme",
-    "meter": "extracted meter or null",
-    "qafiya": "extracted rhyme or null",
-    "line_count": line count or null,
-    "tone": "tone or null",
-    "imagery": ["image 1", "image 2"],
-    "keywords": ["keyword 1", "keyword 2"]
+    "theme": "الموضوع المستخرج",
+    "meter": "البحر المستخرج أو null",
+    "qafiya": "القافية المستخرجة أو null",
+    "line_count": عدد الأبيات أو null,
+    "tone": "النبرة أو null",
+    "imagery": ["صورة 1", "صورة 2"],
+    "keywords": ["كلمة 1", "كلمة 2"]
   }}
 
   **Important: Answer with JSON object only. No other text before or after.**

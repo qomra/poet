@@ -224,6 +224,12 @@ class PipelineEngine:
                 # Merge output with current data for next node
                 current_data.update(output_data)
                 
+                # Debug: Log what's in the current data after merge
+                if 'poem' in current_data:
+                    self.logger.info(f"🔍 After merge - Poem verses: {current_data['poem'].verses}")
+                if 'evaluation' in current_data:
+                    self.logger.info(f"🔍 After merge - Evaluation quality: {current_data['evaluation'].quality_score if hasattr(current_data['evaluation'], 'quality_score') else 'N/A'}")
+                
                 # Check if we should stop refinement
                 if self._should_stop_refinement(node, output_data):
                     self.logger.info(f"🎯 Stopping refinement at node {node.name}")
@@ -233,15 +239,6 @@ class PipelineEngine:
             
             self.logger.info("🎉 Pipeline completed successfully")
             
-            # Generate harmony after pipeline completion
-            if self.context.get('llm'):
-                try:
-                    harmony_reasoning = self.generate_harmony(self.context['llm'])
-                    current_data['harmony_reasoning'] = harmony_reasoning
-                    self.logger.info("🎹 Harmony generation completed")
-                except Exception as e:
-                    self.logger.warning(f"Failed to generate harmony: {e}")
-                    current_data['harmony_reasoning'] = "Harmony generation failed"
             
             return current_data
             
@@ -255,7 +252,8 @@ class PipelineEngine:
         if hasattr(node, 'iteration') and hasattr(node, 'target_quality'):
             quality_score = output_data.get('quality_score', 0)
             target_quality = node.target_quality
-            return quality_score >= target_quality
+            if target_quality is not None:
+                return quality_score >= target_quality
         return False
     
     def generate_harmony(self, llm) -> str:
@@ -338,7 +336,7 @@ class PipelineEngine:
     
     def _parse_harmony_response(self, response: str) -> str:
         """
-        Parse the LLM response and extract structured data like the old harmony implementation.
+        Parse the LLM response and extract structured data.
         
         Args:
             response: Raw LLM response
@@ -378,7 +376,8 @@ class PipelineEngine:
                     harmony_text.append("")
             
             if 'final_poem' in data:
-                harmony_text.append(f"Final Poem: {data['final_poem']}")
+                harmony_text.append(f"Final Poem:")
+                harmony_text.append(data['final_poem'])
                 harmony_text.append("")
             
             if 'conclusion' in data:
@@ -391,9 +390,11 @@ class PipelineEngine:
                 return response
                 
         except json.JSONDecodeError as e:
+            self.logger.error(f"Failed to parse JSON in harmony response: {e}")
             # Fallback to raw response if JSON parsing fails
             return response
         except Exception as e:
+            self.logger.error(f"Failed to parse harmony response: {e}")
             # Fallback to raw response if any parsing fails
             return response
     

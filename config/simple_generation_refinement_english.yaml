@@ -3,7 +3,7 @@
 
 # llm:
 #   provider: "groq"
-#   model: meta-llama/Llama-4-Maverick-17B-128E-Instruct  # From llms.json
+#   model: llama-3.3-70b-versatile  # From llms.json
 #   api_key: "${GROQ_API_KEY}"  # Load from environment variable
 #   api_base: "https://api.groq.com/v1"
 #   temperature: 1
@@ -76,4 +76,4 @@ interface:
   dataset_path: "dataset/diwan.json"
   output_path: "tools/labeler/diwanai.json"
 
-language: "english"
+language: "arabic"

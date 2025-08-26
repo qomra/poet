@@ -64,6 +64,10 @@ class PoemEvaluator(Node):
         poem = input_data.get('poem')
         constraints = input_data.get('constraints')
         
+        # Debug: Log what poem we're evaluating
+        if poem:
+            self.logger.info(f"🔍 Evaluating poem verses: {poem.verses}")
+        
         if not poem:
             raise ValueError("poem not found in input_data")
         if not constraints:
@@ -79,7 +83,7 @@ class PoemEvaluator(Node):
         iteration_text = f" (Iteration {self.iteration})" if self.iteration else ""
         self.logger.info(f"📊 Quality Score{iteration_text}: {quality_score:.3f}")
         
-        if self.target_quality:
+        if self.target_quality is not None:
             if quality_score >= self.target_quality:
                 self.logger.info(f"🎯 Quality target {self.target_quality:.3f} MET! Stopping refinement.")
             else:
@@ -138,7 +142,7 @@ class PoemEvaluator(Node):
             prosody_issues=[],
             line_count_issues=[],
             qafiya_issues=[],
-            overall_score=1.0,
+            overall_score=None,  # Let the quality calculation determine this
             is_acceptable=True,
             recommendations=[],
             prosody_validation=prosody_validation,
@@ -187,34 +191,6 @@ class PoemEvaluator(Node):
         self.logger.info(f"  🎯 Final quality score: {final_score:.3f}")
         
         return final_score
-    
-    def _generate_reasoning(self, input_data: Dict[str, Any], output_data: Dict[str, Any]) -> str:
-        """Generate natural reasoning for this evaluation node."""
-        iteration_text = f" (Iteration {self.iteration})" if self.iteration else ""
-        quality_score = output_data.get('quality_score', 0)
-        target_quality = self.target_quality or 0.8
-        
-        reasoning = f"I evaluated the poem's quality{iteration_text}."
-        reasoning += f" The overall quality score is {quality_score:.2f}."
-        
-        if self.target_quality:
-            if quality_score >= target_quality:
-                reasoning += f" This meets the target quality threshold of {target_quality}."
-            else:
-                reasoning += f" This does not meet the target quality threshold of {target_quality}, so refinement should continue."
-        
-        # Add specific evaluation details
-        evaluation = output_data.get('evaluation')
-        if evaluation:
-            if evaluation.prosody_validation:
-                prosody_valid = evaluation.prosody_validation.overall_valid
-                reasoning += f" Prosody validation: {'Passed' if prosody_valid else 'Failed'}."
-            
-            if evaluation.qafiya_validation:
-                qafiya_valid = evaluation.qafiya_validation.overall_valid
-                reasoning += f" Qafiya validation: {'Passed' if qafiya_valid else 'Failed'}."
-        
-        return reasoning
     
     def _summarize_input(self) -> str:
         """Summarize input data for harmony."""

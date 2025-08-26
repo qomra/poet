@@ -110,6 +110,8 @@ class ProsodyEvaluator:
         Note: Quality assessment is now handled by PoemEvaluator.
         """
         
+        logger.info(f"🎵 Starting prosody validation for bahr: {bahr}")
+        
         # Get bahr class
         bahr_class = self._get_bahr_class(bahr)
         if not bahr_class:
@@ -132,18 +134,26 @@ class ProsodyEvaluator:
         valid_baits = 0
         invalid_baits = 0
         
-        for bait in poem.get_baits():
+        baits = poem.get_baits()
+        logger.info(f"🎵 Validating {len(baits)} baits")
+        
+        for i, bait in enumerate(baits, 1):
+            logger.info(f"🎵 Validating bait {i}: {bait}")
             result = self._validate_bait(bait, bahr_class)
             bait_results.append(result)
             
             if result.is_valid:
                 valid_baits += 1
+                logger.info(f"✅ Bait {i} is valid")
             else:
                 invalid_baits += 1
+                logger.info(f"❌ Bait {i} is invalid: {result.error_details}")
         
         # Create validation result
         overall_valid = invalid_baits == 0
         validation_summary = self._generate_validation_summary(valid_baits, invalid_baits, bahr, bait_results)
+        
+        logger.info(f"🎵 Validation complete: {valid_baits} valid, {invalid_baits} invalid")
         
         prosody_result = ProsodyValidationResult(
             overall_valid=overall_valid,
@@ -213,7 +223,7 @@ class ProsodyEvaluator:
             return validation_result
             
         except Exception as e:
-            logger.error(f"🎵 Error validating bait: {e}")
+            logger.error(f"Error validating bait: {e}")
             return BaitValidationResult(
                 bait_text="#".join(bait),
                 is_valid=False,
@@ -251,7 +261,7 @@ class ProsodyEvaluator:
             return f"نمط ثنائي: {pattern}"
             
         except Exception as e:
-            logger.error(f"📏 Error converting pattern to tafeelat: {e}")
+            logger.error(f"Error converting pattern to tafeelat: {e}")
             return f"نمط ثنائي: {pattern}"
     
     def _get_bahr_zehaf_elal_info(self, bahr_class) -> str:
@@ -291,7 +301,7 @@ class ProsodyEvaluator:
             return "\n".join(info_parts)
             
         except Exception as e:
-            logger.error(f"🎵 Error getting bahr zehaf/elal info: {e}")
+            logger.error(f"Error getting bahr zehaf/elal info: {e}")
             return "معلومات الزحاف والإعل غير متوفرة"
     
     def _validate_bait_with_llm(self, bait_text: str, bahr_name: str, bahr_pattern: str) -> BaitValidationResult:
@@ -299,7 +309,7 @@ class ProsodyEvaluator:
         try:
             # Check if LLM is available
             if not self.llm:
-                logger.warning("⚠️ No LLM provider available, using fallback validation")
+                logger.warning("No LLM provider available, using fallback validation")
                 return BaitValidationResult(
                     bait_text=bait_text,
                     is_valid=False,
@@ -349,7 +359,7 @@ class ProsodyEvaluator:
                 
                 # If still no JSON found, try to create a fallback response
                 if not response_text.startswith('{'):
-                    logger.warning(f"📄 LLM returned non-JSON response: {response_text[:100]}...")
+                    logger.warning(f"LLM returned non-JSON response: {response_text[:100]}...")
                     # Create a fallback response based on the Arabic text
                     if "صحيح" in response_text or "مطابق" in response_text:
                         response_text = '{"is_valid": true, "pattern": "", "error_details": null}'
@@ -374,8 +384,8 @@ class ProsodyEvaluator:
                     raise ValueError("Response is not a dictionary")
                     
             except (json.JSONDecodeError, ValueError) as e:
-                logger.error(f"📝 Failed to parse LLM response: {e}")
-                logger.error(f"📄 Response text: {response_text}")
+                logger.error(f"Failed to parse LLM response: {e}")
+                logger.error(f"Response text: {response_text}")
                 return BaitValidationResult(
                     bait_text=bait_text,
                     is_valid=False,
@@ -385,7 +395,7 @@ class ProsodyEvaluator:
                 )
                 
         except Exception as e:
-            logger.error(f"🎤 Error in LLM validation: {e}")
+            logger.error(f"Error in LLM validation: {e}")
             return BaitValidationResult(
                 bait_text=bait_text,
                 is_valid=False,

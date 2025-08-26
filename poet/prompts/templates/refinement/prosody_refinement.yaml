@@ -1,20 +1,82 @@
 name: prosody_refinement
-description: Refine poem prosody to improve meter
-language: arabic
-category: refinement
+description: "تحسين الوزن العروضي للقصيدة العربية"
 template: |
-  أنت خبير في العروض العربي. مهمتك هي تحسين الوزن العروضي للقصيدة.
+  أنت خبير في العروض العربي وتنقيح الشعر. مهمتك هي إصلاح الانتهاكات العروضية في القصيدة العربية المقدمة.
 
-  القصيدة الحالية:
-  {poem_text}
+  **القصيدة المراد تنقيحها:**
+  {existing_verses}
 
-  البحر المطلوب: {meter}
+  **البحر المطلوب:**
+  {meter}
 
-  المشاكل العروضية:
-  {prosody_issues}
+  **نمط البحر (التفعيلات):**
+  {meeter_tafeelat}
 
-  التكرار: {iteration}
+  **القافية المطلوبة:**
+  {qafiya}
 
-  قم بتحسين القصيدة لتصحيح المشاكل العروضية والالتزام بالبحر المطلوب.
+  **نوع القافية:**
+  {qafiya_type}
 
-  أجب بالقصيدة المحسنة فقط، كل بيت في سطر منفصل.
+  **وصف نوع القافية وأمثلة:**
+  {qafiya_type_description_and_examples}
+
+  **حركة القافية:**
+  {qafiya_harakah}
+
+  **الموضوع:**
+  {theme}
+
+  **النبرة:**
+  {tone}
+
+  **السياق:**
+  {context}
+
+  **التعليمات:**
+  1. حلل الانتهاكات العروضية في الأبيات الموجودة
+  2. أصلح الوزن ليتطابق مع النمط المطلوب
+  3. حافظ على المعنى والموضوع الأصلي
+  4. تأكد من اتساق القافية
+  5. طبق التشكيل العربي الصحيح
+
+  **تنسيق الإجابة:**
+  أجب بالتنسيق JSON التالي:
+  ```json
+  {{
+    "verses": [
+      "البيت الأول المنقح",
+      "البيت الثاني المنقح"
+    ],
+    "changes_made": "وصف الإصلاحات العروضية",
+    "meter_compliance": "شرح إصلاحات الوزن",
+    "rhyme_compliance": "شرح إصلاحات القافية"
+  }}
+  ```
+
+  **ملاحظات مهمة:**
+  - حافظ على المعنى والموضوع الأصلي
+  - أصلح فقط الانتهاكات العروضية
+  - تأكد من تطابق الوزن مع النمط المطلوب
+  - حافظ على اتساق القافية
+  - طبق التشكيل الصحيح
+
+  الآن قم بتنقيح الوزن العروضي للقصيدة:
+
+category: refinement
+parameters:
+  - existing_verses
+  - meter
+  - meeter_tafeelat
+  - qafiya
+  - qafiya_type
+  - qafiya_type_description_and_examples
+  - qafiya_harakah
+  - theme
+  - tone
+  - context
+metadata:
+  version: "1.0"
+  language: "arabic"
+  complexity: "medium"
+  focus: "prosody_refinement"
