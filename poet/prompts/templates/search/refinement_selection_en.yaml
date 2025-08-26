@@ -1,0 +1,54 @@
+name: refinement_selection_en
+description: "Select the best refinement path from multiple refinement strategies"
+template: |
+  You are an expert in Arabic poetry refinement. Your task is to select the best refinement path from multiple strategies based on final results.
+  
+  **Required Constraints:**
+  - Meter: {meter}
+  - Rhyme: {qafiya}
+  - Line count: {line_count}
+  
+  **Refinement Paths:**
+  {candidates_data}
+  
+  **Selection Criteria:**
+  - Improvement in final quality
+  - Efficiency of refinement process
+  - Stability of results
+  - Comprehensiveness of improvements
+  
+  **Important Instructions:**
+  1. Compare each refinement path against the required criteria
+  2. Examine improvement in final quality
+  3. Evaluate efficiency of refinement process
+  4. Select the best path based on metric: {selection_metric}
+  
+  **Required Response Format:**
+  Answer in the following format exactly:
+  ```json
+  {{
+    "selected_candidate": 0,
+    "reasoning": "Detailed explanation for selecting this path",
+    "improvement_analysis": "Analysis of improvements achieved",
+    "final_quality_scores": {{
+      "candidate_0": 0.85,
+      "candidate_1": 0.72,
+      "candidate_2": 0.91,
+      "candidate_3": 0.68
+    }}
+  }}
+  ```
+  
+  **Note:** Path number starts from 0 (candidate_0, candidate_1, etc.)
+category: search
+parameters:
+  - meter
+  - qafiya
+  - line_count
+  - candidates_data
+  - selection_metric
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "refinement_selection"

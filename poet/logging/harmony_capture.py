@@ -151,6 +151,10 @@ class PipelineExecution:
             return f"<max_depth_exceeded: {type(value).__name__}>"
         
         try:
+            # Handle None values
+            if value is None:
+                return None
+            
             # Handle common non-serializable types
             if hasattr(value, '__class__') and 'threading' in str(value.__class__.__module__):
                 return f"<threading_object: {type(value).__name__}>"
@@ -158,7 +162,11 @@ class PipelineExecution:
                 return f"<logging_object: {type(value).__name__}>"
             
             if hasattr(value, 'to_dict'):
-                return value.to_dict()
+                result = value.to_dict()
+                if result is None:
+                    print(f"Warning: to_dict() returned None for {type(value).__name__}")
+                    return f"<to_dict_returned_none: {type(value).__name__}>"
+                return result
             elif hasattr(value, '__dict__'):
                 return {k: self._serialize_value(v, _depth + 1) for k, v in value.__dict__.items() 
                        if not k.startswith('_')}
@@ -169,6 +177,7 @@ class PipelineExecution:
             else:
                 return value
         except Exception as e:
+            print(f"Warning: Serialization error for {type(value).__name__}: {e}")
             return f"<serialization_error: {str(e)}>"
 
 class ExecutionCapture:

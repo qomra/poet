@@ -1,0 +1,59 @@
+name: generation_selection
+description: "Select the best generated poem from multiple candidates"
+template: |
+  أنت خبير في تقييم الشعر العربي. مهمتك اختيار أفضل قصيدة من عدة مرشحين بناءً على المعايير المحددة.
+  
+  **القيود المطلوبة:**
+  - البحر: {meter}
+  - القافية: {qafiya}
+  - عدد الأبيات: {line_count}
+  - الموضوع: {theme}
+  - النبرة: {tone}
+  
+  **المرشحون:**
+  {candidates_data}
+  
+  **معايير الاختيار:**
+  - الالتزام بالبحر والقافية
+  - جودة اللغة والأسلوب
+  - تناسق المعنى والموضوع
+  - الإبداع والجمالية
+  
+  **تعليمات مهمة:**
+  1. قارن كل مرشح بالمعايير المطلوبة
+  2. افحص الالتزام بالبحر والقافية
+  3. قيّم جودة اللغة والأسلوب
+  4. اختر المرشح الأفضل بناءً على المعيار: {selection_metric}
+  
+  **نمط الإجابة المطلوب:**
+  أجب بالتنسيق التالي بدقة:
+  ```json
+  {{
+    "selected_candidate": 0,
+    "reasoning": "شرح مفصل لسبب اختيار هذا المرشح",
+    "comparison_summary": "ملخص مقارنة بين المرشحين",
+    "quality_scores": {{
+      "candidate_0": 0.85,
+      "candidate_1": 0.72,
+      "candidate_2": 0.91,
+      "candidate_3": 0.68,
+      "candidate_4": 0.79
+    }}
+  }}
+  ```
+  
+  **ملاحظة:** رقم المرشح يبدأ من 0 (candidate_0, candidate_1, إلخ)
+category: search
+parameters:
+  - meter
+  - qafiya
+  - line_count
+  - theme
+  - tone
+  - candidates_data
+  - selection_metric
+metadata:
+  version: "1.0"
+  language: "arabic"
+  complexity: "medium"
+  focus: "poem_selection"

@@ -1,0 +1,21 @@
+name: qafiya_selection
+description: Select appropriate qafiya based on constraints
+language: arabic
+category: analysis
+template: |
+  أنت خبير في القوافي العربية. مهمتك هي اختيار القافية المناسبة بناءً على القيود المحددة.
+
+  القيود:
+  - الموضوع: {theme}
+  - البحر: {meter}
+  - النبرة: {tone}
+
+  قم باختيار القافية المناسبة التي تتناسب مع الموضوع والبحر والنبرة.
+
+  أجب بتنسيق JSON فقط:
+
+  {{
+    "qafiya": "القافية المختارة"
+  }}
+
+  **مهم: أجب بـ JSON object فقط. لا نص آخر قبل أو بعد.**

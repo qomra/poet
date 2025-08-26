@@ -1,0 +1,54 @@
+name: refinement_selection
+description: "Select the best refinement path from multiple refinement strategies"
+template: |
+  أنت خبير في تحسين الشعر العربي. مهمتك اختيار أفضل مسار تحسين من عدة استراتيجيات بناءً على النتائج النهائية.
+  
+  **القيود المطلوبة:**
+  - البحر: {meter}
+  - القافية: {qafiya}
+  - عدد الأبيات: {line_count}
+  
+  **مسارات التحسين:**
+  {candidates_data}
+  
+  **معايير الاختيار:**
+  - التحسن في الجودة النهائية
+  - كفاءة عملية التحسين
+  - استقرار النتائج
+  - شمولية التحسينات
+  
+  **تعليمات مهمة:**
+  1. قارن كل مسار تحسين بالمعايير المطلوبة
+  2. افحص التحسن في الجودة النهائية
+  3. قيّم كفاءة عملية التحسين
+  4. اختر المسار الأفضل بناءً على المعيار: {selection_metric}
+  
+  **نمط الإجابة المطلوب:**
+  أجب بالتنسيق التالي بدقة:
+  ```json
+  {{
+    "selected_candidate": 0,
+    "reasoning": "شرح مفصل لسبب اختيار هذا المسار",
+    "improvement_analysis": "تحليل التحسينات المحققة",
+    "final_quality_scores": {{
+      "candidate_0": 0.85,
+      "candidate_1": 0.72,
+      "candidate_2": 0.91,
+      "candidate_3": 0.68
+    }}
+  }}
+  ```
+  
+  **ملاحظة:** رقم المسار يبدأ من 0 (candidate_0, candidate_1, إلخ)
+category: search
+parameters:
+  - meter
+  - qafiya
+  - line_count
+  - candidates_data
+  - selection_metric
+metadata:
+  version: "1.0"
+  language: "arabic"
+  complexity: "medium"
+  focus: "refinement_selection"

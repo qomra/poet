@@ -1,0 +1,21 @@
+name: qafiya_selection
+description: Select appropriate qafiya based on constraints
+language: english
+category: analysis
+template: |
+  You are an expert in Arabic rhymes. Your task is to select the appropriate qafiya based on the specified constraints.
+
+  Constraints:
+  - Theme: {theme}
+  - Meter: {meter}
+  - Tone: {tone}
+
+  Choose the appropriate qafiya that fits the theme, meter, and tone.
+
+  Answer in JSON format only:
+
+  {{
+    "qafiya": "selected qafiya"
+  }}
+
+  **Important: Answer with JSON object only. No other text before or after.**

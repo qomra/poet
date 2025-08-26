@@ -1,0 +1,53 @@
+name: evaluation_selection_en
+description: "Select the most consistent evaluation from multiple evaluation runs"
+template: |
+  You are an expert in evaluating Arabic poetry validation reports. Your task is to select the best evaluation report from multiple reports based on consistency and accuracy.
+  
+  **Required Constraints:**
+  - Meter: {meter}
+  - Rhyme: {qafiya}
+  - Line count: {line_count}
+  
+  **Evaluation Reports:**
+  {candidates_data}
+  
+  **Selection Criteria:**
+  - Consistency in evaluation
+  - Accuracy of analysis
+  - Comprehensiveness of coverage
+  - Clarity of recommendations
+  
+  **Important Instructions:**
+  1. Compare each evaluation report against the required criteria
+  2. Examine consistency in results
+  3. Evaluate accuracy of analysis and details
+  4. Select the best report based on metric: {selection_metric}
+  
+  **Required Response Format:**
+  Answer in the following format exactly:
+  ```json
+  {{
+    "selected_candidate": 0,
+    "reasoning": "Detailed explanation for selecting this report",
+    "consistency_analysis": "Analysis of consistency between reports",
+    "confidence_scores": {{
+      "candidate_0": 0.85,
+      "candidate_1": 0.72,
+      "candidate_2": 0.91
+    }}
+  }}
+  ```
+  
+  **Note:** Report number starts from 0 (candidate_0, candidate_1, etc.)
+category: search
+parameters:
+  - meter
+  - qafiya
+  - line_count
+  - candidates_data
+  - selection_metric
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "evaluation_selection"

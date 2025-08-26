@@ -1,104 +1,39 @@
 # poet/refinement/line_count.py
 
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Dict, Any, Optional
+from poet.core.node import Node
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
-from poet.prompts import get_global_prompt_manager
-from poet.llm.base_llm import BaseLLM
-from poet.core.node import Node
 from poet.models.quality import QualityAssessment
 
 
 class LineCountRefiner(Node):
-    """Fixes poems with incorrect number of lines"""    
+    """
+    Refines poem line count to match constraints.
     
-    def __init__(self, llm: BaseLLM, **kwargs):
+    Supports iteration context for refinement pipelines.
+    """
+    
+    def __init__(self, llm, prompt_manager=None, iteration: int = None, **kwargs):
         super().__init__(**kwargs)
+        
         self.llm = llm
-        self.prompt_manager = get_global_prompt_manager()
-        self.logger.setLevel(logging.INFO)
-    
-    @property
-    def name(self) -> str:
-        return "line_count_refiner"
-    
-    @name.setter
-    def name(self, value: str):
-        """Set the refiner name (ignored, always returns custom name)"""
-        pass
-    
-    def should_refine(self,evaluation: QualityAssessment) -> bool:
-        """Check if line count needs fixing"""
-        if not evaluation.line_count_validation:
-            return False
-        return not evaluation.line_count_validation.is_valid
-    
-    async def refine(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
-        """Fix line count by adding or removing verses"""
-        try:
-            target_count = constraints.line_count or 4
-            current_count = len(poem.verses)
-            
-            self.logger.info(f"Fixing line count: current={current_count}, target={target_count}")
-            
-            if current_count == target_count:
-                return poem
-            
-            if current_count < target_count:
-                return await self._add_verses(poem, constraints, target_count - current_count)
-            else:
-                return await self._remove_verses(poem, constraints, current_count - target_count)
-                
-        except Exception as e:
-            self.logger.error(f"Failed to refine line count: {e}")
-            return poem  # Return original poem if refinement fails
-
-    def _parse_verses_from_response(self, response: str) -> List[str]:
-        """Parse verses from LLM response"""
-        try:
-            # Extract JSON from response
-            import json
-            json_start = response.find('{')
-            json_end = response.rfind('}') + 1
-            
-            if json_start == -1 or json_end == 0:
-                # Fallback: split by newlines
-                return [line.strip() for line in response.split('\n') if line.strip()]
-            
-            json_str = response[json_start:json_end]
-            data = json.loads(json_str)
-            
-            if 'verses' in data:
-                return data['verses']
-            else:
-                # Fallback: split by newlines
-                return [line.strip() for line in response.split('\n') if line.strip()]
-                
-        except Exception as e:
-            self.logger.error(f"Failed to parse verses from response: {e}")
-            # Fallback: split by newlines
-            return [line.strip() for line in response.split('\n') if line.strip()] 
+        self.prompt_manager = prompt_manager
+        self.iteration = iteration
     
     def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Execute the line count refiner node.
+        Refine poem line count.
         
         Args:
-            input_data: Input data containing poem and constraints
+            input_data: Input data containing poem, constraints, and evaluation
             context: Pipeline context
             
         Returns:
             Output data with refined poem
         """
-        # Set up context
-        self.llm = context.get('llm')
-        self.prompt_manager = context.get('prompt_manager') or PromptManager()
-        
-        if not self.llm:
-            raise ValueError("LLM not provided in context")
-        
-        # Extract required data
+        # Validate inputs
         poem = input_data.get('poem')
         constraints = input_data.get('constraints')
         evaluation = input_data.get('evaluation')
@@ -108,107 +43,128 @@ class LineCountRefiner(Node):
         if not constraints:
             raise ValueError("constraints not found in input_data")
         
-        # Check if refinement is needed
-        if evaluation and not self.should_refine(evaluation):
-            self.logger.info(f"{self.name}: No line count refinement needed")
+        # Check if line count refinement is needed
+        if not self.should_refine(poem, constraints):
+            self.logger.info("ℹ️ Line count refinement not needed")
             return {
                 'poem': poem,
                 'refined': False,
-                'refinement_iterations': 0
+                'refiner_used': 'line_count_refiner'
             }
         
-        # Apply refinement
-        try:
-            refined_poem = self._apply_sync_refinement(poem, constraints, evaluation)
-            
-            return {
-                'poem': refined_poem,
-                'refined': True,
-                'refinement_iterations': 1
-            }
-        except Exception as e:
-            self.logger.error(f"{self.name}: Line count refinement failed: {e}")
-            return {
-                'poem': poem,
-                'refined': False,
-                'refinement_iterations': 0
-            }
+        # Perform line count refinement
+        refined_poem = self._refine_line_count(poem, constraints)
+        
+        # Store harmony data
+        output_data = {
+            'poem': refined_poem,
+            'refined': True,
+            'refiner_used': 'line_count_refiner',
+            'iteration': self.iteration
+        }
+        
+        self._store_harmony_data(input_data, output_data)
+        
+        return output_data
     
-    def _apply_sync_refinement(self, poem: LLMPoem, constraints: Constraints, evaluation: QualityAssessment) -> LLMPoem:
-        """
-        Apply line count refinement synchronously.
-        """
-        if not evaluation.line_count_validation:
-            return poem
+    def should_refine(self, poem: LLMPoem, constraints: Constraints) -> bool:
+        """Check if line count refinement is needed."""
+        current_lines = len(poem.verses)
+        target_lines = constraints.line_count or 4  # Default to 4 lines
         
-        # Check if line count is correct
-        if poem.evaluate_line_count():
-            return poem
+        return current_lines != target_lines
+    
+    def _refine_line_count(self, poem: LLMPoem, constraints: Constraints) -> LLMPoem:
+        """Refine the poem's line count."""
+        self.logger.info("📏 Refining poem line count")
         
-        self.logger.info("Fixing line count - ensuring even number of verses")
-        
-        # Get target line count from constraints or use default
-        target_lines = getattr(constraints, 'line_count', 4)
-        if target_lines % 2 != 0:
-            target_lines = target_lines + 1  # Ensure even number
-        
+        target_lines = constraints.line_count or 4
         current_lines = len(poem.verses)
         
-        if current_lines < target_lines:
-            # Add more verses
-            additional_verses = self._generate_additional_verses(poem, constraints, target_lines - current_lines)
-            fixed_verses = poem.verses + additional_verses
-        elif current_lines > target_lines:
-            # Remove extra verses (keep even number)
-            target_lines = max(2, target_lines - (target_lines % 2))  # Ensure even
-            fixed_verses = poem.verses[:target_lines]
-        else:
-            # Already correct
-            return poem
-        
-        # Create new poem
-        return LLMPoem(
-            verses=fixed_verses,
-            llm_provider=poem.llm_provider,
-            model_name=poem.model_name,
-            constraints=poem.constraints,
-            generation_timestamp=poem.generation_timestamp
-        )
-    
-    def _generate_additional_verses(self, poem: LLMPoem, constraints: Constraints, count: int) -> List[str]:
-        """Generate additional verses to reach target line count"""
-        if count <= 0:
-            return []
-        
-        # Format prompt for generating additional verses
-        formatted_prompt = self.prompt_manager.format_prompt(
+        # Create refinement prompt
+        refinement_prompt = self.prompt_manager.format_prompt(
             'line_count_refinement',
-            meter=constraints.meter or "غير محدد",
-            qafiya=constraints.qafiya or "غير محدد",
-            theme=constraints.theme or "غير محدد",
-            tone=constraints.tone or "غير محدد",
-            existing_verses="\n".join(poem.verses),
-            additional_verses_needed=count,
-            context="إضافة أبيات جديدة للحفاظ على الوزن والقافية"
+            poem_text=poem.get_text(),
+            current_lines=current_lines,
+            target_lines=target_lines,
+            theme=constraints.theme,
+            meter=constraints.meter,
+            qafiya=constraints.qafiya,
+            iteration=self.iteration or 1
         )
         
-        # Generate additional verses
-        response = self.llm.generate(formatted_prompt)
-        additional_verses = self._parse_verses_from_response(response)
+        # Generate refined poem
+        response = self.llm.generate(refinement_prompt)
         
-        # Ensure we get the right number of verses
-        if len(additional_verses) >= count:
-            return additional_verses[:count]
+        # Parse response and create new poem
+        refined_verses = self._parse_refinement_response(response)
+        
+        # Create refined poem
+        refined_poem = LLMPoem(
+            verses=refined_verses,
+            llm_provider=self.llm.__class__.__name__,
+            model_name=getattr(self.llm, 'model_name', 'unknown'),
+            constraints={
+                'theme': poem.constraints.get('theme') if poem.constraints else None,
+                'meter': poem.constraints.get('meter') if poem.constraints else None,
+                'qafiya': poem.constraints.get('qafiya') if poem.constraints else None
+            }
+        )
+        
+        self.logger.info("✅ Line count refinement completed")
+        return refined_poem
+    
+    def _parse_refinement_response(self, response: str) -> list:
+        """Parse the refinement response into verses."""
+        # Simple parsing - split by lines and group into verses
+        lines = [line.strip() for line in response.split('\n') if line.strip()]
+        
+        # Group lines into verses (assuming 2 lines per verse)
+        verses = []
+        for i in range(0, len(lines), 2):
+            if i + 1 < len(lines):
+                verses.append([lines[i], lines[i + 1]])
+            else:
+                verses.append([lines[i]])
+        
+        return verses
+    
+    def _generate_reasoning(self, input_data: Dict[str, Any], output_data: Dict[str, Any]) -> str:
+        """Generate natural reasoning for this refiner node."""
+        iteration_text = f" (Iteration {self.iteration})" if self.iteration else ""
+        refined = output_data.get('refined', False)
+        
+        if refined:
+            reasoning = f"I refined the poem's line count{iteration_text}."
+            reasoning += " I adjusted the number of lines to match the specified constraints."
         else:
-            # If not enough verses generated, pad with simple verses
-            while len(additional_verses) < count:
-                additional_verses.append("بيت إضافي للحفاظ على الوزن")
-            return additional_verses
+            reasoning = f"I checked the poem's line count{iteration_text}."
+            reasoning += " The line count was already correct, so no refinement was needed."
+        
+        return reasoning
+    
+    def _summarize_input(self) -> str:
+        """Summarize input data for harmony."""
+        if not self.harmony_data['input']:
+            return "No input data"
+        
+        poem = self.harmony_data['input'].get('poem')
+        if poem:
+            return f"Refined line count for poem with {len(poem.verses)} verses"
+        return "Refined line count"
+    
+    def _summarize_output(self) -> str:
+        """Summarize output data for harmony."""
+        if not self.harmony_data['output']:
+            return "No output data"
+        
+        refined = self.harmony_data['output'].get('refined', False)
+        return f"Line count refinement: {'Applied' if refined else 'Not needed'}"
     
     def get_required_inputs(self) -> list:
         """Get list of required input keys for this node."""
-        return ['poem', 'constraints', 'evaluation']
+        return ['poem', 'constraints']
     
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""
-        return ['poem', 'refined', 'refinement_iterations']
+        return ['poem', 'refined', 'refiner_used', 'iteration']

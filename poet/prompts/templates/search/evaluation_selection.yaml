@@ -1,0 +1,53 @@
+name: evaluation_selection
+description: "Select the most consistent evaluation from multiple evaluation runs"
+template: |
+  أنت خبير في تقييم تقارير التحقق من الشعر العربي. مهمتك اختيار أفضل تقرير تقييم من عدة تقارير بناءً على الاتساق والدقة.
+  
+  **القيود المطلوبة:**
+  - البحر: {meter}
+  - القافية: {qafiya}
+  - عدد الأبيات: {line_count}
+  
+  **تقارير التقييم:**
+  {candidates_data}
+  
+  **معايير الاختيار:**
+  - الاتساق في التقييم
+  - دقة التحليل
+  - شمولية التغطية
+  - وضوح التوصيات
+  
+  **تعليمات مهمة:**
+  1. قارن كل تقرير تقييم بالمعايير المطلوبة
+  2. افحص الاتساق في النتائج
+  3. قيّم دقة التحليل والتفاصيل
+  4. اختر التقرير الأفضل بناءً على المعيار: {selection_metric}
+  
+  **نمط الإجابة المطلوب:**
+  أجب بالتنسيق التالي بدقة:
+  ```json
+  {{
+    "selected_candidate": 0,
+    "reasoning": "شرح مفصل لسبب اختيار هذا التقرير",
+    "consistency_analysis": "تحليل الاتساق بين التقارير",
+    "confidence_scores": {{
+      "candidate_0": 0.85,
+      "candidate_1": 0.72,
+      "candidate_2": 0.91
+    }}
+  }}
+  ```
+  
+  **ملاحظة:** رقم التقرير يبدأ من 0 (candidate_0, candidate_1, إلخ)
+category: search
+parameters:
+  - meter
+  - qafiya
+  - line_count
+  - candidates_data
+  - selection_metric
+metadata:
+  version: "1.0"
+  language: "arabic"
+  complexity: "medium"
+  focus: "evaluation_selection"

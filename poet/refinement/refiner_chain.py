@@ -1,342 +1,166 @@
 import logging
-from typing import List, Tuple, Optional, Dict, Any
-from poet.refinement.base import BaseRefiner, RefinementStep
+from typing import List, Dict, Any, Optional
+from poet.core.node import Node
 from poet.models.poem import LLMPoem
 from poet.models.constraints import Constraints
 from poet.models.quality import QualityAssessment
-from poet.evaluation.poem import PoemEvaluator, EvaluationType
 
-from poet.core.node import Node
 
 class RefinerChain(Node):
-    """Manages sequential execution of refiners"""
+    """
+    Configuration parser that builds a sequence of refinement nodes.
+    
+    This node doesn't execute refinement logic itself, but instead builds
+    a flat sequence of individual nodes that can be executed by the pipeline.
+    
+    Example configuration:
+    refiner_chain:
+      refiners: [prosody_refiner, qafiya_refiner]
+      max_iterations: 3
+      target_quality: 0.85
+    
+    This translates to 9 nodes:
+    - poem_evaluation_1, prosody_refiner_1, qafiya_refiner_1
+    - poem_evaluation_2, prosody_refiner_2, qafiya_refiner_2  
+    - poem_evaluation_3, prosody_refiner_3, qafiya_refiner_3
+    """
     
     def __init__(self, llm, refiners=None, max_iterations: int = 3, target_quality: float = 0.8, **kwargs):
-        # Remove max_iterations from kwargs to avoid duplicate parameter error
-        kwargs.pop('max_iterations', None)
+        kwargs.pop('max_iterations', None)  # Avoid duplicate parameter
         super().__init__(**kwargs)
+        
         self.llm = llm
         self.max_iterations = max_iterations
         self.target_quality = target_quality
         
-        # Handle refiners parameter - it might be a list of strings from config
+        # Handle refiners parameter - can be list of strings (names) or actual refiner objects
         if isinstance(refiners, list) and all(isinstance(r, str) for r in refiners):
-            # This is a list of refiner names from config, we'll create them later
             self.refiner_names = refiners
-            self.refiners = []
         else:
-            # This is a list of actual refiner objects
-            self.refiner_names = []
-            self.refiners = refiners or []
-        
-        # Initialize evaluator
-        self.evaluator = PoemEvaluator(self.llm, metrics=['prosody', 'qafiya'])
+            self.refiner_names = ['prosody_refiner', 'qafiya_refiner']
     
-    async def refine(self, 
-                     poem: LLMPoem, 
-                     constraints: Constraints,
-                     target_quality: float = 0.8) -> Tuple[LLMPoem, List[RefinementStep]]:
+    def build_refinement_sequence(self, context: Dict[str, Any]) -> List[Node]:
         """
-        Iteratively refine poem until quality target is met or max iterations reached
-        """
-        current_poem = poem
-        refinement_history = []
-        
-        for iteration in range(self.max_iterations):            
-            # Evaluate current poem
-            evaluated_poem = self.evaluator.evaluate_poem(
-                current_poem, 
-                constraints,
-                [EvaluationType.PROSODY, EvaluationType.QAFIYA]
-            )
-            
-            # Check if quality target met
-            quality_score = self._calculate_quality_score(evaluated_poem.quality)
-            self.logger.info(f"Current quality score: {quality_score:.3f}, target: {target_quality}")
-            
-            if quality_score >= target_quality:
-                self.logger.info("Quality target reached, stopping refinement")
-                break
-            
-            # Apply refiners that are needed
-            iteration_refinements = []
-            for refiner in self.refiners:
-                if refiner.should_refine(evaluated_poem.quality):
-                    
-                    before_poem = current_poem
-                    refined_poem = await refiner.refine(current_poem, constraints, evaluated_poem.quality)
-                    
-                    # Create refinement step
-                    refinement_step = RefinementStep(
-                        refiner_name=refiner.name,
-                        iteration=iteration,
-                        before=before_poem,
-                        after=refined_poem,
-                        quality_before=quality_score,
-                        quality_after=None,
-                        details=f"Applied {refiner.name} to fix issues"
-                    )
-                    
-                    iteration_refinements.append(refinement_step)
-                    current_poem = refined_poem
-            
-            # If no refiners were applied, break to avoid infinite loop
-            if not iteration_refinements:
-                self.logger.info("No refiners applied, stopping refinement")
-                break
-            
-            # Add iteration refinements to history
-            refinement_history.extend(iteration_refinements)
-        
-        # Update quality_after for the last refinement step
-        if refinement_history:
-            final_evaluation = self.evaluator.evaluate_poem(
-                current_poem,
-                constraints,
-                [EvaluationType.PROSODY, EvaluationType.QAFIYA]
-            )
-            final_quality = self._calculate_quality_score(final_evaluation.quality)
-            refinement_history[-1].quality_after = final_quality
-        
-        self.logger.info(f"Refinement completed. Total steps: {len(refinement_history)}")
-        return current_poem, refinement_history
-    
-    def _calculate_quality_score(self, evaluation: QualityAssessment) -> float:
-        """Calculate overall quality score from evaluation"""
-        if not evaluation:
-            return 0.0
-        
-        # If overall_score is provided, use it directly
-        if hasattr(evaluation, 'overall_score') and evaluation.overall_score is not None:
-            return evaluation.overall_score
-        
-        # Otherwise, calculate score based on validation results
-        score = 1.0
-        
-        # Deduct for prosody issues
-        if evaluation.prosody_validation and not evaluation.prosody_validation.overall_valid:
-            # Count number of broken verses
-            broken_verses = 0
-            if hasattr(evaluation.prosody_validation, 'bait_results'):
-                for bait_result in evaluation.prosody_validation.bait_results:
-                    if not bait_result.is_valid:
-                        broken_verses += 1
-            
-            # Deduct based on proportion of broken verses
-            total_verses = len(evaluation.prosody_validation.bait_results) if evaluation.prosody_validation and evaluation.prosody_validation.bait_results else 1
-            prosody_penalty = min(0.4, (broken_verses / total_verses) * 0.4)
-            score -= prosody_penalty
-        
-        # Deduct for qafiya issues
-        if evaluation.qafiya_validation and not evaluation.qafiya_validation.overall_valid:
-            # Count number of wrong qafiya verses
-            wrong_qafiya_verses = 0
-            if hasattr(evaluation.qafiya_validation, 'bait_results'):
-                for bait_result in evaluation.qafiya_validation.bait_results:
-                    if not bait_result.is_valid:
-                        wrong_qafiya_verses += 1
-            
-            # Deduct based on proportion of wrong qafiya verses
-            total_verses = len(evaluation.qafiya_validation.bait_results) if evaluation.qafiya_validation and evaluation.qafiya_validation.bait_results else 1
-            qafiya_penalty = min(0.3, (wrong_qafiya_verses / total_verses) * 0.3)
-            score -= qafiya_penalty
-        
-        return max(0.0, score)
-    
-    def _create_refiner(self, refiner_name: str, context: Dict[str, Any]) -> Optional[BaseRefiner]:
-        """Create a refiner instance based on name."""
-        try:
-            if refiner_name == 'prosody_refiner':
-                from poet.refinement.prosody import ProsodyRefiner
-                refiner = ProsodyRefiner(self.llm, prompt_manager=context.get('prompt_manager'), max_iterations=1)
-            elif refiner_name == 'qafiya_refiner':
-                from poet.refinement.qafiya import QafiyaRefiner
-                refiner = QafiyaRefiner(self.llm, prompt_manager=context.get('prompt_manager'), max_iterations=1)
-            elif refiner_name == 'line_count_refiner':
-                from poet.refinement.line_count import LineCountRefiner
-                refiner = LineCountRefiner(self.llm, prompt_manager=context.get('prompt_manager'), max_iterations=1)
-            elif refiner_name == 'tashkeel_refiner':
-                from poet.refinement.tashkeel import TashkeelRefiner
-                refiner = TashkeelRefiner(self.llm, prompt_manager=context.get('prompt_manager'), max_iterations=1)
-            else:
-                self.logger.warning(f"Unknown refiner type: {refiner_name}")
-                return None
-            
-            # Set up context for the refiner
-            refiner.llm = self.llm
-            refiner.prompt_manager = context.get('prompt_manager')
-            
-            # Wrap the refiner with capture middleware if harmony capture is enabled
-            if hasattr(self, 'context') and self.context.get('harmony_capture_enabled', False):
-                from poet.logging.capture_middleware import capture_component
-                refiner = capture_component(refiner, refiner_name)
-            
-            return refiner
-            
-        except ImportError as e:
-            self.logger.error(f"Failed to import {refiner_name}: {e}")
-            return None
-        except Exception as e:
-            self.logger.error(f"Failed to create {refiner_name}: {e}")
-            return None
-    
-    def get_refinement_summary(self, refinement_history: List[RefinementStep]) -> dict:
-        """Get summary of refinement process"""
-        if not refinement_history:
-            return {"total_steps": 0, "refiners_used": [], "quality_improvement": 0.0, "iterations": 0}
-        
-        refiners_used = list(set(step.refiner_name for step in refinement_history))
-        quality_improvement = 0.0
-        
-        if refinement_history:
-            first_step = refinement_history[0]
-            last_step = refinement_history[-1]
-            
-            if first_step.quality_before is not None and last_step.quality_after is not None:
-                quality_improvement = last_step.quality_after - first_step.quality_before
-        
-        return {
-            "total_steps": len(refinement_history),
-            "refiners_used": refiners_used,
-            "quality_improvement": quality_improvement,
-            "iterations": max(step.iteration for step in refinement_history) + 1
-        }
-    
-    def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Execute the refiner chain node.
+        Build a flat sequence of refinement nodes.
         
         Args:
-            input_data: Input data containing poem and constraints
             context: Pipeline context
             
         Returns:
-            Output data with refined poem
+            List of nodes representing the refinement sequence
         """
-        # Set up context
-        self.llm = context.get('llm')
-        if not self.llm:
-            raise ValueError("LLM not provided in context")
+        refinement_nodes = []
         
-        # Store context for refiner creation
-        self.context = context
-        
-        # Initialize evaluator
-        self.evaluator = PoemEvaluator(self.llm, metrics=['prosody', 'qafiya'])
-        
-        # Initialize refiners from config or use defaults
-        if not self.refiners:
-            # Get refiner configuration from config or use refiner_names from constructor
-            if hasattr(self, 'refiner_names') and self.refiner_names:
-                refiner_config = self.refiner_names
-            else:
-                refiner_config = self.config.get('refiners', ['prosody_refiner', 'qafiya_refiner', 'line_count_refiner', 'tashkeel_refiner'])
+        for iteration in range(1, self.max_iterations + 1):
+            # Add evaluation node for this iteration
+            evaluation_node = self._create_evaluation_node(iteration, context)
+            refinement_nodes.append(evaluation_node)
             
-            # Create refiner instances based on configuration
-            self.refiners = []
-            for refiner_name in refiner_config:
-                refiner = self._create_refiner(refiner_name, context)
-                if refiner:
-                    self.refiners.append(refiner)
+            # Add each refiner for this iteration
+            for refiner_name in self.refiner_names:
+                refiner_node = self._create_refiner_node(refiner_name, iteration, context)
+                refinement_nodes.append(refiner_node)
+        
+        self.logger.info(f"🔧 Built refinement sequence with {len(refinement_nodes)} nodes across {self.max_iterations} iterations")
+        return refinement_nodes
+    
+    def _create_evaluation_node(self, iteration: int, context: Dict[str, Any]) -> Node:
+        """Create evaluation node for specific iteration."""
+        from poet.evaluation.poem import PoemEvaluator
+        
+        return PoemEvaluator(
+            llm=self.llm,
+            name=f"poem_evaluation_{iteration}",
+            iteration=iteration,
+            target_quality=self.target_quality,
+            metrics=['prosody', 'qafiya']
+        )
+    
+    def _create_refiner_node(self, refiner_name: str, iteration: int, context: Dict[str, Any]) -> Node:
+        """Create refiner node for specific iteration."""
+        try:
+            # Check if this is a BestOfNNode wrapper
+            if refiner_name.startswith('best_of_n_'):
+                # Extract the underlying refiner name
+                underlying_refiner = refiner_name.replace('best_of_n_', '')
+                underlying_node = self._create_underlying_refiner(underlying_refiner, iteration, context)
+                
+                if underlying_node:
+                    from poet.search.best_of_n_node import BestOfNNode
+                    return BestOfNNode(
+                        underlying_node=underlying_node,
+                        name=refiner_name,
+                        node_type='refiner_chain',
+                        **context.get('refiner_config', {})
+                    )
                 else:
-                    self.logger.warning(f"Failed to create refiner: {refiner_name}")
+                    return None
             
-            if not self.refiners:
-                self.logger.warning("No refiners created, using default set")
-                # Fallback to default refiners
-                self.refiners = [
-                    self._create_refiner('prosody_refiner', context),
-                    self._create_refiner('qafiya_refiner', context),
-                    self._create_refiner('line_count_refiner', context),
-                    self._create_refiner('tashkeel_refiner', context)
-                ]
-                # Filter out None values
-                self.refiners = [r for r in self.refiners if r is not None]
-        
-        # Extract required data
-        poem = input_data.get('poem')
-        constraints = input_data.get('constraints')
-        evaluation_data = input_data.get('evaluation')
-        
-        if not poem:
-            raise ValueError("poem not found in input_data")
-        if not constraints:
-            raise ValueError("constraints not found in input_data")
-        
-        # Check if we have evaluation data from pipeline or need to evaluate
-        if evaluation_data and isinstance(evaluation_data, dict) and 'evaluation_completed' in evaluation_data:
-            # We have evaluation results from pipeline, use the evaluated poem
-            current_poem = poem  # poem should already have quality assessment
-            self.logger.info("Using evaluation data from pipeline")
-        else:
-            # No evaluation data, we need to evaluate the poem ourselves
-            self.logger.info("No evaluation data from pipeline, evaluating poem")
-            current_poem = poem
-        
-        # Run refinement iterations
-        total_iterations = 0
-        refiners_used = []
-        
-        for iteration in range(self.max_iterations):
-            self.logger.info(f"Starting refinement iteration {iteration + 1}/{self.max_iterations}")
-            
-            # Check if poem already has quality assessment or need to evaluate
-            if hasattr(current_poem, 'quality') and current_poem.quality:
-                evaluated_poem = current_poem
-                self.logger.info("Using existing quality assessment from poem")
-            else:
-                # Evaluate current poem
-                evaluated_poem = self.evaluator.evaluate_poem(
-                    current_poem, 
-                    constraints,
-                    [EvaluationType.PROSODY, EvaluationType.QAFIYA]
+            # Handle regular refiners
+            return self._create_underlying_refiner(refiner_name, iteration, context)
+                
+        except ImportError as e:
+            self.logger.error(f"📦 Failed to import {refiner_name}: {e}")
+            return None
+        except Exception as e:
+            self.logger.error(f"🔧 Failed to create refiner {refiner_name}: {e}")
+            return None
+    
+    def _create_underlying_refiner(self, refiner_name: str, iteration: int, context: Dict[str, Any]) -> Node:
+        """Create the underlying refiner node."""
+        try:
+            if refiner_name == 'prosody_refiner':
+                from poet.refinement.prosody import ProsodyRefiner
+                return ProsodyRefiner(
+                    llm=self.llm,
+                    prompt_manager=context.get('prompt_manager'),
+                    name=f"prosody_refiner_{iteration}",
+                    iteration=iteration
                 )
-                self.logger.info("Evaluated poem quality")
-            
-            # Check if quality target met
-            quality_score = self._calculate_quality_score(evaluated_poem.quality)
-            self.logger.info(f"Current quality score: {quality_score:.3f}, target: {self.target_quality}")
-            
-            if quality_score >= self.target_quality:
-                self.logger.info("Quality target reached, stopping refinement")
-                break
-            
-            # Apply refiners that are needed
-            iteration_refinements = 0
-            for refiner in self.refiners:
-                if refiner.should_refine(evaluated_poem.quality):
-                    
-                    # Add evaluation to input data for the refiner
-                    refiner_input = {
-                        'poem': current_poem,
-                        'constraints': constraints,
-                        'evaluation': evaluated_poem.quality
-                    }
-                    
-                    # Run the refiner
-                    refiner_output = refiner.run(refiner_input, context)
-                    
-                    if refiner_output.get('refined', False):
-                        current_poem = refiner_output['poem']
-                        iteration_refinements += 1
-                        if refiner.name not in refiners_used:
-                            refiners_used.append(refiner.name)
-            
-            # If no refiners were applied, break to avoid infinite loop
-            if iteration_refinements == 0:
-                self.logger.info("No refiners applied, stopping refinement")
-                break
-            
-            total_iterations += 1
-        
-        self.logger.info(f"Refinement completed. Total iterations: {total_iterations}")
-        return {
-            'poem': current_poem,
-            'refined': total_iterations > 0,
-            'refinement_iterations': total_iterations,
-            'refiner_chain_used': True,
-            'refiners_used': refiners_used
-        }
+            elif refiner_name == 'qafiya_refiner':
+                from poet.refinement.qafiya import QafiyaRefiner
+                return QafiyaRefiner(
+                    llm=self.llm,
+                    prompt_manager=context.get('prompt_manager'),
+                    name=f"qafiya_refiner_{iteration}",
+                    iteration=iteration
+                )
+            elif refiner_name == 'line_count_refiner':
+                from poet.refinement.line_count import LineCountRefiner
+                return LineCountRefiner(
+                    llm=self.llm,
+                    prompt_manager=context.get('prompt_manager'),
+                    name=f"line_count_refiner_{iteration}",
+                    iteration=iteration
+                )
+            elif refiner_name == 'tashkeel_refiner':
+                from poet.refinement.tashkeel import TashkeelRefiner
+                return TashkeelRefiner(
+                    llm=self.llm,
+                    prompt_manager=context.get('prompt_manager'),
+                    name=f"tashkeel_refiner_{iteration}",
+                    iteration=iteration
+                )
+            else:
+                self.logger.warning(f"❓ Unknown refiner type: {refiner_name}")
+                return None
+                
+        except ImportError as e:
+            self.logger.error(f"📦 Failed to import {refiner_name}: {e}")
+            return None
+        except Exception as e:
+            self.logger.error(f"🔧 Failed to create refiner {refiner_name}: {e}")
+            return None
+    
+    def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        This method should not be called directly.
+        RefinerChain is a configuration parser, not an executable node.
+        """
+        raise NotImplementedError(
+            "RefinerChain is a configuration parser and should not be executed directly. "
+            "Use build_refinement_sequence() to get the actual nodes to execute."
+        )
     
     def get_required_inputs(self) -> list:
         """Get list of required input keys for this node."""

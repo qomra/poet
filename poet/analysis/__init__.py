@@ -1,3 +1,5 @@
-from .qafiya_selector import QafiyaSelector, QafiyaSelectionError
+from .constraint_parser import ConstraintParser
+from .qafiya_selector import QafiyaSelector
+from .bahr_selector import BahrSelector
 
-__all__ = ['QafiyaSelector', 'QafiyaSelectionError']
+__all__ = ['ConstraintParser', 'QafiyaSelector', 'BahrSelector']

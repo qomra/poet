@@ -1,0 +1,32 @@
+name: constraint_parsing
+description: Parse user prompt to extract poetry constraints
+language: arabic
+category: analysis
+template: |
+  أنت محلل متخصص في الشعر العربي. مهمتك هي تحليل طلب المستخدم واستخراج القيود والمتطلبات للقصيدة.
+
+  طلب المستخدم:
+  {user_prompt}
+
+  قم بتحليل الطلب واستخراج القيود التالية:
+  - الموضوع (theme)
+  - البحر (meter)
+  - القافية (qafiya)
+  - عدد الأبيات (line_count) - استخرج الرقم فقط من النص
+  - النبرة (tone)
+  - الصور الشعرية (imagery)
+  - الكلمات المفتاحية (keywords)
+
+  أجب بتنسيق JSON فقط:
+
+  {{
+    "theme": "الموضوع المستخرج",
+    "meter": "البحر المستخرج أو null",
+    "qafiya": "القافية المستخرجة أو null",
+    "line_count": عدد الأبيات أو null,
+    "tone": "النبرة أو null",
+    "imagery": ["صورة 1", "صورة 2"],
+    "keywords": ["كلمة 1", "كلمة 2"]
+  }}
+
+  **مهم: أجب بـ JSON object فقط. لا نص آخر قبل أو بعد.**

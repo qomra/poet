@@ -319,10 +319,52 @@ class BahrSelector(Node):
     def get_required_inputs(self) -> list:
         """Get list of required input keys for this node."""
         return ['constraints', 'user_prompt']
-    
+
     def get_output_keys(self) -> list:
         """Get list of output keys this node produces."""
-        return ['constraints', 'bahr_selected'] 
+        return ['constraints', 'bahr_selected']
+    
+    def _generate_reasoning(self, input_data: Dict[str, Any], output_data: Dict[str, Any]) -> str:
+        """Generate natural reasoning for this selector node."""
+        constraints = input_data.get('constraints')
+        enhanced_constraints = output_data.get('constraints')
+        
+        reasoning = f"I selected and standardized the bahr (meter) specification."
+        
+        if constraints and enhanced_constraints:
+            reasoning += f" The selection was influenced by the theme '{constraints.theme}' and tone '{constraints.tone}'."
+            reasoning += f" Standardized bahr: {enhanced_constraints.meter}"
+        
+        reasoning += " This complete bahr specification will provide the appropriate rhythmic structure for the poem."
+        
+        return reasoning
+    
+    def _summarize_input(self) -> str:
+        """Summarize input data for harmony."""
+        if not self.harmony_data['input']:
+            return "No input data"
+        
+        constraints = self.harmony_data['input'].get('constraints')
+        if constraints:
+            return f"Selected bahr for theme: {constraints.theme}, tone: {constraints.tone}"
+        return "Selected bahr"
+    
+    def _summarize_output(self) -> str:
+        """Summarize output data for harmony."""
+        if not self.harmony_data['output']:
+            return "No output data"
+        
+        constraints = self.harmony_data['output'].get('constraints')
+        if constraints:
+            if hasattr(constraints, 'meter') and hasattr(constraints, 'meeter_tafeelat'):
+                meter = getattr(constraints, 'meter', 'unknown')
+                tafeelat = getattr(constraints, 'meeter_tafeelat', 'unknown')
+                return f"Selected: {meter} meter with {tafeelat} pattern"
+            elif isinstance(constraints, dict):
+                meter = constraints.get('meter', 'unknown')
+                tafeelat = constraints.get('meeter_tafeelat', 'unknown')
+                return f"Selected: {meter} meter with {tafeelat} pattern"
+        return "Meter pattern selected" 
 
 
  

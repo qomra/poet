@@ -11,75 +11,187 @@ class PipelineEngine:
     
     Accepts a list of Node classes and their configurations, dynamically
     instantiates them, and executes the pipeline step by step.
+    Supports building flat compute graphs from nested configurations.
     """
     
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(self.__class__.__name__)
         self.nodes = []
+        self.compute_graph = []  # Flat compute graph
         self.context = {}
         
-    def add_node(self, node_class: Type[Node], node_config: Optional[Dict[str, Any]] = None):
+    def build_compute_graph(self, pipeline_config: List[Any], context: Dict[str, Any]):
         """
-        Add a node to the pipeline.
+        Build a flat compute graph from nested configurations.
         
         Args:
-            node_class: The Node class to instantiate
-            node_config: Configuration for the node
-        """
-        try:
-            # Extract required parameters from context
-            llm = self.context.get('llm')
-            prompt_manager = self.context.get('prompt_manager')
-            
-            # Check if harmony capture is enabled
-            harmony_enabled = self.context.get('harmony_capture_enabled', False)
-            self.logger.info(f"Adding node {node_class.__name__}, harmony_capture_enabled: {harmony_enabled}")
-            
-            # Handle different node types with their specific requirements
-            if node_class.__name__ == 'RefinerChain':
-                # RefinerChain only needs llm and config
-                if node_config:
-                    node = node_class(llm=llm, **node_config)
-                else:
-                    node = node_class(llm=llm)
-            elif node_class.__name__ == 'DataEnricher':
-                # DataEnricher needs llm and config but not prompt_manager
-                if node_config:
-                    node = node_class(llm=llm, **node_config)
-                else:
-                    node = node_class(llm=llm)
-            else:
-                # Other nodes need llm and prompt_manager
-                if node_config:
-                    node = node_class(llm=llm, prompt_manager=prompt_manager, **node_config)
-                else:
-                    node = node_class(llm=llm, prompt_manager=prompt_manager)
-            
-            # If harmony capture is enabled, wrap the node with capture middleware
-            if harmony_enabled and not node_class.__name__.startswith('Captured'):
-                from poet.logging.capture_middleware import capture_component
-                # Wrap the node immediately after creation, before adding to pipeline
-                node = capture_component(node, node_class.__name__)
-            
-            self.nodes.append(node)
-            self.logger.info(f"Added node: {node.name}")
-        except Exception as e:
-            self.logger.error(f"Failed to add node {node_class.__name__}: {e}")
-            raise
-    
-    def set_context(self, context: Dict[str, Any]):
-        """
-        Set the pipeline context (LLM, prompt_manager, etc.).
-        
-        Args:
-            context: Context dictionary
+            pipeline_config: List of node configurations
+            context: Pipeline context
         """
         self.context = context
+        self.compute_graph = []
+        
+        for node_config in pipeline_config:
+            if isinstance(node_config, dict):
+                # Handle nested structures like RefinerChain
+                self._flatten_node_config(node_config, context)
+            else:
+                # Simple node
+                node = self._create_node(node_config, context)
+                if node:
+                    self.compute_graph.append(node)
+        
+        self.logger.info(f"🏗️ Built compute graph with {len(self.compute_graph)} nodes")
+        
+    def _flatten_node_config(self, node_config: Dict[str, Any], context: Dict[str, Any]):
+        """Flatten nested node configurations into individual nodes."""
+        if 'refiner_chain' in node_config:
+            # Create RefinerChain configuration parser
+            from poet.refinement.refiner_chain import RefinerChain
+            
+            refiner_chain = RefinerChain(
+                llm=context['llm'],
+                refiners=node_config['refiner_chain'].get('refiners', ['prosody_refiner', 'qafiya_refiner']),
+                max_iterations=node_config['refiner_chain'].get('max_iterations', 3),
+                target_quality=node_config['refiner_chain'].get('target_quality', 0.8)
+            )
+            
+            # Build the refinement sequence
+            refinement_nodes = refiner_chain.build_refinement_sequence(context)
+            
+            # Add all nodes to the compute graph
+            self.compute_graph.extend(refinement_nodes)
+            
+        else:
+            # Handle other nested structures
+            node = self._create_node(node_config, context)
+            if node:
+                self.compute_graph.append(node)
+    
+    def _create_node(self, node_config: Any, context: Dict[str, Any]) -> Optional[Node]:
+        """Create a node from configuration."""
+        try:
+            # Extract required parameters from context
+            llm = context.get('llm')
+            prompt_manager = context.get('prompt_manager')
+            
+            # Handle BestOfN nodes specially
+            if isinstance(node_config, dict) and any(key.startswith('best_of_n_') for key in node_config.keys()):
+                return self._create_best_of_n_node(node_config, llm, prompt_manager)
+            
+            # Handle different node types with their specific requirements
+            if isinstance(node_config, dict):
+                node_class = self._get_node_class(node_config)
+                if node_class.__name__ == 'RefinerChain':
+                    # RefinerChain only needs llm and config
+                    return node_class(llm=llm, **node_config)
+                elif node_class.__name__ == 'DataEnricher':
+                    # DataEnricher needs llm and config but not prompt_manager
+                    return node_class(llm=llm, **node_config)
+                else:
+                    # Other nodes need llm and prompt_manager
+                    return node_class(llm=llm, prompt_manager=prompt_manager, **node_config)
+            else:
+                # Simple string node name
+                node_class = self._get_node_class(node_config)
+                return node_class(llm=llm, prompt_manager=prompt_manager)
+                
+        except Exception as e:
+            self.logger.error(f"🚨 Failed to create node: {e}")
+            return None
+    
+    def _get_node_class(self, node_config: Any) -> Type[Node]:
+        """Get node class from configuration."""
+        # This would need to be implemented based on your node registry
+        # For now, using a simple mapping
+        node_mapping = {
+            'constraints_parser': 'ConstraintParser',
+            'qafiya_selector': 'QafiyaSelector',
+            'bahr_selector': 'BahrSelector',
+            'data_enrichment': 'DataEnricher',
+            'generation': 'SimplePoemGenerator',
+            'evaluation': 'PoemEvaluator',
+            'refiner_chain': 'RefinerChain'
+        }
+        
+        if isinstance(node_config, str):
+            node_name = node_config
+        elif isinstance(node_config, dict):
+            # Find the key that's not a configuration parameter
+            for key in node_config.keys():
+                if key in node_mapping:
+                    node_name = key
+                    break
+            else:
+                raise ValueError(f"Unknown node configuration: {node_config}")
+        else:
+            raise ValueError(f"Invalid node configuration: {node_config}")
+        
+        # Import and return the node class
+        if node_name == 'constraints_parser':
+            from poet.analysis.constraint_parser import ConstraintParser
+            return ConstraintParser
+        elif node_name == 'qafiya_selector':
+            from poet.analysis.qafiya_selector import QafiyaSelector
+            return QafiyaSelector
+        elif node_name == 'bahr_selector':
+            from poet.analysis.bahr_selector import BahrSelector
+            return BahrSelector
+        elif node_name == 'data_enrichment':
+            from poet.data.enricher import DataEnricher
+            return DataEnricher
+        elif node_name == 'generation':
+            from poet.generation.poem_generator import SimplePoemGenerator
+            return SimplePoemGenerator
+        elif node_name == 'evaluation':
+            from poet.evaluation.poem import PoemEvaluator
+            return PoemEvaluator
+        elif node_name == 'refiner_chain':
+            from poet.refinement.refiner_chain import RefinerChain
+            return RefinerChain
+        else:
+            raise ValueError(f"Unknown node type: {node_name}")
+    
+    def _create_best_of_n_node(self, node_config: Dict[str, Any], llm, prompt_manager):
+        """Create a BestOfN node with the appropriate underlying node."""
+        from poet.search.factory import create_best_of_n_node
+        
+        # Determine the node type from the configuration key
+        node_type = None
+        for key in node_config.keys():
+            if key.startswith('best_of_n_'):
+                if 'evaluation' in key:
+                    node_type = 'evaluation'
+                elif 'refiner' in key:
+                    node_type = 'refiner_chain'
+                elif 'generation' in key:
+                    node_type = 'generation'
+                break
+        
+        # Fallback: determine from content if key doesn't help
+        if node_type is None:
+            if 'metrics' in node_config:
+                node_type = 'evaluation'
+            elif 'refiners' in node_config:
+                node_type = 'refiner_chain'
+            else:
+                node_type = 'generation'
+        
+        # Extract search configuration from node_config
+        search_config = {
+            'n_candidates': node_config.get('n_candidates', 5),
+            'selection_prompt': node_config.get('selection_prompt', f'{node_type}_selection'),
+            'selection_metric': node_config.get('selection_metric', 'overall_score'),
+            'temperature_range': node_config.get('temperature_range', [0.5, 0.7, 0.9, 1.1, 1.3])
+        }
+        
+        # Create the BestOfN node
+        return create_best_of_n_node(node_type, node_config, search_config, llm, prompt_manager)
     
     def run_pipeline(self, initial_input: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Run the complete pipeline.
+        Run the complete pipeline using the flat compute graph.
         
         Args:
             initial_input: Initial input data for the first node
@@ -87,13 +199,13 @@ class PipelineEngine:
         Returns:
             Final output from the pipeline
         """
-        self.logger.info(f"Starting pipeline with {len(self.nodes)} nodes")
+        self.logger.info(f"🚀 Starting pipeline with {len(self.compute_graph)} nodes")
         
         current_data = initial_input.copy()
         
         try:
-            for i, node in enumerate(self.nodes):
-                self.logger.info(f"Running node {i+1}/{len(self.nodes)}: {node.name}")
+            for i, node in enumerate(self.compute_graph):
+                self.logger.info(f"🎬 Running node {i+1}/{len(self.compute_graph)}: {node.name}")
                 
                 # Validate input
                 if not node.validate_input(current_data):
@@ -102,6 +214,9 @@ class PipelineEngine:
                 # Run node
                 output_data = node.run(current_data, self.context)
                 
+                # Store harmony data
+                node._store_harmony_data(current_data, output_data)
+                
                 # Validate output
                 if not node.validate_output(output_data):
                     raise ValueError(f"Node {node.name} output validation failed")
@@ -109,14 +224,178 @@ class PipelineEngine:
                 # Merge output with current data for next node
                 current_data.update(output_data)
                 
-                self.logger.info(f"Node {node.name} completed successfully")
+                # Check if we should stop refinement
+                if self._should_stop_refinement(node, output_data):
+                    self.logger.info(f"🎯 Stopping refinement at node {node.name}")
+                    break
+                
+                self.logger.info(f"🎭 Node {node.name} completed successfully")
             
-            self.logger.info("Pipeline completed successfully")
+            self.logger.info("🎉 Pipeline completed successfully")
+            
+            # Generate harmony after pipeline completion
+            if self.context.get('llm'):
+                try:
+                    harmony_reasoning = self.generate_harmony(self.context['llm'])
+                    current_data['harmony_reasoning'] = harmony_reasoning
+                    self.logger.info("🎹 Harmony generation completed")
+                except Exception as e:
+                    self.logger.warning(f"Failed to generate harmony: {e}")
+                    current_data['harmony_reasoning'] = "Harmony generation failed"
+            
             return current_data
             
         except Exception as e:
-            self.logger.error(f"Pipeline failed at node {node.name if 'node' in locals() else 'unknown'}: {e}")
+            self.logger.error(f"💣 Pipeline failed at node {node.name if 'node' in locals() else 'unknown'}: {e}")
             raise
+    
+    def _should_stop_refinement(self, node: Node, output_data: Dict[str, Any]) -> bool:
+        """Check if refinement should stop (e.g., quality target met)."""
+        # Check if this is an evaluation node and quality target is met
+        if hasattr(node, 'iteration') and hasattr(node, 'target_quality'):
+            quality_score = output_data.get('quality_score', 0)
+            target_quality = node.target_quality
+            return quality_score >= target_quality
+        return False
+    
+    def generate_harmony(self, llm) -> str:
+        """
+        Generate harmony by visiting the compute graph.
+        
+        Args:
+            llm: LLM instance for generating harmony
+            
+        Returns:
+            Generated harmony text
+        """
+        self.logger.info("🎹 Generating harmony from compute graph")
+        
+        harmony_data = []
+        
+        for node in self.compute_graph:
+            node_harmony = node.get_harmony()
+            harmony_data.append(node_harmony)
+        
+        # Generate final harmony using LLM
+        return self._generate_final_harmony(harmony_data, llm)
+    
+    def _generate_final_harmony(self, harmony_data: List[Dict[str, Any]], llm) -> str:
+        """Generate final harmony text from node harmony data using the harmony prompt template."""
+        from poet.prompts import get_global_prompt_manager
+        
+        prompt_manager = get_global_prompt_manager()
+        
+        # Format execution steps from harmony data
+        execution_steps = []
+        for i, node_data in enumerate(harmony_data):
+            step_info = f"Step {i+1}: {node_data['node_name']}\n"
+            step_info += f"Input: {node_data['input_summary']}\n"
+            step_info += f"Output: {node_data['output_summary']}\n"
+            step_info += f"Reasoning: {node_data['reasoning']}\n"
+            execution_steps.append(step_info)
+        
+        execution_steps_text = "\n\n".join(execution_steps)
+        
+        # Get final poem and quality assessment from the last node
+        final_poem = "No poem generated"
+        quality_assessment = "No quality assessment"
+        
+        for node_data in reversed(harmony_data):
+            if 'poem' in node_data.get('output_summary', ''):
+                final_poem = node_data['output_summary']
+                break
+        
+        for node_data in reversed(harmony_data):
+            if 'quality' in node_data.get('output_summary', '').lower():
+                quality_assessment = node_data['output_summary']
+                break
+        
+        # Get user prompt from first node
+        user_prompt = "No user prompt available"
+        initial_constraints = "No constraints available"
+        
+        if harmony_data:
+            first_node = harmony_data[0]
+            user_prompt = first_node.get('input_summary', 'No user prompt available')
+            initial_constraints = first_node.get('output_summary', 'No constraints available')
+        
+        # Format the harmony prompt
+        harmony_prompt = prompt_manager.format_prompt(
+            'harmony_structured',
+            user_prompt=user_prompt,
+            initial_constraints=initial_constraints,
+            execution_steps=execution_steps_text,
+            final_poem=final_poem,
+            quality_assessment=quality_assessment,
+            conversation_start_date="2025-08-26"
+        )
+        
+        # Generate harmony using LLM
+        harmony_response = llm.generate(harmony_prompt)
+        
+        # Parse the harmony response like the old implementation
+        return self._parse_harmony_response(harmony_response)
+    
+    def _parse_harmony_response(self, response: str) -> str:
+        """
+        Parse the LLM response and extract structured data like the old harmony implementation.
+        
+        Args:
+            response: Raw LLM response
+            
+        Returns:
+            Parsed harmony text
+        """
+        try:
+            import json
+            import re
+            
+            # First try to extract JSON from code blocks
+            json_block_pattern = r'```(?:json)?\s*\n(.*?)\n```'
+            json_blocks = re.findall(json_block_pattern, response, re.DOTALL)
+            
+            if json_blocks:
+                json_str = json_blocks[0]
+            else:
+                # Fallback: find JSON between { and }
+                json_start = response.find('{')
+                json_end = response.rfind('}') + 1
+                if json_start == -1 or json_end == 0 or json_end <= json_start:
+                    # No JSON found, return raw response
+                    return response
+                json_str = response[json_start:json_end]
+            
+            # Parse the JSON
+            data = json.loads(json_str)
+            
+            # Convert to readable text format
+            harmony_text = []
+            
+            if 'analysis' in data:
+                for i, step in enumerate(data['analysis'], 1):
+                    harmony_text.append(f"Step {i}: {step.get('step', 'Unknown')}")
+                    harmony_text.append(f"Explanation: {step.get('explanation', '')}")
+                    harmony_text.append("")
+            
+            if 'final_poem' in data:
+                harmony_text.append(f"Final Poem: {data['final_poem']}")
+                harmony_text.append("")
+            
+            if 'conclusion' in data:
+                harmony_text.append(f"Conclusion: {data['conclusion']}")
+            
+            if harmony_text:
+                return "\n".join(harmony_text)
+            else:
+                # Fallback to raw response if parsing fails
+                return response
+                
+        except json.JSONDecodeError as e:
+            # Fallback to raw response if JSON parsing fails
+            return response
+        except Exception as e:
+            # Fallback to raw response if any parsing fails
+            return response
     
     def get_pipeline_info(self) -> Dict[str, Any]:
         """
@@ -126,7 +405,7 @@ class PipelineEngine:
             Dictionary with pipeline information
         """
         return {
-            "node_count": len(self.nodes),
+            "node_count": len(self.compute_graph),
             "nodes": [
                 {
                     "name": node.name,
@@ -135,7 +414,7 @@ class PipelineEngine:
                     "required_inputs": node.get_required_inputs(),
                     "output_keys": node.get_output_keys()
                 }
-                for node in self.nodes
+                for node in self.compute_graph
             ]
         }
 
@@ -170,26 +449,5 @@ class PipelineBuilder:
             Configured PipelineEngine
         """
         pipeline = PipelineEngine({})
-        pipeline.set_context(context)
-        
-        for step in pipeline_config:
-            if isinstance(step, str):
-                # Simple node name
-                if step not in self.node_registry:
-                    raise ValueError(f"Unknown node type: {step}")
-                pipeline.add_node(self.node_registry[step])
-                
-            elif isinstance(step, dict):
-                # Node with configuration
-                for node_name, node_config in step.items():
-                    if node_name not in self.node_registry:
-                        raise ValueError(f"Unknown node type: {node_name}")
-                    
-                    if isinstance(node_config, dict):
-                        pipeline.add_node(self.node_registry[node_name], node_config)
-                    else:
-                        pipeline.add_node(self.node_registry[node_name])
-            else:
-                raise ValueError(f"Invalid pipeline step: {step}")
-        
+        pipeline.build_compute_graph(pipeline_config, context)
         return pipeline

@@ -14,6 +14,7 @@ class DynamicAgent:
     
     This agent replaces the hardcoded agent.py with a fully dynamic system
     that can create pipelines from configuration without any hardcoding.
+    Uses flat compute graphs and node-level harmony.
     """
     
     def __init__(self, config: Dict[str, Any], llm, prompt_manager=None):
@@ -41,6 +42,7 @@ class DynamicAgent:
             from poet.data.enricher import DataEnricher
             from poet.refinement.refiner_chain import RefinerChain
             from poet.evaluation.poem import PoemEvaluator
+            from poet.search.best_of_n_node import BestOfNNode
             
             # Register each node type
             self.pipeline_builder.register_node("constraints_parser", ConstraintParser)
@@ -51,13 +53,17 @@ class DynamicAgent:
             self.pipeline_builder.register_node("refiner_chain", RefinerChain)
             self.pipeline_builder.register_node("evaluation", PoemEvaluator)
             
-            self.logger.info("All nodes registered successfully")
+            # Register BestOfN search nodes
+            self.pipeline_builder.register_node("best_of_n_generation", BestOfNNode)
+            self.pipeline_builder.register_node("best_of_n_evaluation", BestOfNNode)
+            
+            self.logger.info("📋 All nodes registered successfully")
             
         except ImportError as e:
-            self.logger.error(f"Failed to import node classes: {e}")
+            self.logger.error(f"📦 Failed to import node classes: {e}")
             raise
         except Exception as e:
-            self.logger.error(f"Failed to register nodes: {e}")
+            self.logger.error(f"🔧 Failed to register nodes: {e}")
             raise
     
     def _build_pipeline(self) -> PipelineEngine:
@@ -66,25 +72,21 @@ class DynamicAgent:
             agent_config = self.config.get("agent", {})
             pipeline_config = agent_config.get("pipeline", [])
             
-            # Check if harmony capture is enabled
-            harmony_enabled = self.config.get("agent", {}).get("compilers", {}).get("harmony", {}).get("enabled", False)
-            
             # Create context for the pipeline
             context = {
                 'llm': self.llm,
                 'prompt_manager': self.prompt_manager,
-                'config': self.config,
-                'harmony_capture_enabled': harmony_enabled
+                'config': self.config
             }
             
             # Build pipeline using the builder
             pipeline = self.pipeline_builder.build_pipeline(pipeline_config, context)
             
-            self.logger.info(f"Pipeline built successfully with {len(pipeline.nodes)} nodes")
+            self.logger.info(f"🏗️ Pipeline built successfully with {len(pipeline.compute_graph)} nodes")
             return pipeline
             
         except Exception as e:
-            self.logger.error(f"Failed to build pipeline: {e}")
+            self.logger.error(f"🏚️ Failed to build pipeline: {e}")
             raise
     
     def run_pipeline(self, user_prompt: str, initial_constraints: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -98,14 +100,7 @@ class DynamicAgent:
         Returns:
             Pipeline results
         """
-        self.logger.info("Starting dynamic pipeline execution")
-        
-        # Start harmony capture if enabled
-        harmony_enabled = self.config.get("agent", {}).get("compilers", {}).get("harmony", {}).get("enabled", False)
-        if harmony_enabled:
-            from poet.logging.integration import HarmonyIntegration
-            self.logger.info("Harmony capture enabled - starting execution capture")
-            HarmonyIntegration.start_captured_execution(user_prompt, initial_constraints)
+        self.logger.info("🚀 Starting dynamic pipeline execution")
         
         try:
             # Prepare initial input
@@ -124,60 +119,15 @@ class DynamicAgent:
             result['success'] = True
             result['pipeline_info'] = self.pipeline.get_pipeline_info()
             
-            # Complete harmony capture if enabled
-            if harmony_enabled:
-                self.logger.info("Completing harmony capture and generating reasoning")
-                harmony_config = self.config.get("agent", {}).get("compilers", {}).get("harmony", {})
-                output_dir = Path(harmony_config.get("output_dir", "outputs/harmony"))
-                save_output = harmony_config.get("save_output", True)
-                
-                # Get final poem and quality assessment from result
-                final_poem = result.get('poem')
-                quality_assessment = result.get('evaluation')
-                
-                harmony_reasoning = HarmonyIntegration.complete_and_reason(
-                    llm=self.llm,
-                    final_poem=final_poem,
-                    quality_assessment=quality_assessment,
-                    output_dir=output_dir if save_output else None
-                )
-                
-                if harmony_reasoning:
-                    # Store both structured data and conversation string
-                    result['harmony_reasoning'] = harmony_reasoning.get('conversation_string', '')
-                    result['harmony_structured_data'] = harmony_reasoning.get('structured_data', {})
-                    result['harmony_execution_id'] = harmony_reasoning.get('execution_id', '')
-                    
-                    if save_output:
-                        self.logger.info(f"Harmony reasoning generated and saved to {output_dir}")
-                    else:
-                        self.logger.info("Harmony reasoning generated (not saved to files)")
-                else:
-                    self.logger.warning("Failed to generate harmony reasoning")
+            # Generate harmony using node-level data
+            harmony_text = self.pipeline.generate_harmony(self.llm)
+            result['harmony_reasoning'] = harmony_text
             
-            self.logger.info("Dynamic pipeline completed successfully")
+            self.logger.info("🎉 Dynamic pipeline completed successfully")
             return result
             
         except Exception as e:
-            # Complete harmony capture even on error
-            if harmony_enabled:
-                try:
-                    from poet.logging.integration import HarmonyIntegration
-                    harmony_config = self.config.get("agent", {}).get("compilers", {}).get("harmony", {})
-                    output_dir = Path(harmony_config.get("output_dir", "outputs/harmony"))
-                    save_output = harmony_config.get("save_output", True)
-                    
-                    HarmonyIntegration.complete_and_reason(
-                        llm=self.llm,
-                        final_poem=None,
-                        quality_assessment={'error': str(e)},
-                        output_dir=output_dir if save_output else None
-                    )
-                except Exception as harmony_error:
-                    self.logger.error(f"Failed to complete harmony capture on error: {harmony_error}")
-            
-            raise e
-            self.logger.error(f"Dynamic pipeline failed: {e}")
+            self.logger.error(f"💀 Dynamic pipeline failed: {e}")
             return {
                 'user_prompt': user_prompt,
                 'success': False,
@@ -204,8 +154,8 @@ class DynamicAgent:
             # Rebuild the pipeline
             self.pipeline = self._build_pipeline()
             
-            self.logger.info("Pipeline updated and rebuilt successfully")
+            self.logger.info("🔄 Pipeline updated and rebuilt successfully")
             
         except Exception as e:
-            self.logger.error(f"Failed to update pipeline: {e}")
+            self.logger.error(f"🔄 Failed to update pipeline: {e}")
             raise

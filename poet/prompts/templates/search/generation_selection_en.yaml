@@ -1,0 +1,59 @@
+name: generation_selection_en
+description: "Select the best generated poem from multiple candidates"
+template: |
+  You are an expert in Arabic poetry evaluation. Your task is to select the best poem from multiple candidates based on the specified criteria.
+  
+  **Required Constraints:**
+  - Meter: {meter}
+  - Rhyme: {qafiya}
+  - Line count: {line_count}
+  - Theme: {theme}
+  - Tone: {tone}
+  
+  **Candidates:**
+  {candidates_data}
+  
+  **Selection Criteria:**
+  - Adherence to meter and rhyme
+  - Language quality and style
+  - Meaning and thematic coherence
+  - Creativity and aesthetic appeal
+  
+  **Important Instructions:**
+  1. Compare each candidate against the required criteria
+  2. Examine adherence to meter and rhyme
+  3. Evaluate language quality and style
+  4. Select the best candidate based on metric: {selection_metric}
+  
+  **Required Response Format:**
+  Answer in the following format exactly:
+  ```json
+  {{
+    "selected_candidate": 0,
+    "reasoning": "Detailed explanation for selecting this candidate",
+    "comparison_summary": "Summary comparison between candidates",
+    "quality_scores": {{
+      "candidate_0": 0.85,
+      "candidate_1": 0.72,
+      "candidate_2": 0.91,
+      "candidate_3": 0.68,
+      "candidate_4": 0.79
+    }}
+  }}
+  ```
+  
+  **Note:** Candidate number starts from 0 (candidate_0, candidate_1, etc.)
+category: search
+parameters:
+  - meter
+  - qafiya
+  - line_count
+  - theme
+  - tone
+  - candidates_data
+  - selection_metric
+metadata:
+  version: "1.0"
+  language: "english"
+  complexity: "medium"
+  focus: "poem_selection"

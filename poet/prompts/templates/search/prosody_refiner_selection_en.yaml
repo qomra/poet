@@ -1,0 +1,47 @@
+name: "prosody_refiner_selection"
+description: "Select the best prosody refinement candidate from multiple options"
+language: "english"
+
+template: |
+  You are an expert Arabic poetry prosody evaluator. Your task is to select the best prosody refinement from multiple candidates.
+
+  **Context:**
+  - Original poem: {original_poem}
+  - Target meter: {meter}
+  - Number of candidates: {n_candidates}
+
+  **Selection Criteria:**
+  1. **Meter Accuracy**: How well does the candidate follow the target meter pattern?
+  2. **Prosody Fixes**: How effectively does it fix the original prosody issues?
+  3. **Poetic Flow**: Does it maintain natural Arabic poetic flow?
+  4. **Minimal Changes**: Does it make the least disruptive changes to preserve meaning?
+  5. **Overall Quality**: Which candidate has the best overall prosody quality?
+
+  **Candidates:**
+  {candidates}
+
+  **Instructions:**
+  Analyze each candidate carefully and select the one that best meets the criteria above.
+  Consider both technical accuracy and poetic quality.
+
+  **Output Format:**
+  Provide your response in JSON format:
+  ```json
+  {{
+    "selected_candidate": <index_number>,
+    "reasoning": "<detailed explanation of why this candidate was selected>",
+    "criterion_scores": {{
+      "meter_accuracy": <score_1-10>,
+      "prosody_fixes": <score_1-10>,
+      "poetic_flow": <score_1-10>,
+      "minimal_changes": <score_1-10>,
+      "overall_quality": <score_1-10>
+    }}
+  }}
+  ```
+
+  **Important Notes:**
+  - Index numbers start from 0
+  - Only select from the provided candidates
+  - Provide clear reasoning for your selection
+  - Consider the specific meter requirements

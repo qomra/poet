@@ -421,6 +421,8 @@ class HarmonyCompiler:
         
         else:
             # Generic case - extract first meaningful input
+            if inputs is None:
+                return "Processing request"
             for key, value in inputs.items():
                 if key.startswith('arg_') and isinstance(value, dict):
                     if 'user_prompt' in value:
@@ -1276,6 +1278,8 @@ class HarmonyCompiler:
         
         else:
             # Generic case - extract first meaningful output
+            if outputs is None:
+                return "Processing completed"
             for key, value in outputs.items():
                 if key == 'constraints':
                     return "Updated constraints"
@@ -1294,6 +1298,10 @@ class HarmonyCompiler:
             return f"<max_depth_exceeded: {type(output).__name__}>"
         
         try:
+            # Handle None values
+            if output is None:
+                return None
+            
             # Handle common non-serializable types
             if hasattr(output, '__class__') and 'threading' in str(output.__class__.__module__):
                 return f"<threading_object: {type(output).__name__}>"

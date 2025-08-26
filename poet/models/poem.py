@@ -48,6 +48,10 @@ class LLMPoem:
             "quality": self.quality.to_dict() if self.quality else None
         } 
     
+    def get_text(self) -> str:
+        """Get the poem text as a single string"""
+        return '\n'.join(self.verses)
+    
     def __str__(self):
         """Return a string representation of the poem"""
         newline = '\n'

@@ -1,0 +1,20 @@
+name: prosody_refinement
+description: Refine poem prosody to improve meter
+language: arabic
+category: refinement
+template: |
+  أنت خبير في العروض العربي. مهمتك هي تحسين الوزن العروضي للقصيدة.
+
+  القصيدة الحالية:
+  {poem_text}
+
+  البحر المطلوب: {meter}
+
+  المشاكل العروضية:
+  {prosody_issues}
+
+  التكرار: {iteration}
+
+  قم بتحسين القصيدة لتصحيح المشاكل العروضية والالتزام بالبحر المطلوب.
+
+  أجب بالقصيدة المحسنة فقط، كل بيت في سطر منفصل.

@@ -8,6 +8,39 @@ import glob
 def most_common_letter(letters):
     return Counter(letters).most_common(1)[0][0]
 
+def get_letter_name(letter):
+    name_map = {
+        'ا': 'الف',
+        'ب': 'الباء',
+        'ت': 'التاء',
+        'ث': 'الثاء',
+        'ج': 'الجيم',
+        'ح': 'الحاء',
+        'خ': 'الخاء',
+        'د': 'الدال',
+        'ذ': 'الذال',
+        'ر': 'الراء',
+        'ز': 'الزاي',
+        'س': 'السين',
+        'ش': 'الشين',
+        'ص': 'الصاد',
+        'ض': 'الضاد',
+        'ط': 'الطاء',
+        'ظ': 'الظاء',
+        'ع': 'العين',
+        'غ': 'الغين',
+        'ف': 'الفاء',
+        'ق': 'القاف',
+        'ك': 'الكاف',
+        'ل': 'اللام',
+        'م': 'الميم',
+        'ن': 'النون',
+        'ه': 'الهاء',
+        'و': 'الواو',
+        'ي': 'الياء',
+    }
+    return name_map.get(letter, letter)
+
 def get_rhyme_letter(poem):
     # poem is a list of verses
     if len(poem) < 2:
@@ -17,7 +50,9 @@ def get_rhyme_letter(poem):
     # get the last letter of each verse
     last_letters = [strip_tashkeel(verse[-1]) for verse in even_verses if len(verse) > 0]
     # get the most common letter
-    return most_common_letter(last_letters)
+    letter =  most_common_letter(last_letters)
+    letter_name = get_letter_name(letter)
+    return letter_name
 
 # Get paths
 script_dir = os.path.dirname(os.path.abspath(__file__))

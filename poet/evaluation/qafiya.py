@@ -95,7 +95,7 @@ class QafiyaEvaluator:
                     error_details = validation_data.get('issue', None)
                 except Exception as e:
                     # If parsing fails, treat as invalid with error details
-                    self.logger.warning(f"Failed to parse LLM response for bait {bait_number}: {e}")
+                    self.logger.warning(f"📝 Failed to parse LLM response for bait {bait_number}: {e}")
                     is_valid = False
                     error_details = f"فشل في تحليل استجابة الذكاء الاصطناعي: {str(e)}"
                 
@@ -134,7 +134,7 @@ class QafiyaEvaluator:
             )
             
         except Exception as e:
-            self.logger.error(f"Failed to validate qafiya: {e}")
+            self.logger.error(f"🎯 Failed to validate qafiya: {e}")
             raise QafiyaValidationError(f"Qafiya validation failed: {e}")
     
     def _parse_llm_response(self, response: str) -> Dict[str, Any]:
@@ -176,12 +176,12 @@ class QafiyaEvaluator:
             return data
             
         except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse JSON response: {e}")
-            self.logger.error(f"Response text: {response[:200]}...")
+            self.logger.error(f"📄 Failed to parse JSON response: {e}")
+            self.logger.error(f"📝 Response text: {response[:200]}...")
             raise QafiyaValidationError(f"Invalid JSON response: {e}")
         except ValueError as e:
-            self.logger.error(f"Invalid response format: {e}")
-            self.logger.error(f"Response text: {response[:200]}...")
+            self.logger.error(f"📋 Invalid response format: {e}")
+            self.logger.error(f"📝 Response text: {response[:200]}...")
             raise QafiyaValidationError(f"Invalid response format: {e}")
     
     def _validate_response_structure(self, data: Dict[str, Any]):

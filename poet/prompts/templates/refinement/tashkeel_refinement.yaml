@@ -1,0 +1,18 @@
+name: tashkeel_refinement
+description: Refine poem tashkeel to improve pronunciation
+language: arabic
+category: refinement
+template: |
+  أنت خبير في التشكيل العربي. مهمتك هي تحسين التشكيل في القصيدة.
+
+  القصيدة الحالية:
+  {poem_text}
+
+  مشاكل التشكيل:
+  {tashkeel_issues}
+
+  التكرار: {iteration}
+
+  قم بتحسين التشكيل في القصيدة لتحسين النطق والوضوح.
+
+  أجب بالقصيدة المحسنة فقط، كل بيت في سطر منفصل.

@@ -27,6 +27,41 @@ class QafiyaTypeDescriptionAndExamples(Enum):
     MUTARADIF = "oo - Mutaradif (المُترادِف): Two consecutive sukuns at the end of the verse. This pattern creates an abrupt stop and often occurs when a long vowel precedes the final consonant. Examples: دِینْ, عَیْنْ, حینْ, أَیْنْ"
 
 
+def get_letter_name(letter):
+    name_map = {
+        'ا': 'الف',
+        'ب': 'الباء',
+        'ت': 'التاء',
+        'ث': 'الثاء',
+        'ج': 'الجيم',
+        'ح': 'الحاء',
+        'خ': 'الخاء',
+        'د': 'الدال',
+        'ذ': 'الذال',
+        'ر': 'الراء',
+        'ز': 'الزاي',
+        'س': 'السين',
+        'ش': 'الشين',
+        'ص': 'الصاد',
+        'ض': 'الضاد',
+        'ط': 'الطاء',
+        'ظ': 'الظاء',
+        'ع': 'العين',
+        'غ': 'الغين',
+        'ف': 'الفاء',
+        'ق': 'القاف',
+        'ك': 'الكاف',
+        'ل': 'اللام',
+        'م': 'الميم',
+        'ن': 'النون',
+        'ه': 'الهاء',
+        'و': 'الواو',
+        'ي': 'الياء',
+    }
+    return name_map.get(letter, letter)
+
+
+
 @dataclass
 class ExampleData:
     """Type-safe structure for example data containing retrieved poems"""
@@ -95,7 +130,9 @@ class Constraints:
         # Basic validation
         if self.line_count is not None and self.line_count <= 0:
             raise ValueError("Line count must be positive")
-    
+        
+        if self.qafiya:
+            self.qafiya = get_letter_name(self.qafiya)
     def has_ambiguities(self) -> bool:
         """Check if constraints have ambiguities"""
         return len(self.ambiguities) > 0

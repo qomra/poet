@@ -1,0 +1,32 @@
+name: constraint_parsing
+description: Parse user prompt to extract poetry constraints
+language: english
+category: analysis
+template: |
+  You are a specialist analyst in Arabic poetry. Your task is to analyze the user's request and extract constraints and requirements for the poem.
+
+  User request:
+  {user_prompt}
+
+  Analyze the request and extract the following constraints:
+  - Theme (theme)
+  - Meter (meter)
+  - Rhyme (qafiya)
+  - Line count (line_count)
+  - Tone (tone)
+  - Imagery (imagery)
+  - Keywords (keywords)
+
+  Answer in JSON format only:
+
+  {{
+    "theme": "extracted theme",
+    "meter": "extracted meter or null",
+    "qafiya": "extracted rhyme or null",
+    "line_count": line count or null,
+    "tone": "tone or null",
+    "imagery": ["image 1", "image 2"],
+    "keywords": ["keyword 1", "keyword 2"]
+  }}
+
+  **Important: Answer with JSON object only. No other text before or after.**

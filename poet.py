@@ -85,8 +85,10 @@ def create_llm(config: Dict[str, Any]) -> Any:
         elif provider == "anthropic":
             import os
             api_key = os.getenv("ANTHROPIC_API_KEY")
+        elif provider == "mock":
+            api_key = None  # Mock doesn't need API key
     
-    if not api_key:
+    if not api_key and provider != "mock":
         print(f"Error: No API key found for {provider}")
         sys.exit(1)
     
@@ -106,6 +108,9 @@ def create_llm(config: Dict[str, Any]) -> Any:
         return OpenAIAdapter(llm_config_obj)
     elif provider == "anthropic":
         return AnthropicAdapter(llm_config_obj)
+    elif provider == "mock":
+        from poet.llm.base_llm import MockLLM
+        return MockLLM(llm_config_obj)
     else:
         print(f"Error: Unsupported LLM provider: {provider}")
         sys.exit(1)

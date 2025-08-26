@@ -67,6 +67,9 @@ class HarmonyIntegration:
         try:
             # Serialize the execution object to ensure all Constraints objects are converted to dictionaries
             execution_dict = execution.to_dict()
+            if execution_dict is None:
+                print(f"Warning: execution.to_dict() returned None")
+                return {}
             structured_data = reasoner.generate_structured_harmony(execution_dict)
             
             # Save structured data

@@ -1,0 +1,49 @@
+name: "qafiya_refiner_selection"
+description: "Select the best qafiya refinement candidate from multiple options"
+language: "english"
+
+template: |
+  You are an expert Arabic poetry qafiya (rhyme) evaluator. Your task is to select the best qafiya refinement from multiple candidates.
+
+  **Context:**
+  - Original poem: {original_poem}
+  - Target qafiya: {qafiya}
+  - Qafiya type: {qafiya_type}
+  - Qafiya harakah: {qafiya_harakah}
+  - Number of candidates: {n_candidates}
+
+  **Selection Criteria:**
+  1. **Rhyme Accuracy**: How well does the candidate follow the target qafiya pattern?
+  2. **Qafiya Fixes**: How effectively does it fix the original qafiya issues?
+  3. **Rhyme Consistency**: Does it maintain consistent rhyme throughout the poem?
+  4. **Minimal Changes**: Does it make the least disruptive changes to preserve meaning?
+  5. **Overall Quality**: Which candidate has the best overall qafiya quality?
+
+  **Candidates:**
+  {candidates}
+
+  **Instructions:**
+  Analyze each candidate carefully and select the one that best meets the criteria above.
+  Consider both technical accuracy and poetic quality.
+
+  **Output Format:**
+  Provide your response in JSON format:
+  ```json
+  {{
+    "selected_candidate": <index_number>,
+    "reasoning": "<detailed explanation of why this candidate was selected>",
+    "criterion_scores": {{
+      "rhyme_accuracy": <score_1-10>,
+      "qafiya_fixes": <score_1-10>,
+      "rhyme_consistency": <score_1-10>,
+      "minimal_changes": <score_1-10>,
+      "overall_quality": <score_1-10>
+    }}
+  }}
+  ```
+
+  **Important Notes:**
+  - Index numbers start from 0
+  - Only select from the provided candidates
+  - Provide clear reasoning for your selection
+  - Consider the specific qafiya requirements and harakah

@@ -132,7 +132,7 @@ class BaseSearchProvider(ABC):
             )
             
         except Exception as e:
-            self.logger.error(f"Search failed: {e}")
+            self.logger.error(f"🔍 Search failed: {e}")
             return SearchResponse(
                 results=[],
                 total_results=0,
@@ -186,7 +186,7 @@ class BaseSearchProvider(ABC):
                 results.append(search_result)
                 
             except Exception as e:
-                self.logger.warning(f"Failed to parse search result: {e}")
+                self.logger.warning(f"📄 Failed to parse search result: {e}")
                 continue
         
         return results
@@ -220,7 +220,7 @@ class MockSearchProvider(BaseSearchProvider):
     def search(self, query: str, max_results: int = 10, **kwargs) -> SearchResponse:
         """Return mock search results"""
         self.call_count += 1
-        self.logger.info(f"Mock search called with query: {query}, max_results: {max_results}")
+        self.logger.info(f"🎭 Mock search called with query: {query}, max_results: {max_results}")
         
         start_time = time.time()
         
@@ -277,11 +277,11 @@ class SerpSearchProvider(BaseSearchProvider):
     def validate_config(self) -> bool:
         """Validate Serp configuration"""
         if not self.api_key:
-            self.logger.error("SerpAPI API key is missing")
+            self.logger.error(f"🔑 SerpAPI API key is missing")
             return False
         
         if not self.api_key.startswith('sk-'):
-            self.logger.warning("SerpAPI API key format may be incorrect")
+            self.logger.warning("🔑 SerpAPI API key format may be incorrect")
         
         return True
     
@@ -295,7 +295,7 @@ class SerpSearchProvider(BaseSearchProvider):
             test_response = self._make_request("test", max_results=1)
             return test_response is not None
         except Exception as e:
-            self.logger.error(f"Serp availability check failed: {e}")
+            self.logger.error(f"🔍 Serp availability check failed: {e}")
             return False
     
     def _make_request(self, query: str, max_results: int = 10, **kwargs) -> Optional[Dict[str, Any]]:
@@ -335,10 +335,10 @@ class SerpSearchProvider(BaseSearchProvider):
             return response.json()
             
         except (requests.exceptions.RequestException, Exception) as e:
-            self.logger.error(f"SerpAPI request failed: {e}")
+            self.logger.error(f"🌐 SerpAPI request failed: {e}")
             return None
         except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse SerpAPI response: {e}")
+            self.logger.error(f"📄 Failed to parse SerpAPI response: {e}")
             return None
 
 

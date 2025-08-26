@@ -70,7 +70,7 @@ class BaseRefiner(Node):
         
         # Check if refinement is needed
         if evaluation and not self.should_refine(evaluation):
-            self.logger.info(f"{self.name}: No refinement needed")
+            self.logger.info(f"🔄 {self.name}: No refinement needed")
             return {
                 'poem': poem,
                 'refined': False,
@@ -83,14 +83,14 @@ class BaseRefiner(Node):
             # For now, we'll create a simple refinement that can be done synchronously
             refined_poem = self._apply_sync_refinement(poem, constraints, evaluation)
             
-            self.logger.info(f"{self.name}: Refinement applied successfully")
+            self.logger.info(f"✨ {self.name}: Refinement applied successfully")
             return {
                 'poem': refined_poem,
                 'refined': True,
                 'refinement_iterations': 1
             }
         except Exception as e:
-            self.logger.error(f"{self.name}: Refinement failed: {e}")
+            self.logger.error(f"💥 {self.name}: Refinement failed: {e}")
             return {
                 'poem': poem,
                 'refined': False,

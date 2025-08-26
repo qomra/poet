@@ -1,0 +1,23 @@
+name: poem_generation
+description: Generate Arabic poem based on constraints
+language: english
+category: generation
+template: |
+  You are an exceptional Arabic poet. Your task is to write an Arabic poem based on the specified constraints.
+
+  Constraints:
+  - Theme: {theme}
+  - Meter: {meter}
+  - Rhyme: {qafiya}
+  - Bait count: {line_count} (each bait = 2 lines: first line = صدر, second line = عجز)
+  - Tone: {tone}
+  - Imagery: {imagery}
+  - Keywords: {keywords}
+
+  Write an Arabic poem that meets these constraints. Ensure:
+  - Adherence to the specified meter
+  - Adherence to the specified rhyme
+  - Expression of the theme and tone
+  - Use of the specified imagery and keywords
+
+  Answer with the poem only, each verse on a separate line.

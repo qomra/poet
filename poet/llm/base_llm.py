@@ -226,12 +226,90 @@ class MockLLM(BaseLLM):
         self.last_prompt = prompt
         self.call_count += 1
         
+        # Debug: Print first 200 characters of prompt to see what we're getting
+        print(f"MockLLM call {self.call_count}: {prompt[:200]}...")
+        
         if self.responses:
             # Cycle through predefined responses
             response = self.responses[(self.call_count - 1) % len(self.responses)]
         else:
-            # Echo prompt with mock prefix
-            response = f"Mock response for: {prompt[:50]}..."
+            # Return appropriate mock responses based on prompt content
+            if "constraint" in prompt.lower() or "parse" in prompt.lower():
+                # Mock constraint parsing response
+                response = '''{
+  "meter": "بحر الكامل",
+  "qafiya": "ق",
+  "line_count": 2,
+  "theme": "غزل",
+  "tone": "حزينة",
+  "language": "فصحى",
+  "style": "كلاسيكي",
+  "imagery": ["الدموع", "الفراق", "القلب النابض"],
+  "keywords": ["غزل", "فراق", "حزن", "دموع"],
+  "register": "فصحى",
+  "era": "كلاسيكي",
+  "poet_style": "عاطفي",
+  "sections": ["مقدمة", "موضوع", "خاتمة"],
+  "ambiguities": [],
+  "suggestions": ["استخدام صور قوية", "تركيز على العاطفة"],
+  "reasoning": "الطلب يتعلق بموضوع الغزل والفراق مع التركيز على العاطفة"
+}'''
+            elif "qafiya" in prompt.lower() or "qafiya_completion" in prompt.lower() or "qafiya_selection" in prompt.lower():
+                # Mock qafiya selection/completion response
+                response = '''{
+  "qafiya_letter": "ق",
+  "qafiya_type": "مقيدة",
+  "qafiya_harakah": "مفتوح"
+}'''
+            elif "selection" in prompt.lower():
+                # Mock selection response
+                response = '''{
+  "selected_candidate": 0,
+  "reasoning": "This candidate shows the best quality and meets all criteria",
+  "criterion_scores": {
+    "overall_quality": 8,
+    "meter_accuracy": 9,
+    "qafiya_accuracy": 8
+  }
+}'''
+            elif "refinement" in prompt.lower() or "prosody_refinement" in prompt.lower():
+                # Mock prosody refinement response - generate improved poem
+                response = '''يَا مُهَلِّمٌ لِلمُشتاقينَ إِذا لَقِيتَ
+حَيَّيتَ مِنهُم بِالوَفاءِ لِلمُصافِي قِفاً
+وَأَيُّ مُصافٍ مِن مَراشِفِه يَعصى
+غَيرَكَ وَما أَحسَنَ المُصافِي الوِقافِ
+وَلَكنَّ قَلبِي في حُبِّكَ مُشتَعِلٌ
+يُذَكِّرُني بِالوَصلِ كُلَّ خِلافِ'''
+            elif "qafiya_refinement" in prompt.lower():
+                # Mock qafiya refinement response - generate improved poem
+                response = '''يَا مُهَلِّمٌ لِلمُشتاقينَ إِذا لَقِيتَ
+حَيَّيتَ مِنهُم بِالوَفاءِ لِلمُصافِي قِفاً
+وَأَيُّ مُصافٍ مِن مَراشِفِه يَعصى
+غَيرَكَ وَما أَحسَنَ المُصافِي الوِقافِ
+وَلَكنَّ قَلبِي في حُبِّكَ مُشتَعِلٌ
+يُذَكِّرُني بِالوَصلِ كُلَّ خِلافِ'''
+            elif "evaluation" in prompt.lower():
+                # Mock evaluation response - indicate poem needs refinement
+                response = '''{
+  "overall_score": 0.65,
+  "prosody_validation": {
+    "overall_valid": false,
+    "bait_results": [
+      {"is_valid": false, "details": "Verse too short, needs more content"},
+      {"is_valid": false, "details": "Incomplete bait structure"}
+    ]
+  },
+  "qafiya_validation": {
+    "overall_valid": false,
+    "bait_results": [
+      {"is_valid": false, "details": "Qafiya not properly developed"},
+      {"is_valid": false, "details": "Rhyme scheme incomplete"}
+    ]
+  }
+}'''
+            else:
+                # Generic mock response
+                response = f"Mock response for: {prompt[:50]}..."
         
         return response
     
