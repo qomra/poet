@@ -84,6 +84,8 @@ class CapturedCall:
                 return [self._serialize_value(v, _depth + 1) for v in value]
             elif isinstance(value, dict):
                 return {k: self._serialize_value(v, _depth + 1) for k, v in value.items()}
+            elif isinstance(value, slice):
+                return f"<slice: {value.start}:{value.stop}:{value.step}>"
             else:
                 return value
         except Exception as e:

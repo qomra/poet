@@ -209,8 +209,6 @@ class ProsodyRefiner(Node):
             # Fallback: split by newlines
             return [line.strip() for line in response.split('\n') if line.strip()]
     
-
-    
     def _summarize_input(self) -> str:
         """Summarize input data for harmony."""
         if not self.harmony_data['input']:

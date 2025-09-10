@@ -65,9 +65,13 @@ class PipelineEngine:
             
         else:
             # Handle other nested structures
+            self.logger.info(f"Processing node config: {node_config}")
             node = self._create_node(node_config, context)
             if node:
                 self.compute_graph.append(node)
+                self.logger.info(f"Successfully added node to compute graph: {node.__class__.__name__}")
+            else:
+                self.logger.error(f"Failed to create node from config: {node_config}")
     
     def _create_node(self, node_config: Any, context: Dict[str, Any]) -> Optional[Node]:
         """Create a node from configuration."""
@@ -76,6 +80,10 @@ class PipelineEngine:
             llm = context.get('llm')
             prompt_manager = context.get('prompt_manager')
             
+            # Check if node has its own LLM configuration
+            if isinstance(node_config, dict) and 'llm' in node_config:
+                llm = self._create_llm_from_config(node_config['llm'])
+            
             # Handle BestOfN nodes specially
             if isinstance(node_config, dict) and any(key.startswith('best_of_n_') for key in node_config.keys()):
                 return self._create_best_of_n_node(node_config, llm, prompt_manager)
@@ -83,15 +91,31 @@ class PipelineEngine:
             # Handle different node types with their specific requirements
             if isinstance(node_config, dict):
                 node_class = self._get_node_class(node_config)
+                
+                # Handle nested configurations like {'pre_generated_generation': {'dataset_path': '...'}}
+                if len(node_config) == 1 and list(node_config.keys())[0] in ['generation', 'evaluation', 'refiner_chain', 'constraints_parser', 
+                                                                           'qafiya_selector', 'bahr_selector', 'knowledge_retriever', 'data_enricher', 
+                                                                           'pre_generated_generation']:
+                    # Extract the nested config
+                    filtered_config = list(node_config.values())[0] if isinstance(list(node_config.values())[0], dict) else {}
+                else:
+                    # Filter out the node name key and llm from the config
+                    filtered_config = {k: v for k, v in node_config.items() 
+                                     if k not in ['generation', 'evaluation', 'refiner_chain', 'constraints_parser', 
+                                                'qafiya_selector', 'bahr_selector', 'knowledge_retriever', 'data_enricher', 
+                                                'pre_generated_generation', 'llm']}
+                
+                self.logger.info(f"Creating {node_class.__name__} with config: {filtered_config}")
+                
                 if node_class.__name__ == 'RefinerChain':
                     # RefinerChain only needs llm and config
-                    return node_class(llm=llm, **node_config)
+                    return node_class(llm=llm, **filtered_config)
                 elif node_class.__name__ == 'DataEnricher':
                     # DataEnricher needs llm and config but not prompt_manager
-                    return node_class(llm=llm, **node_config)
+                    return node_class(llm=llm, **filtered_config)
                 else:
                     # Other nodes need llm and prompt_manager
-                    return node_class(llm=llm, prompt_manager=prompt_manager, **node_config)
+                    return node_class(llm=llm, prompt_manager=prompt_manager, **filtered_config)
             else:
                 # Simple string node name
                 node_class = self._get_node_class(node_config)
@@ -100,6 +124,55 @@ class PipelineEngine:
         except Exception as e:
             self.logger.error(f"🚨 Failed to create node: {e}")
             return None
+    
+    def _create_llm_from_config(self, llm_config: Dict[str, Any]):
+        """Create LLM instance from node-specific configuration."""
+        from poet.llm.base_llm import LLMConfig
+        from poet.llm.openai_adapter import OpenAIAdapter
+        from poet.llm.anthropic_adapter import AnthropicAdapter
+        from poet.llm.groq_adapter import GroqAdapter
+        from poet.llm.base_llm import MockLLM
+        import os
+        
+        provider = llm_config.get("provider", "groq")
+        
+        # Get API key from config or environment
+        api_key = llm_config.get("api_key")
+        if not api_key:
+            if provider == "openai":
+                api_key = os.getenv("OPENAI_API_KEY")
+            elif provider == "anthropic":
+                api_key = os.getenv("ANTHROPIC_API_KEY")
+            elif provider == "groq":
+                api_key = os.getenv("GROQ_API_KEY")
+            elif provider == "mock":
+                api_key = None
+        
+        if not api_key and provider != "mock":
+            self.logger.warning(f"No API key found for {provider}, falling back to global LLM")
+            return self.context.get('llm')
+        
+        # Create LLM config
+        llm_config_obj = LLMConfig(
+            model_name=llm_config.get("model"),
+            api_key=api_key,
+            temperature=llm_config.get("temperature", 0.7),
+            max_tokens=llm_config.get("max_tokens"),
+            timeout=llm_config.get("timeout", 320)
+        )
+        
+        # Create appropriate LLM adapter
+        if provider == "groq":
+            return GroqAdapter(llm_config_obj)
+        elif provider == "openai":
+            return OpenAIAdapter(llm_config_obj)
+        elif provider == "anthropic":
+            return AnthropicAdapter(llm_config_obj)
+        elif provider == "mock":
+            return MockLLM(llm_config_obj)
+        else:
+            self.logger.warning(f"Unknown LLM provider: {provider}, falling back to global LLM")
+            return self.context.get('llm')
     
     def _get_node_class(self, node_config: Any) -> Type[Node]:
         """Get node class from configuration."""
@@ -111,6 +184,7 @@ class PipelineEngine:
             'bahr_selector': 'BahrSelector',
             'data_enrichment': 'DataEnricher',
             'generation': 'SimplePoemGenerator',
+            'pre_generated_generation': 'PreGeneratedPoemGenerator',
             'evaluation': 'PoemEvaluator',
             'refiner_chain': 'RefinerChain'
         }
@@ -144,6 +218,9 @@ class PipelineEngine:
         elif node_name == 'generation':
             from poet.generation.poem_generator import SimplePoemGenerator
             return SimplePoemGenerator
+        elif node_name == 'pre_generated_generation':
+            from poet.generation.poem_generator import PreGeneratedPoemGenerator
+            return PreGeneratedPoemGenerator
         elif node_name == 'evaluation':
             from poet.evaluation.poem import PoemEvaluator
             return PoemEvaluator

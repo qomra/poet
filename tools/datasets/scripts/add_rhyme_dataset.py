@@ -4,6 +4,11 @@ from pyarabic.araby import strip_tashkeel
 import os
 import pandas as pd
 import glob
+from datasets import load_dataset
+from pathlib import Path
+
+# project dir is 3 levels up
+project_root = Path(__file__).parent.parent.parent.parent
 
 def most_common_letter(letters):
     return Counter(letters).most_common(1)[0][0]
@@ -54,43 +59,16 @@ def get_rhyme_letter(poem):
     letter_name = get_letter_name(letter)
     return letter_name
 
-# Get paths
-script_dir = os.path.dirname(os.path.abspath(__file__))
-dataset_path = os.path.join(script_dir, "..", "..", "..", "dataset", "ashaar_original", "data")
-output_path = os.path.join(script_dir, "..", "..", "..", "dataset", "ashaar")
 
-print(f"Reading parquet files from: {dataset_path}")
+dataset = load_dataset("arbml/ashaar")["train"]
+dataset = dataset.add_column(name="rhyme", column=[""]*len(dataset))
 
-
-# Read all parquet files
-parquet_files = glob.glob(os.path.join(dataset_path, "*.parquet"))
-if not parquet_files:
-    print(f"No parquet files found in {dataset_path}")
-    exit(1)
-
-print(f"Found {len(parquet_files)} parquet files")
-
-# Load and combine all data
-all_data = []
-for i, file_path in enumerate(parquet_files):
-    print(f"Loading file {i+1}/{len(parquet_files)}: {os.path.basename(file_path)}")
-    df = pd.read_parquet(file_path)
-    all_data.append(df)
-
-# Combine all dataframes
-print("Combining all data...")
-combined_df = pd.concat(all_data, ignore_index=True)
-print(f"Total rows: {len(combined_df)}")
 
 # Add rhyme column
 print("Adding rhyme column...")
-combined_df['rhyme'] = combined_df['poem verses'].apply(get_rhyme_letter)
-
-# Convert to datasets Dataset
-print("Converting to datasets Dataset...")
-dataset = Dataset.from_pandas(combined_df)
+dataset = dataset.map(lambda x: {"rhyme": get_rhyme_letter(x["poem verses"])})
 
 # Save using save_to_disk
-print(f"Saving dataset to: {output_path}")
-dataset.save_to_disk(output_path)
+print(f"Saving dataset to: {project_root / 'dataset' / 'ashaar_with_rhymes'}")
+dataset.save_to_disk(project_root / "dataset" / "ashaar_with_rhymes")
 print("Dataset saved successfully using save_to_disk!")

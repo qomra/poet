@@ -108,6 +108,7 @@ class Constraints:
     when requesting a poem, including prosodic, thematic, and stylistic
     requirements.
     """    
+    poem_id: Optional[str] = None
     # Prosodic constraints
     meter: Optional[str] = None
     meeter_tafeelat: Optional[str] = None
@@ -261,6 +262,7 @@ class Constraints:
         
         # Create constraints with init=True fields only
         constraints = cls(
+            poem_id=data.get("poem_id"),
             meter=data.get("meter"),
             meeter_tafeelat=data.get("meeter_tafeelat"),
             qafiya=data.get("qafiya"),
@@ -347,14 +349,12 @@ class Constraints:
             constraints.example_data = data.get("example_data")
         
         return constraints
-    
 
-    
-
-    
     def __str__(self) -> str:
         """String representation of constraints"""
         parts = []
+        if self.poem_id:
+            parts.append(f"الرقم: {self.poem_id}")
         if self.meter:
             parts.append(f"البحر: {self.meter}")
         if self.meeter_tafeelat:

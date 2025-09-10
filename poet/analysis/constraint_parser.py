@@ -36,19 +36,20 @@ class ConstraintParser(Node):
         Execute the constraint parsing node.
         
         Args:
-            input_data: Input data containing user_prompt
+            input_data: Input data containing user_prompt or prompt
             context: Pipeline context
             
         Returns:
             Output data with parsed constraints
         """
-        # Validate inputs
-        user_prompt = input_data.get('user_prompt')
+        # Validate inputs - handle both 'user_prompt' and 'prompt' keys
+        user_prompt = input_data.get('user_prompt') or input_data.get('prompt')
+        poem_id = input_data.get('poem_id')
         if not user_prompt:
-            raise ValueError("user_prompt not found in input_data")
+            raise ValueError("user_prompt or prompt not found in input_data")
         
         # Parse constraints from user prompt
-        constraints = self.parse_constraints(user_prompt)
+        constraints = self.parse_constraints(user_prompt, poem_id)
         
         # Store harmony data
         output_data = {
@@ -60,7 +61,7 @@ class ConstraintParser(Node):
         
         return output_data
     
-    def parse_constraints(self, user_prompt: str) -> Constraints:
+    def parse_constraints(self, user_prompt: str, poem_id: int) -> Constraints:
         """
         Parse constraints from user input using LLM analysis.
         
@@ -86,7 +87,7 @@ class ConstraintParser(Node):
             constraints_data = self._parse_llm_response(response)
             
             # Create Constraints object
-            constraints = self._create_constraints(constraints_data, user_prompt)
+            constraints = self._create_constraints(constraints_data, user_prompt, poem_id)
             
             # Handle ambiguities and clarifications
             if constraints.has_ambiguities():
@@ -195,19 +196,21 @@ class ConstraintParser(Node):
             if data[field] is not None and not isinstance(data[field], list):
                 raise ValueError(f"Field '{field}' must be a list or null")
     
-    def _create_constraints(self, data: Dict[str, Any], original_prompt: str) -> Constraints:
+    def _create_constraints(self, data: Dict[str, Any], original_prompt: str, poem_id: int) -> Constraints:
         """
         Create Constraints object from parsed data.
         
         Args:
             data: Parsed constraints data
             original_prompt: Original user prompt for reference
+            poem_id: Poem ID
             
         Returns:
             Constraints object
         """
         # Convert null values to None and handle type conversions
         constraints = Constraints(
+            poem_id=poem_id,
             meter=data.get('meter') if data.get('meter') != 'null' else None,
             qafiya=data.get('qafiya') if data.get('qafiya') != 'null' else None,
             line_count=data.get('line_count') if data.get('line_count') != 'null' else None,
@@ -320,8 +323,13 @@ class ConstraintParser(Node):
         if not self.harmony_data['input']:
             return "No input data"
         
-        user_prompt = self.harmony_data['input'].get('user_prompt', '')
-        return f"Parsed constraints from prompt: {user_prompt[:50]}..."
+        # Handle both 'user_prompt' and 'prompt' keys
+        user_prompt = self.harmony_data['input'].get('user_prompt') or self.harmony_data['input'].get('prompt', '')
+        
+        if isinstance(user_prompt, str):
+            return f"Parsed constraints from prompt: {user_prompt[:50]}..."
+        else:
+            return f"Parsed constraints from prompt: {str(user_prompt)[:50]}..."
     
     def _summarize_output(self) -> str:
         """Summarize output data for harmony."""

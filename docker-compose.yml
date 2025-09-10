@@ -1,0 +1,49 @@
+services:
+  poet:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.poet
+    container_name: poet-app
+    restart: "no"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./dataset:/app/dataset
+      - ./outputs:/app/outputs
+      - ./config:/app/config
+      - ./poet.py:/app/poet.py
+      - ./requirements.txt:/app/requirements.txt
+      - ./poet:/app/poet
+      - ./tools/labeler:/app/tools/labeler
+      
+    command: python poet.py --config config/simple_generation_refinement_dataset.yaml
+
+  labeler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.labeler
+    container_name: labeler-server
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./tools/labeler/server.js:/app/server.js
+      - ./tools/labeler/diwanai.html:/app/diwanai.html
+      - ./dataset:/app/dataset
+      - ./outputs:/app/outputs
+    working_dir: /app
+    command: npm start
+    networks:
+      - poet-network
+
+networks:
+  poet-network:
+    driver: bridge
+
+volumes:
+  outputs:
+
+
+
+

@@ -3,8 +3,8 @@
 
 llm:
   provider: "groq"
-  model: meta-llama/llama-4-maverick-17b-128e-instruct  # From llms.json
-  # model: openai/gpt-oss-120b
+  # model: meta-llama/llama-4-maverick-17b-128e-instruct  # From llms.json
+  model: llama-3.3-70b-versatile
   api_key: "${GROQ_API_KEY}"  # Load from environment variable
   api_base: "https://api.groq.com/v1"
   temperature: 1
@@ -44,19 +44,8 @@ agent:
     - constraints_parser
     - qafiya_selector
     - bahr_selector
-    # - data_enrichment:
-    #     sources:
-    #       - type: corpus
-    #         local_knowledge_path: "dataset"
-    #         top_k: 20
-    #         search_criteria:
-    #           - meter
-    #           - qafiya
-    - generation:
-      llm:
-        provider: "openai"
-        model: "gpt-4o"
-        temperature: 0.7
+    - pre_generated_generation:
+        dataset_path: "dataset/final_data.json"
       
     - evaluation:
         metrics:

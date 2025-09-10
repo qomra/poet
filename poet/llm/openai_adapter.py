@@ -71,11 +71,9 @@ class OpenAIAdapter(BaseLLM):
                 api_params["frequency_penalty"] = kwargs["frequency_penalty"]
             if "presence_penalty" in kwargs and kwargs["presence_penalty"] is not None:
                 api_params["presence_penalty"] = kwargs["presence_penalty"]
-            #  "reasoning_effort": "minimal"
+            # Only set reasoning_effort if explicitly provided (only supported by certain models)
             if "reasoning_effort" in kwargs and kwargs["reasoning_effort"] is not None:
                 api_params["reasoning_effort"] = kwargs["reasoning_effort"]
-            else:
-                api_params["reasoning_effort"] = "minimal"
             # Add other parameters that aren't None
             for k, v in params.items():
                 if k not in ["model", "temperature", "max_tokens", "top_p", "frequency_penalty", "presence_penalty", "reasoning_effort"] and v is not None:

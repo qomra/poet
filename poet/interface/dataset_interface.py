@@ -73,7 +73,10 @@ class DatasetInterface(BaseInterface):
                 self.logger.info(f"  Generating poem {generation_idx + 1}/{self.n_per_instance} for item {poem_id}")
                 
                 # Run the pipeline
-                result = self.agent.run_pipeline(prompt_text)
+                result = self.agent.run_pipeline({
+                    'poem_id': poem_id,
+                    'prompt': prompt_text
+                })
                 
                 # Debug: log the result structure
                 self.logger.info(f"Pipeline result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")

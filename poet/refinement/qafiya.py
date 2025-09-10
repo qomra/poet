@@ -162,9 +162,7 @@ class QafiyaRefiner(Node):
 
         # Generate fixed verse
         response = self.llm.generate(formatted_prompt)
-        self.logger.info(f"🔍 LLM response for qafiya fix: {response[:500]}...")
         fixed_verses = self._parse_verses_from_response(response)
-        self.logger.info(f"🔍 Parsed fixed verses: {fixed_verses}")
 
         # Return the first fixed verse, or original if parsing failed
         return fixed_verses

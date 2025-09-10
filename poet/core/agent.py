@@ -89,7 +89,7 @@ class DynamicAgent:
             self.logger.error(f"🏚️ Failed to build pipeline: {e}")
             raise
     
-    def run_pipeline(self, user_prompt: str, initial_constraints: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def run_pipeline(self, user_prompt: [str|Dict[str, Any]], initial_constraints: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Run the complete pipeline.
         
@@ -105,7 +105,8 @@ class DynamicAgent:
         try:
             # Prepare initial input
             initial_input = {
-                'user_prompt': user_prompt
+                'user_prompt': user_prompt if isinstance(user_prompt, str) else user_prompt['prompt'],
+                'poem_id': -1 if isinstance(user_prompt, str) else user_prompt['poem_id']
             }
             
             if initial_constraints:

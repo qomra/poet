@@ -282,6 +282,73 @@ class SimplePoemGenerator(BasePoemGenerator, Node):
         """Get list of output keys this node produces."""
         return ['poem', 'generated']
 
+class PreGeneratedPoemGenerator(SimplePoemGenerator, Node):
+    """
+    Pre-generated poem generator that returns a pre-generated poem from the dataset.
+    """
+    def __init__(self, llm: BaseLLM, prompt_manager=None, dataset_path: str = None, **kwargs):
+        SimplePoemGenerator.__init__(self, llm)
+        Node.__init__(self, **kwargs)
+        
+        if dataset_path is None:
+            raise ValueError("dataset_path is required for PreGeneratedPoemGenerator")
+        
+        # load json dataset
+        with open(dataset_path, 'r', encoding='utf-8') as f:
+            self.dataset = {item['poem_id']: item for item in json.load(f)}
+
+    def run(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        poem_id = input_data.get('poem_id', -1)
+        if poem_id == -1:
+            # no poem id, so generate a poem
+            return SimplePoemGenerator.run(self, input_data, context)
+        else:
+            if poem_id not in self.dataset:
+                print(f"Poem ID {poem_id} not found in dataset, falling back to generation")
+                return SimplePoemGenerator.run(self, input_data, context)
+            
+            generation = self.dataset[poem_id]
+            poem_text = generation["ai"]["text"]
+            
+            # Parse the poem text into verses (assuming it's line-separated)
+            verses = [line.strip() for line in poem_text.split('\n') if line.strip()]
+            
+            # Create LLMPoem object
+            from poet.models.poem import LLMPoem
+            from datetime import datetime
+            constraints = input_data.get('constraints')
+            
+            # Convert constraints to dict if possible
+            constraints_dict = None
+            if constraints:
+                if hasattr(constraints, 'to_dict'):
+                    constraints_dict = constraints.to_dict()
+                elif hasattr(constraints, '__dict__'):
+                    constraints_dict = {k: v for k, v in constraints.__dict__.items() if not k.startswith('_')}
+                else:
+                    constraints_dict = None
+            
+            poem = LLMPoem(
+                verses=verses,
+                llm_provider="PreGenerated",
+                model_name="dataset",
+                constraints=constraints_dict,
+                generation_timestamp=datetime.now()
+            )
+            
+            # Store harmony data
+            output_data = {
+                'poem': poem,
+                'generated': True
+            }
+            
+            self._store_harmony_data(input_data, output_data)
+            
+            return output_data
+    
+    def can_handle_constraints(self, constraints: Constraints) -> bool:
+        """Check if this generator can handle the given constraints."""
+        return True
 
 class GenerationError(Exception):
     """Raised when poem generation fails"""
