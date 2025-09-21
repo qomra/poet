@@ -29,12 +29,22 @@ while [ $# -gt 0 ]; do
             LOG_FILE="$2"
             shift 2
             ;;
+        --local)
+            LOCAL_SERVER=true
+            shift
+            ;;
+        --api-base)
+            API_BASE="$2"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo "Options:"
             echo "  -b, --background    Run in background"
             echo "  -o, --output FILE   Map output to file (default: stdout)"
             echo "  -l, --log FILE      Log file for background mode (default: vllm.log)"
+            echo "  --local             Enable local vLLM server mode (no API key required)"
+            echo "  --api-base URL      Set API base URL for local server (default: http://localhost:8000)"
             echo "  -h, --help          Show this help message"
             exit 0
             ;;
@@ -47,7 +57,16 @@ while [ $# -gt 0 ]; do
 done
 
 # Build the command
-CMD="python3 -m vllm.entrypoints.openai.api_server --model $MODEL --runner auto --convert auto --tokenizer-mode auto --dtype $dtype --max-model-len $max_model_len  --pipeline-parallel-size $pp --tensor-parallel-size $tp --data-parallel-size $dp --host $HOST --port $PORT"
+if [ "$LOCAL_SERVER" = true ]; then
+    # Local vLLM server mode - no API key required
+    echo "Starting local vLLM server mode..."
+    echo "API Base: $API_BASE"
+    echo "No API key required for local server"
+    CMD="python3 -m vllm.entrypoints.openai.api_server --model $MODEL --runner auto --convert auto --tokenizer-mode auto --dtype $dtype --max-model-len $max_model_len --pipeline-parallel-size $pp --tensor-parallel-size $tp --data-parallel-size $dp --host $HOST --port $PORT --served-model-name $MODEL"
+else
+    # Standard vLLM server mode
+    CMD="python3 -m vllm.entrypoints.openai.api_server --model $MODEL --runner auto --convert auto --tokenizer-mode auto --dtype $dtype --max-model-len $max_model_len --pipeline-parallel-size $pp --tensor-parallel-size $tp --data-parallel-size $dp --host $HOST --port $PORT"
+fi
 
 # Add output redirection if specified
 if [ -n "$OUTPUT_FILE" ]; then

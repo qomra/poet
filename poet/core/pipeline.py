@@ -145,10 +145,12 @@ class PipelineEngine:
                 api_key = os.getenv("ANTHROPIC_API_KEY")
             elif provider == "groq":
                 api_key = os.getenv("GROQ_API_KEY")
+            elif provider == "vllm":
+                api_key = ""  # vLLM doesn't require API key
             elif provider == "mock":
                 api_key = None
         
-        if not api_key and provider != "mock":
+        if not api_key and provider not in ["mock", "vllm"]:
             self.logger.warning(f"No API key found for {provider}, falling back to global LLM")
             return self.context.get('llm')
         
@@ -158,7 +160,8 @@ class PipelineEngine:
             api_key=api_key,
             temperature=llm_config.get("temperature", 0.7),
             max_tokens=llm_config.get("max_tokens"),
-            timeout=llm_config.get("timeout", 320)
+            timeout=llm_config.get("timeout", 320),
+            base_url=llm_config.get("api_base")
         )
         
         # Create appropriate LLM adapter
@@ -168,6 +171,9 @@ class PipelineEngine:
             return OpenAIAdapter(llm_config_obj)
         elif provider == "anthropic":
             return AnthropicAdapter(llm_config_obj)
+        elif provider == "vllm":
+            from poet.llm.vllm_adapter import VLLMAdapter
+            return VLLMAdapter(llm_config_obj)
         elif provider == "mock":
             return MockLLM(llm_config_obj)
         else:

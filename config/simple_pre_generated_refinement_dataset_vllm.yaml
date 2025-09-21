@@ -2,10 +2,8 @@
 # This configuration uses the API key and settings from tests/fixtures/llms.json
 
 llm:
-  provider: "groq"
-  # model: meta-llama/llama-4-maverick-17b-128e-instruct  # From llms.json
-  model: openai/gpt-oss-120b
-  api_key: ""  # Load from environment variable
+  provider: "vllm"
+  model: meta-llama/Meta-Llama-3-8B 
   api_base: "http://localhost:8000"
   temperature: 1
 

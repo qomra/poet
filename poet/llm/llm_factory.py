@@ -8,6 +8,7 @@ from .base_llm import BaseLLM, LLMConfig, LLMError
 from .openai_adapter import OpenAIAdapter
 from .anthropic_adapter import AnthropicAdapter
 from .groq_adapter import GroqAdapter
+from .vllm_adapter import VLLMAdapter
 
 def get_real_llm_from_env() -> Optional[BaseLLM]:
     """
