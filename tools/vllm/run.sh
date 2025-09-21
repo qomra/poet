@@ -10,7 +10,7 @@ dtype="bfloat16"
 max_model_len=8192
 
 # Default values
-BACKGROUND=false
+BACKGROUND=true
 OUTPUT_FILE=""
 LOG_FILE="vllm.log"
 
