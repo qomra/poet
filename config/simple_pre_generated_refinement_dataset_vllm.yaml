@@ -1,0 +1,72 @@
+# Groq Configuration for Poet
+# This configuration uses the API key and settings from tests/fixtures/llms.json
+
+llm:
+  provider: "groq"
+  # model: meta-llama/llama-4-maverick-17b-128e-instruct  # From llms.json
+  model: openai/gpt-oss-120b
+  api_key: ""  # Load from environment variable
+  api_base: "http://localhost:8000"
+  temperature: 1
+
+
+# llm:
+#   provider: anthropic
+#   model: claude-sonnet-4-20250514
+#   api_key: "${ANTHROPIC_API_KEY}"  # Load from environment variable
+#   temperature: 0.7
+#   max_tokens: 8192
+#   timeout: 320
+
+# llm:
+#   provider: openai
+#   model: gpt-5-2025-08-07
+#   api_key: "${OPENAI_API_KEY}"  # Load from environment variable
+#   temperature: 1
+#   max_tokens: 8192
+#   timeout: 320
+#   reasoning_effort: "minimal"
+
+agent:
+  name: "simple_generation_refinement"
+  compilers:
+    harmony:
+      enabled: true
+      output_format: "structured"  # or "conversation"
+      save_output: false  # Disable saving harmony files
+      output_dir: "outputs/harmony"
+      config:
+        system_message_template: "default"
+        include_metadata: true
+
+  pipeline:
+    - constraints_parser
+    - qafiya_selector
+    - bahr_selector
+    - pre_generated_generation:
+        dataset_path: "dataset/final_data.json"
+      
+    - evaluation:
+        metrics:
+        - "prosody"
+        - "qafiya"
+    - refiner_chain:
+        max_iterations: 3
+        target_quality: 1
+        refiners:
+          - prosody_refiner
+          - qafiya_refiner
+  logging:
+    output_dir: "outputs/simple_generation_refinement"
+    items:
+      - llm_calls
+      - harmony
+      
+experiment:
+interface:
+  type: "dataset"
+  n_per_instance: 1
+  name: "simple_generation_refinement"
+  log_level: "INFO"
+  dataset_path: "dataset/diwan.json"
+  output_path: "tools/labeler/diwanai.json"
