@@ -15,7 +15,7 @@ OUTPUT_FILE=""
 LOG_FILE="vllm.log"
 
 # Parse command line arguments
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case $1 in
         -b|--background)
             BACKGROUND=true
@@ -50,12 +50,12 @@ done
 CMD="python3 -m vllm.entrypoints.openai.api_server --model $MODEL --runner auto --convert auto --tokenizer-mode auto --dtype $dtype --max-model-len $max_model_len  --pipeline-parallel-size $pp --tensor-parallel-size $tp --data-parallel-size $dp --host $HOST --port $PORT"
 
 # Add output redirection if specified
-if [[ -n "$OUTPUT_FILE" ]]; then
+if [ -n "$OUTPUT_FILE" ]; then
     CMD="$CMD > $OUTPUT_FILE 2>&1"
 fi
 
 # Execute based on mode
-if [[ "$BACKGROUND" == true ]]; then
+if [ "$BACKGROUND" = true ]; then
     echo "Starting vLLM server in background..."
     echo "Log file: $LOG_FILE"
     echo "PID file: vllm.pid"
