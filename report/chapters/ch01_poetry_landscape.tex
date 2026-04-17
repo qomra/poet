@@ -1,0 +1,145 @@
+% ============================================================================
+% Chapter 1 — The Arabic Poetry Landscape
+% ============================================================================
+\chapter{The Arabic Poetry Landscape}
+\label{ch:landscape}
+
+% ============================================================================
+\section{Fourteen Centuries of an Oral Art}
+\label{sec:landscape_history}
+
+Arabic poetry is among the oldest continuously active literary traditions in the world. From the \textit{Mu'allaqat} — the seven (or ten) pre-Islamic odes said to have been hung on the Ka'ba — through the vast Abbasid court poetry of the eighth through thirteenth centuries, through the Andalusian innovations of zajal and muwashshah, through the Nabati oral poetry of the Arabian Peninsula, and into the modernist free-verse revolution of the mid-twentieth century, Arabic poetry has never ceased to be composed, recited, memorised, and performed. It has also never settled into a single form.
+
+This document is the primary reference for \poeteng{} (\ar{الشاعر}), an AI system designed to understand, evaluate, and generate Arabic poetry across all major traditions. Understanding those traditions — their distinct rules, their shared roots, their tensions with one another — is prerequisite to building a system that can navigate them competently.
+
+% ============================================================================
+\section{Three Major Traditions}
+\label{sec:landscape_traditions}
+
+Arabic poetry as it exists today divides cleanly into three major traditions, each with its own prosodic system, its own repertoire of purposes, and its own performance conventions:
+
+\begin{description}[leftmargin=2cm, style=nextline]
+  \item[\textbf{Classical Arabic Poetry} (\ar{الشعر العربي الفصيح})]
+    Composed in Standard/Classical Arabic (Fusha), governed by the Khalilian prosodic system of sixteen meters (البحور الخليلية الستة عشر), and organised around a set of recognised thematic purposes (\ar{أغراض}). This is the tradition that dominates the literary canon, the school curriculum, and academic study of Arabic poetry. It includes pre-Islamic poetry (\ar{الشعر الجاهلي}), the great Abbasid masters (al-Mutanabbi, Abu Tammam, al-Buhturi), and continues in neo-classical (\ar{إحيائي}) form to the present.
+
+  \item[\textbf{Dialectal / Nabati Poetry} (\ar{الشعر العامي / الشعر النبطي})]
+    Composed in the spoken Arabic dialects of the Arabian Peninsula — principally Najdi, Hijazi, Gulf, and Yemeni Arabic — and governed by the Nabati prosodic system, which is parallel to but distinct from the Khalilian system. The Nabati tradition has its own set of meters (بحور نبطية), a distinctive dual-rhyme convention not found in classical poetry, and a performance culture closely tied to tribal identity and oral transmission. It is the dominant poetic tradition in Saudi Arabia and the Gulf states and commands an enormous popular audience.
+
+  \item[\textbf{Modern Forms} (\ar{الأشكال الشعرية الحديثة})]
+    Emerging in the mid-twentieth century, modern Arabic poetry includes \textit{shi'r al-tafila} (\ar{شعر التفعيلة} — metrical free verse, retaining classical meters but abandoning fixed line length) and \textit{qasidat al-nathr} (\ar{قصيدة النثر} — prose poetry, abandoning both meter and rhyme). These forms radically expanded what Arabic poetry could do and who could write it, at the cost of severing the link between poetry and the oral-musical tradition that had sustained it for fourteen centuries.
+\end{description}
+
+Beyond these three, several specialised \textbf{performance poetry forms} (\ar{أشكال الشعر الأدائي}) constitute a fourth category: improvised poetic dueling (\ar{المحاورة / القلطة}), tribal martial performance (\ar{العرضة الجنوبية}), the Najdi evening tradition (\ar{السامري}), and the Levantine zajal (\ar{الزجل}). These forms belong primarily to the dialectal world but have their own specific performance rules, social contexts, and compositional constraints that set them apart from ordinary Nabati verse.
+
+% ============================================================================
+\section{A Note on Prosodic Systems}
+\label{sec:landscape_prosody_note}
+
+A central challenge in Arabic poetry AI is that \textbf{each tradition has its own prosodic system}, and those systems, while related, are not interchangeable.
+
+\begin{itemize}
+  \item Classical Arabic prosody (\ar{علم العروض}) was codified by al-Khalil ibn Ahmad al-Farahidi (718–786 CE) and describes sixteen meters through a binary system of ``moving'' (\ar{متحرك}) and ``silent'' (\ar{ساكن}) syllables organised into feet (\ar{تفعيلات}).
+
+  \item Nabati prosody grew from the same phonological soil as Khalilian prosody but was independently systematised. Because it is realised through the phonology of colloquial spoken Arabic, many of its meters are acoustically related to Khalilian meters but scan differently at the phoneme level. A poem that sounds correct in Nabati cannot always be validated using the Khalilian rules.
+
+  \item Modern free verse (\ar{شعر التفعيلة}) retains Khalilian feet but applies them without the fixed line structure of the classical bayt. Validation requires identifying the chosen foot and checking that each line is built from valid iterations of that foot.
+
+  \item Prose poetry (\ar{قصيدة النثر}) has no prosodic constraints in the traditional sense. Evaluation is entirely qualitative: density of imagery, internal rhythm, linguistic concentration.
+\end{itemize}
+
+This means that \poeteng{} must know \textit{which tradition a given request belongs to} before it can apply the correct generation and evaluation logic. The constraint-parsing layer is therefore one of the most critical components of the system.
+
+% ============================================================================
+\section{Geographic and Regional Variation}
+\label{sec:landscape_geography}
+
+Arabic poetry is not geographically homogeneous. Significant regional traditions exist:
+
+\begin{table}[H]
+\centering
+\caption{Major regional Arabic poetry traditions}
+\label{tab:regional_traditions}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{Region} & \textbf{Arabic} & \textbf{Primary Dialect} & \textbf{Dominant Form(s)} \\
+\midrule
+Najd / Central Arabia & \ar{نجد} & Najdi Arabic & Nabati, Samri \\
+Hijaz (Mecca-Medina) & \ar{الحجاز} & Hijazi Arabic & Muhawara / Qalta \\
+Gulf (Kuwait, UAE, Qatar, Bahrain) & \ar{الخليج} & Gulf Arabic & Nabati, Samri, Muhawara \\
+Southern Saudi (Asir, Jizan) & \ar{جنوب المملكة} & Asiri/Jizan Arabic & Al-Ardah al-Janubiyya \\
+Levant (Lebanon, Syria, Palestine) & \ar{بلاد الشام} & Levantine Arabic & Zajal (Lebanese form) \\
+Egypt & \ar{مصر} & Egyptian Arabic & Zajal (Egyptian form), mawwal \\
+Yemen & \ar{اليمن} & Yemeni Arabic & Humaini poetry, Nabati variants \\
+Maghreb (Morocco, Algeria, Tunisia) & \ar{المغرب العربي} & Darija & Zajal (Maghrebi form), malhun \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+For the initial implementation of \poeteng{}, the primary focus is on the traditions most commonly requested by Arabic-speaking users in the Gulf and Levant: classical Fusha poetry, Arabian Peninsula Nabati poetry, and Gulf performance forms. Egyptian and Levantine dialectal forms are supported at a secondary level.
+
+% ============================================================================
+\section{What This Document Covers}
+\label{sec:landscape_scope}
+
+The following chapters form the complete poetry reference for \poeteng{}:
+
+\begin{description}[leftmargin=2cm, style=nextline]
+  \item[\textbf{Chapter~\ref{ch:classical}: Classical Arabic Poetry}]
+    The Khalilian prosodic system in full; the sixteen meters with tafeelat patterns, zehafs, and aruz/dharb combinations; the full system of poetic purposes (\ar{أغراض}); classical qasida structure; and all intertextual compositional forms (معارضة، مساجلة، تضمين، تشطير، تخميس، إكمال، تصوير).
+
+  \item[\textbf{Chapter~\ref{ch:nabati}: Dialectal / Nabati Poetry}]
+    The Nabati prosodic system; its twelve major meters; the dual-rhyme convention; regional dialects and style markers; and the major أغراض of the Nabati tradition.
+
+  \item[\textbf{Chapter~\ref{ch:performance}: Performance Poetry Forms}]
+    The rules and structure of improvised poetic dueling (\ar{المحاورة / القلطة}); the Southern Ardah (\ar{العرضة الجنوبية}); the Samri tradition (\ar{السامري}); and the Levantine Zajal (\ar{الزجل}).
+
+  \item[\textbf{Chapter~\ref{ch:modern}: Modern Arabic Poetry}]
+    \ar{شعر التفعيلة} theory and compositional rules; \ar{قصيدة النثر} characteristics and evaluation criteria; the relationship between modern and traditional forms.
+\end{description}
+
+% ============================================================================
+\clearpage
+\langsep{}
+
+% ============================================================================
+%  ARABIC VERSION / النسخة العربية
+% ============================================================================
+\begin{otherlanguage}{arabic}
+
+\section*{أربعة عشر قرنًا من فن شفهي}
+
+الشعر العربي من أقدم التقاليد الأدبية الحيّة المستمرة في العالم. من المعلَّقات السبع التي قيل إنها عُلِّقت على الكعبة المشرَّفة في الجاهلية، مرورًا بشعر البلاط الأموي والعباسي الضخم، ثم الابتكارات الأندلسية في الزجل والموشحات، ثم الشعر النبطي الشفهي في الجزيرة العربية، وصولًا إلى ثورة شعر التفعيلة في منتصف القرن العشرين — لم يتوقف الشعر العربي عن التأليف والإلقاء والحفظ والأداء، ولم يستقر قط في شكل واحد.
+
+هذه الوثيقة هي المرجع الرئيسي لنظام \textbf{الشاعر}، وهو نظام ذكاء اصطناعي مُصمَّم لفهم الشعر العربي وتقييمه وتوليده عبر جميع تقاليده الكبرى.
+
+\section*{ثلاثة تقاليد كبرى}
+
+ينقسم الشعر العربي كما هو اليوم إلى ثلاثة تقاليد كبرى، لكلٍّ منها نظامه العروضي الخاص، وخزانته من الأغراض، وأعرافه الأدائية:
+
+\begin{description}
+  \item[\textbf{الشعر العربي الفصيح}]
+    يُنظَم باللغة العربية الفصيحة، ويخضع للنظام العروضي الخليلي القائم على ستة عشر بحرًا، ويتنظّم حول أغراض شعرية معروفة. وهو التقليد الذي يهيمن على الكنز الأدبي والمناهج المدرسية والدراسات الأكاديمية، ويشمل الشعر الجاهلي، وعمالقة العصر العباسي كالمتنبي وأبي تمام والبحتري، ويستمر حتى اليوم في صورته الإحيائية.
+
+  \item[\textbf{الشعر العامي / الشعر النبطي}]
+    يُنظَم باللهجات العربية المحكية في شبه الجزيرة العربية — النجدية والحجازية والخليجية واليمنية — ويخضع للنظام العروضي النبطي، وهو نظام مستقل عن الخليلي وإن كان متوازيًا معه. للتقليد النبطي بحوره الخاصة، ونظام قافية مزدوجة لا نظير له في الشعر الكلاسيكي، وثقافة أداء مرتبطة ارتباطًا وثيقًا بالهوية القبلية والرواية الشفهية.
+
+  \item[\textbf{الأشكال الشعرية الحديثة}]
+    تشمل شعر التفعيلة (الذي يحافظ على البحور الخليلية لكنه يتخلى عن الشطرين الثابتين) وقصيدة النثر (التي تتخلى عن الوزن والقافية معًا). هذه الأشكال وسَّعت آفاق الشعر العربي توسيعًا جذريًا، غير أنها قطعت الصلة بالتقليد الشفهي الموسيقي الذي أمدّ الشعر بحياته أربعة عشر قرنًا.
+\end{description}
+
+\section*{ملاحظة حول الأنظمة العروضية}
+
+التحدي المحوري في الذكاء الاصطناعي الشعري العربي هو أن \textbf{لكل تقليد نظامه العروضي الخاص}، وهذه الأنظمة — وإن كانت متعلقة ببعضها — غير قابلة للتبادل:
+
+\begin{itemize}
+  \item العروض العربي الكلاسيكي قنّنه الخليل بن أحمد الفراهيدي (718–786م) ويصف ستة عشر بحرًا عبر نظام ثنائي من المتحرك والساكن مرتبًا في تفعيلات.
+  \item العروض النبطي نما من نفس البيئة الصوتية الخليلية لكنه وُضع بصورة مستقلة، وكثير من بحوره مرتبطة صوتيًا بالبحور الخليلية لكنها تختلف عنها على مستوى المقاطع.
+  \item شعر التفعيلة يحتفظ بالتفعيلات الخليلية لكن بدون التقييد بطول البيت الثابت.
+  \item قصيدة النثر لا قيود عروضية عليها، والتقييم فيها نوعي بحت.
+\end{itemize}
+
+هذا يعني أن نظام \textbf{الشاعر} يجب أن يحدد \textit{التقليد الذي ينتمي إليه الطلب} قبل تطبيق منطق التوليد والتقييم المناسب.
+
+\end{otherlanguage}
+

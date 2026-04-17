@@ -1,0 +1,13 @@
+schema
+db
+store
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+polars>=1.26
+pyarrow>=19
+datasets>=3.5
+huggingface-hub>=0.30
+httpx>=0.28
+tqdm>=4.67
+rich>=14
+typer>=0.15

@@ -1,0 +1,90 @@
+% ============================================================================
+% Appendix A — Complete Meter Reference
+% ============================================================================
+\chapter{Complete Meter Reference}
+\label{app:meters_reference}
+
+This appendix provides the complete structural data for all sixteen Khalilian meters and the major Nabati meters, formatted for direct use in AI generation prompts and prosodic validation.
+
+% ============================================================================
+\section{All Sixteen Khalilian Meters — Quick Reference}
+\label{app:khalilian_quick}
+
+\begin{longtable}{p{2.5cm}p{4cm}p{3.5cm}p{3cm}}
+\caption{Complete Khalilian meter reference}\label{tab:all_meters}\\
+\toprule
+\textbf{Meter} & \textbf{Sadr Tafeelat} & \textbf{Main Aruz Form} & \textbf{Frequency} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\small\textit{(continued from previous page)}}\\
+\toprule
+\textbf{Meter} & \textbf{Sadr Tafeelat} & \textbf{Main Aruz Form} & \textbf{Frequency} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\ar{الطويل} & \ar{فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ} & \ar{فَعُولُ} (مقبوضة) & Very common \\[6pt]
+\ar{المديد} & \ar{فَاعِلَاتُنْ فَاعِلُنْ فَاعِلَاتُنْ} & \ar{فَاعِلَاتُنْ / فَاعِلُنْ} & Rare \\[6pt]
+\ar{البسيط} & \ar{مُسْتَفْعِلُنْ فَاعِلُنْ مُسْتَفْعِلُنْ فَاعِلُنْ} & \ar{مُفَاعِلُنْ} (مخبونة) & Very common \\[6pt]
+\ar{الوافر} & \ar{مُفَاعَلَتُنْ مُفَاعَلَتُنْ فَعُولُنْ} & \ar{مَفَاعِيلُنْ} (مقطوف) & Common \\[6pt]
+\ar{الكامل} & \ar{مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ} & \ar{مُتَفَاعِلُنْ / مُتْفَاعِلُنْ} & Very common \\[6pt]
+\ar{الهزج} & \ar{مَفَاعِيلُنْ مَفَاعِيلُنْ} & \ar{مَفَاعِيلُنْ / مَفَاعِيلُ} & Common \\[6pt]
+\ar{الرجز} & \ar{مُسْتَفْعِلُنْ مُسْتَفْعِلُنْ مُسْتَفْعِلُنْ} & Multiple & Very common \\[6pt]
+\ar{الرمل} & \ar{فَاعِلَاتُنْ فَاعِلَاتُنْ فَاعِلَاتُنْ} & \ar{فَاعِلَاتُنْ/فَاعِلَا} (محذوف) & Common \\[6pt]
+\ar{السريع} & \ar{مُسْتَفْعِلُنْ مُسْتَفْعِلُنْ مَفْعُولَاتُ} & \ar{مَفْعُولَاتْ} (موقوف) & Moderate \\[6pt]
+\ar{المنسرح} & \ar{مُسْتَفْعِلُنْ مَفْعُولَاتُ مُسْتَفْعِلُنْ} & \ar{مُسْتَفْعِلُنْ} & Rare \\[6pt]
+\ar{الخفيف} & \ar{فَاعِلَاتُنْ مُسْتَفْعِ لُنْ فَاعِلَاتُنْ} & \ar{فَاعِلَاتُنْ / فَعِلَاتُنْ} & Moderate \\[6pt]
+\ar{المضارع} & \ar{مَفَاعِيلُنْ فَاعِلَاتُنْ} & \ar{فَاعِلَاتُنْ} & Very rare \\[6pt]
+\ar{المقتضب} & \ar{مَفْعُولَاتُ مُسْتَفْعِلُنْ} & \ar{مُسْتَفْعِلُنْ} & Nearly extinct \\[6pt]
+\ar{المجتث} & \ar{مُسْتَفْعِ لُنْ فَاعِلَاتُنْ} & \ar{فَاعِلَاتُنْ / فَعِلَاتُنْ} & Rare \\[6pt]
+\ar{المتقارب} & \ar{فَعُولُنْ فَعُولُنْ فَعُولُنْ فَعُولُنْ} & \ar{فَعُولُ / فَعَلْ} & Common \\[6pt]
+\ar{المتدارك} & \ar{فَاعِلُنْ فَاعِلُنْ فَاعِلُنْ فَاعِلُنْ} & Multiple & Moderate \\
+\end{longtable}
+
+% ============================================================================
+\section{Zehaf Reference}
+\label{app:zehafs}
+
+\begin{table}[H]
+\centering
+\caption{Main zehafs and their effects}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{llXX}
+\toprule
+\textbf{Zehaf} & \textbf{Arabic} & \textbf{Effect} & \textbf{Applicable Feet} \\
+\midrule
+Al-Khabn & \ar{الخبن} & Removes 2nd element & \ar{مُسْتَفْعِلُنْ} → \ar{مُفَاعِلُنْ}; \ar{فَاعِلُنْ} → \ar{فَعِلُنْ} \\
+Al-Tay & \ar{الطي} & Removes 4th element & \ar{مُسْتَفْعِلُنْ} → \ar{مُسْتَعِلُنْ} \\
+Al-Khabal & \ar{الخبل} & Khabn + Tay (removes 2nd + 4th) & \ar{مُسْتَفْعِلُنْ} → \ar{مُفَاعِلُنْ} → \ar{مُتَعِلُنْ} \\
+Al-Qabadh & \ar{القبض} & Removes 5th element & \ar{فَعُولُنْ} → \ar{فَعُولُ}; \ar{مَفَاعِيلُنْ} → \ar{مَفَاعِيلُ} \\
+Al-Kaff & \ar{الكف} & Removes 7th element & \ar{مَفَاعِيلُنْ} → \ar{مَفَاعِيلُ}; \ar{فَاعِلَاتُنْ} → \ar{فَاعِلَاتُ} \\
+Al-'Asab & \ar{العصب} & Quiesces 5th element & \ar{مُفَاعَلَتُنْ} → \ar{مُفَاعِلْتُنْ} (Wafir only) \\
+Al-Idmaar & \ar{الإضمار} & Quiesces 2nd element & \ar{مُتَفَاعِلُنْ} → \ar{مُتْفَاعِلُنْ} \\
+Al-Waqas & \ar{الوقص} & Removes 2nd element & \ar{مُتَفَاعِلُنْ} (rare) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================================
+\section{Nabati Meters Quick Reference}
+\label{app:nabati_meters_quick}
+
+\begin{table}[H]
+\centering
+\caption{Major Nabati meters summary}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabularx}{\textwidth}{llXlX}
+\toprule
+\textbf{Meter} & \textbf{Arabic} & \textbf{Approximate Pattern} & \textbf{Rhyme} & \textbf{Notes} \\
+\midrule
+Al-Mashhub & \ar{المسحوب} & \ar{مستفعلن مستفعلن فاعلاتن} & Dual & Most common Nabati meter \\
+Al-Hilali & \ar{الهلالي} & \ar{مستفعلن مستفعلن فاعلاتن} (long) & Single & Oldest; ancestor of Mashhub \\
+Al-Hijini & \ar{الهجيني} & Mixed Sari'/Baseet & Single & Camel-riding, journey \\
+Al-Sakhri & \ar{الصخري} & Wafir-like & Single & Narrative \\
+Al-Hida' & \ar{الحداء} & Rajaz-like & Single & Camel-driving, martial \\
+Al-Zuhayri & \ar{الزهيري} & \ar{مستفعلن فاعلن مستفعلن} & Single & Dense rhyming \\
+Bahr al-Funun & \ar{بحر الفنون} & \ar{فاعلاتن فاعلاتن فاعلن} & Single & Innovated by Ibn La'bun \\
+Al-Samiri & \ar{السامري} & Mashhub-derived & Dual & Nocturnal performance \\
+\bottomrule
+\end{tabularx}
+\end{table}

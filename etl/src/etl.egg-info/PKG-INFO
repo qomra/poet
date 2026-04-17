@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: etl
+Version: 0.1.0
+Summary: ETL pipelines — raw sources → data lake → knowledge base
+Requires-Python: >=3.12
+Requires-Dist: schema
+Requires-Dist: db
+Requires-Dist: store
+Requires-Dist: sqlalchemy>=2.0
+Requires-Dist: psycopg[binary]>=3.2
+Requires-Dist: polars>=1.26
+Requires-Dist: pyarrow>=19
+Requires-Dist: datasets>=3.5
+Requires-Dist: huggingface-hub>=0.30
+Requires-Dist: httpx>=0.28
+Requires-Dist: tqdm>=4.67
+Requires-Dist: rich>=14
+Requires-Dist: typer>=0.15

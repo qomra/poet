@@ -1,0 +1,14 @@
+[project]
+name = "mcp-poet_lookup"
+version = "0.1.0"
+description = "MCP server: poet_lookup"
+requires-python = ">=3.12"
+dependencies = [
+    "schema",
+    "db",
+    "store",
+    "mcp>=1.6",
+]
+
+[project.scripts]
+mcp-poet_lookup = "mcp.poet_lookup.server:main"

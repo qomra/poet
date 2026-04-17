@@ -1,0 +1,123 @@
+\babel@toc {english}{}\relax 
+\babel@toc {arabic}{}\relax 
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {1}The Arabic Poetry Landscape}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Fourteen Centuries of an Oral Art}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Three Major Traditions}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}A Note on Prosodic Systems}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Geographic and Regional Variation}{3}{section.1.4}%
+\contentsline {section}{\numberline {1.5}What This Document Covers}{5}{section.1.5}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {2}Classical Arabic Poetry}{8}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Foundations of Arabic Prosody (\foreignlanguage {arabic}{علم العروض})}{8}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}The Three Prosodic Building Blocks}{8}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}The Eight Tafeelat}{9}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}The Five Prosodic Circles}{11}{subsection.2.1.3}%
+\contentsline {section}{\numberline {2.2}The Sixteen Khalilian Meters}{11}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}\foreignlanguage {arabic}{البحر الطويل} — Bahr al-Taweel (``The Long'')}{12}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}\foreignlanguage {arabic}{البحر البسيط} — Bahr al-Baseet (``The Simple'')}{12}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}\foreignlanguage {arabic}{البحر الكامل} — Bahr al-Kamel (``The Complete'')}{13}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}\foreignlanguage {arabic}{البحر الوافر} — Bahr al-Wafir (``The Abundant'')}{14}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}\foreignlanguage {arabic}{البحر الرجز} — Bahr al-Rajaz (``The Trembling'')}{14}{subsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.2.6}\foreignlanguage {arabic}{البحر الرمل} — Bahr al-Ramal (``The Sand'')}{15}{subsection.2.2.6}%
+\contentsline {subsection}{\numberline {2.2.7}\foreignlanguage {arabic}{البحر الهزج} — Bahr al-Hazaj (``The Buzzing'')}{15}{subsection.2.2.7}%
+\contentsline {subsection}{\numberline {2.2.8}\foreignlanguage {arabic}{البحر الخفيف} — Bahr al-Khafeef (``The Light'')}{16}{subsection.2.2.8}%
+\contentsline {subsection}{\numberline {2.2.9}\foreignlanguage {arabic}{البحر السريع} — Bahr al-Saree' (``The Fast'')}{16}{subsection.2.2.9}%
+\contentsline {subsection}{\numberline {2.2.10}\foreignlanguage {arabic}{البحر المتقارب} — Bahr al-Mutakareb (``The Approaching'')}{17}{subsection.2.2.10}%
+\contentsline {subsection}{\numberline {2.2.11}\foreignlanguage {arabic}{البحر المتدارك / المحدث} — Bahr al-Mutadarak}{17}{subsection.2.2.11}%
+\contentsline {section}{\numberline {2.3}The Rhyme System (\foreignlanguage {arabic}{نظام القافية})}{18}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}The Five Rhyme Letters}{18}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Rhyme Vowel Types (\foreignlanguage {arabic}{حركات القافية})}{18}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Qafiya Defects (\foreignlanguage {arabic}{عيوب القافية})}{19}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Qafiya Type by Inter-Consonant Vowel Count}{19}{subsection.2.3.4}%
+\contentsline {section}{\numberline {2.4}Classical Qasida Structure (\foreignlanguage {arabic}{بنية القصيدة})}{20}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Poetic Purposes (\foreignlanguage {arabic}{أغراض الشعر})}{20}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}\foreignlanguage {arabic}{المديح} — Panegyric}{20}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}\foreignlanguage {arabic}{الهجاء} — Satire/Invective}{21}{subsection.2.5.2}%
+\contentsline {subsection}{\numberline {2.5.3}\foreignlanguage {arabic}{الغزل} — Love Poetry}{22}{subsection.2.5.3}%
+\contentsline {subsection}{\numberline {2.5.4}\foreignlanguage {arabic}{الرثاء} — Elegy}{22}{subsection.2.5.4}%
+\contentsline {subsection}{\numberline {2.5.5}\foreignlanguage {arabic}{الفخر} — Boasting/Self-Glorification}{23}{subsection.2.5.5}%
+\contentsline {subsection}{\numberline {2.5.6}\foreignlanguage {arabic}{الحكمة} — Wisdom Poetry}{23}{subsection.2.5.6}%
+\contentsline {subsection}{\numberline {2.5.7}\foreignlanguage {arabic}{الزهد} — Asceticism}{23}{subsection.2.5.7}%
+\contentsline {subsection}{\numberline {2.5.8}\foreignlanguage {arabic}{الخمريات} — Wine Poetry}{23}{subsection.2.5.8}%
+\contentsline {subsection}{\numberline {2.5.9}\foreignlanguage {arabic}{الشعر الصوفي} — Sufi/Mystical Poetry}{23}{subsection.2.5.9}%
+\contentsline {section}{\numberline {2.6}Intertextual Compositional Forms (\foreignlanguage {arabic}{الأشكال التناصية})}{24}{section.2.6}%
+\contentsline {subsection}{\numberline {2.6.1}\foreignlanguage {arabic}{المعارضة} — Response/Counter-Poem}{24}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {2.6.2}\foreignlanguage {arabic}{المساجلة} — Poetic Competition}{25}{subsection.2.6.2}%
+\contentsline {subsection}{\numberline {2.6.3}\foreignlanguage {arabic}{التضمين} — Intertextual Borrowing}{25}{subsection.2.6.3}%
+\contentsline {subsection}{\numberline {2.6.4}\foreignlanguage {arabic}{التشطير} — Hemistichal Splitting}{25}{subsection.2.6.4}%
+\contentsline {subsection}{\numberline {2.6.5}\foreignlanguage {arabic}{التخميس} — Quintuple Form}{26}{subsection.2.6.5}%
+\contentsline {subsection}{\numberline {2.6.6}\foreignlanguage {arabic}{إكمال القصيدة} — Completing an Unfinished Poem}{26}{subsection.2.6.6}%
+\contentsline {subsection}{\numberline {2.6.7}\foreignlanguage {arabic}{التصوير الشعري} — Poetic Visualization}{27}{subsection.2.6.7}%
+\contentsline {subsection}{\numberline {2.6.8}\foreignlanguage {arabic}{شعر المناسبات} — Occasional Poetry}{27}{subsection.2.6.8}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {3}Dialectal and Nabati Poetry}{32}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Origins and Historical Development}{32}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Relationship to Khalilian Prosody}{32}{subsection.3.1.1}%
+\contentsline {section}{\numberline {3.2}The Nabati Prosodic System}{33}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Primary Nabati Meters (\foreignlanguage {arabic}{البحور الرئيسية})}{33}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Innovated Nabati Meters (\foreignlanguage {arabic}{البحور المبتكرة})}{34}{subsection.3.2.2}%
+\contentsline {section}{\numberline {3.3}The Dual-Rhyme System (\foreignlanguage {arabic}{نظام القافية المزدوجة})}{34}{section.3.3}%
+\contentsline {section}{\numberline {3.4}The Hilali and Mashhub Meters in Detail}{35}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Al-Hilali (\foreignlanguage {arabic}{الهلالي})}{35}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Al-Mashhub (\foreignlanguage {arabic}{المسحوب})}{36}{subsection.3.4.2}%
+\contentsline {section}{\numberline {3.5}Nabati Poetic Purposes (\foreignlanguage {arabic}{أغراض الشعر النبطي})}{36}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Regional Varieties of Dialectal Poetry}{37}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Najdi Poetry (\foreignlanguage {arabic}{الشعر النجدي})}{37}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Hijazi Poetry (\foreignlanguage {arabic}{الشعر الحجازي})}{38}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Gulf Poetry (\foreignlanguage {arabic}{الشعر الخليجي})}{38}{subsection.3.6.3}%
+\contentsline {section}{\numberline {3.7}Famous Nabati Poets}{39}{section.3.7}%
+\contentsline {section}{\numberline {3.8}AI Implementation Notes for Nabati Poetry}{40}{section.3.8}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {4}Performance Poetry Forms}{43}{chapter.4}%
+\contentsline {section}{\numberline {4.1}\foreignlanguage {arabic}{شعر المحاورة والقلطة} — Improvised Poetic Dueling}{43}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Definition and Regional Names}{43}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}The Core Mechanics}{44}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}The Tariq System (\foreignlanguage {arabic}{نظام الطريق})}{44}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}The Opening and Response Structure}{44}{subsection.4.1.4}%
+\contentsline {subsection}{\numberline {4.1.5}Evaluation Criteria}{44}{subsection.4.1.5}%
+\contentsline {subsection}{\numberline {4.1.6}Types of \foreignlanguage {arabic}{محاورة}}{45}{subsection.4.1.6}%
+\contentsline {section}{\numberline {4.2}\foreignlanguage {arabic}{العرضة الجنوبية} — The Southern Ardah}{45}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Definition and Origins}{45}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}The Performance Structure}{46}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Poetic Characteristics of the Ardah}{46}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Historical Forms of the Ardah}{46}{subsection.4.2.4}%
+\contentsline {section}{\numberline {4.3}\foreignlanguage {arabic}{السامري} — The Samri Tradition}{47}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Definition and Origins}{47}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}The Performance Structure}{47}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Poetic Content}{48}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Instruments}{48}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}Regional Samri Styles}{48}{subsection.4.3.5}%
+\contentsline {section}{\numberline {4.4}\foreignlanguage {arabic}{الزجل} — The Zajal}{49}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Definition and Origins}{49}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Structural Characteristics}{49}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Lebanese Zajal Forms}{50}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}The Zajal Dueling Format}{50}{subsection.4.4.4}%
+\contentsline {subsection}{\numberline {4.4.5}Metrical System}{50}{subsection.4.4.5}%
+\contentsline {section}{\numberline {4.5}Other Performance Forms}{51}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}\foreignlanguage {arabic}{الحداء} — The Camel-Driver's Call}{51}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}\foreignlanguage {arabic}{الموال / المواليا} — The Mawwal}{51}{subsection.4.5.2}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {5}Modern Arabic Poetry Forms}{54}{chapter.5}%
+\contentsline {section}{\numberline {5.1}\foreignlanguage {arabic}{شعر التفعيلة} — Metrical Free Verse}{54}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Historical Origins}{54}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Structural Rules}{55}{subsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.1.3}Meter Selection in \foreignlanguage {arabic}{شعر التفعيلة}}{55}{subsection.5.1.3}%
+\contentsline {subsection}{\numberline {5.1.4}Al-Sayyab's ``Rain Song'' — A Reference Example}{56}{subsection.5.1.4}%
+\contentsline {subsection}{\numberline {5.1.5}Evaluation Criteria for \foreignlanguage {arabic}{شعر التفعيلة}}{56}{subsection.5.1.5}%
+\contentsline {section}{\numberline {5.2}\foreignlanguage {arabic}{قصيدة النثر} — The Prose Poem}{56}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Historical Origins and Theoretical Grounding}{57}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Defining Characteristics}{57}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Evaluation Criteria for \foreignlanguage {arabic}{قصيدة نثر}}{57}{subsection.5.2.3}%
+\contentsline {section}{\numberline {5.3}Mixing Traditions (\foreignlanguage {arabic}{التمزيج بين التقاليد})}{58}{section.5.3}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {A}Complete Meter Reference}{62}{appendix.A}%
+\contentsline {section}{\numberline {A.1}All Sixteen Khalilian Meters — Quick Reference}{62}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Zehaf Reference}{63}{section.A.2}%
+\contentsline {section}{\numberline {A.3}Nabati Meters Quick Reference}{64}{section.A.3}%
+\contentsline {chapter}{\numberline {B}Glossary of Arabic Poetry Terms}{65}{appendix.B}%

@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: schema
+Version: 0.1.0
+Summary: Canonical data models for الشاعر
+Requires-Python: >=3.12
+Requires-Dist: pydantic>=2.10

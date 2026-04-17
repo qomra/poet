@@ -1,0 +1,12 @@
+schema
+db
+store
+polars>=1.26
+duckdb>=1.2
+pyarrow>=19
+datasets>=3.5
+huggingface-hub>=0.30
+httpx>=0.28
+tqdm>=4.67
+rich>=14
+typer>=0.15

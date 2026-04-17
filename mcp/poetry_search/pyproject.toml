@@ -1,0 +1,14 @@
+[project]
+name = "mcp-poetry_search"
+version = "0.1.0"
+description = "MCP server: poetry_search"
+requires-python = ">=3.12"
+dependencies = [
+    "schema",
+    "db",
+    "store",
+    "mcp>=1.6",
+]
+
+[project.scripts]
+mcp-poetry_search = "mcp.poetry_search.server:main"

@@ -1,0 +1,333 @@
+% ============================================================================
+% الشاعر — The Poet
+% A Comprehensive Reference for Arabic Poetry AI Systems
+% ============================================================================
+% Compile with: lualatex (for HarfBuzz Arabic shaping)
+\documentclass[12pt,a4paper,twoside]{report}
+
+% --- Fonts (XeLaTeX required) ---
+\usepackage{fontspec}
+\setmainfont[Ligatures=TeX]{TeX Gyre Pagella}
+\setsansfont[Ligatures=TeX]{TeX Gyre Heros}
+\setmonofont{TeX Gyre Cursor}
+
+% --- Page Layout ---
+\usepackage[
+  top=2.5cm,
+  bottom=2.5cm,
+  left=3cm,
+  right=2.5cm,
+  headheight=14pt
+]{geometry}
+
+% --- Math ---
+\usepackage{amsmath,amssymb,amsfonts}
+
+% --- Graphics ---
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+
+% --- Tables ---
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{makecell}
+
+% --- Colors ---
+\usepackage[dvipsnames]{xcolor}
+\definecolor{PoetGold}{HTML}{B8860B}
+\definecolor{PoetWine}{HTML}{722F37}
+\definecolor{PoetDark}{HTML}{1A1A2E}
+\definecolor{PoetGray}{HTML}{4A4A4A}
+\definecolor{PoetCream}{HTML}{FDF8F0}
+\definecolor{PoetSand}{HTML}{E8DCC8}
+\definecolor{PoetGoldLight}{HTML}{F5E6C8}
+
+% --- Links ---
+\usepackage[
+  colorlinks=true,
+  linkcolor=PoetWine,
+  citecolor=PoetGold,
+  urlcolor=PoetWine,
+  unicode=true,
+  psdextra
+]{hyperref}
+% Make \ar and \foreignlanguage safe in PDF bookmarks (drop Arabic silently)
+\pdfstringdefDisableCommands{%
+  \def\ar#1{}%
+  \def\arterm#1{}%
+  \def\bahr#1{}%
+  \def\tafeela#1{}%
+  \def\foreignlanguage#1#2{}%
+  \def\textbf#1{#1}%
+  \def\textit#1{#1}%
+}
+
+% --- Headers and Footers ---
+\usepackage{fancyhdr}
+
+% --- Chapter / Section Heading Style ---
+\usepackage{titlesec}
+
+% --- Code / Verse Listings ---
+\usepackage{listings}
+
+% --- TikZ ---
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows.meta,positioning,calc,fit,backgrounds}
+
+% --- Misc ---
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{csquotes}
+\usepackage{mdframed}
+\usepackage{tcolorbox}
+\tcbuselibrary{most}
+
+% --- Bibliography ---
+\usepackage[
+  backend=biber,
+  style=numeric-comp,
+  sorting=nyt,
+  maxbibnames=99
+]{biblatex}
+\addbibresource{bib/references.bib}
+
+% --- Language: babel with automatic Arabic character detection ---
+% onchar=ids fonts: switches font+direction automatically on Arabic codepoints
+\usepackage[bidi=basic]{babel}
+\babelprovide[main,import]{english}
+\babelprovide[import,onchar=ids fonts]{arabic}
+\babelfont{rm}{TeX Gyre Pagella}
+\babelfont{sf}{TeX Gyre Heros}
+\babelfont{tt}{TeX Gyre Cursor}
+\babelfont[arabic]{rm}[Scale=1.15,Script=Arabic]{Amiri}
+\babelfont[arabic]{sf}[Scale=1.1,Script=Arabic]{Amiri}
+\babelfont[arabic]{tt}[Script=Arabic]{Amiri}
+
+% Alias for explicit Arabic environments / inline spans
+\newcommand{\arabicfont}{\fontencoding{TU}\fontfamily{Amiri(0)}\selectfont}
+
+% ============================================================================
+% Configuration (after all packages)
+% ============================================================================
+
+% --- Spacing ---
+\setlength{\parskip}{6pt}
+\onehalfspacing
+
+% --- Page style ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\color{PoetGray}\leftmark}
+\fancyhead[RO]{\small\color{PoetGray}\rightmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{%
+  \color{PoetGold}\leaders\hrule height \headrulewidth\hfill}}
+
+% --- Chapter heading style ---
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{PoetDark}}
+  {\color{PoetGold}\chaptertitlename\ \thechapter}
+  {20pt}
+  {\Huge}
+  [\vspace{2pt}\color{PoetGold}\titlerule]
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{PoetDark}}
+  {\color{PoetWine}\thesection}
+  {1em}{}
+  [{\color{PoetSand}\titlerule[0.5pt]}]
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{PoetDark}}
+  {\thesubsection}
+  {1em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{PoetGray}}
+  {\thesubsubsection}
+  {1em}{}
+
+% --- Listings style ---
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{PoetGoldLight},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{PoetGold},
+  breaklines=true,
+}
+
+% --- Custom Environments ---
+
+\newmdenv[
+  backgroundcolor=PoetGoldLight,
+  linecolor=PoetGold,
+  linewidth=1pt,
+  leftmargin=20pt,
+  rightmargin=20pt,
+  innerleftmargin=12pt,
+  innerrightmargin=12pt,
+  innertopmargin=8pt,
+  innerbottommargin=8pt,
+  skipabove=8pt,
+  skipbelow=8pt,
+]{verseframe}
+
+\newmdenv[
+  backgroundcolor=PoetGoldLight,
+  linecolor=PoetWine,
+  linewidth=1pt,
+  leftmargin=20pt,
+  rightmargin=20pt,
+  innerleftmargin=12pt,
+  innerrightmargin=12pt,
+  innertopmargin=8pt,
+  innerbottommargin=8pt,
+  skipabove=8pt,
+  skipbelow=8pt,
+]{arabicverseframe}
+
+\newtcolorbox{implnote}{
+  colback=blue!5!white,
+  colframe=PoetDark,
+  fonttitle=\bfseries,
+  title={\small\textbf{Implementation Note}},
+  boxrule=0.8pt,
+  arc=3pt,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+}
+
+\newtcolorbox{rulebox}[1]{
+  colback=PoetGoldLight,
+  colframe=PoetGold,
+  fonttitle=\bfseries\color{PoetDark},
+  title={#1},
+  boxrule=0.8pt,
+  arc=3pt,
+}
+
+\newtcolorbox{arabicbox}[1]{
+  colback=PoetGoldLight,
+  colframe=PoetWine,
+  fonttitle=\bfseries\color{PoetDark},
+  title={\foreignlanguage{arabic}{#1}},
+  boxrule=0.8pt,
+  arc=3pt,
+}
+
+% --- Custom Commands ---
+% With babel onchar, Arabic chars auto-switch font+direction.
+% \foreignlanguage{arabic}{} forces the arabic babel context explicitly.
+\newcommand{\poet}{\foreignlanguage{arabic}{الشاعر}}
+\newcommand{\poeteng}{\textbf{The Poet}}
+\newcommand{\ar}[1]{\foreignlanguage{arabic}{#1}}
+\newcommand{\arterm}[1]{\textbf{\foreignlanguage{arabic}{#1}}}
+\newcommand{\meter}[1]{\textit{#1}}
+\newcommand{\bahr}[1]{\textbf{\foreignlanguage{arabic}{#1}}}
+\newcommand{\tafeela}[1]{\foreignlanguage{arabic}{#1}}
+
+\newcommand{\langsep}{%
+  \vspace{1.5cm}
+  \begin{center}
+    \color{PoetGold}\rule{0.3\textwidth}{0.4pt}
+    \quad{\large\textbf{\foreignlanguage{arabic}{النسخة العربية}}}\quad
+    \color{PoetGold}\rule{0.3\textwidth}{0.4pt}
+  \end{center}
+  \vspace{0.5cm}
+}
+
+% ============================================================================
+\begin{document}
+
+% --- Title Page ---
+\begin{titlepage}
+  \pagecolor{PoetDark}
+  \color{white}
+  \centering
+  \vspace*{2cm}
+
+  {\fontsize{72}{80}\selectfont\color{PoetGold}%
+    \foreignlanguage{arabic}{الشاعر}}
+
+  \vspace{0.4cm}
+
+  {\LARGE\color{PoetSand} The Poet}
+
+  \vspace{1.5cm}
+
+  \color{PoetGold}\rule{0.6\textwidth}{0.8pt}
+
+  \vspace{1cm}
+
+  {\Large\bfseries\color{white}
+    A Comprehensive Reference\\[0.4em]
+    for Arabic Poetry AI Systems}
+
+  \vspace{0.5cm}
+
+  {\large\color{PoetSand}\itshape
+    Forms, Meters, Purposes, and Generation Rules\\[0.2em]
+    Across Classical, Dialectal, Performance, and Modern Traditions}
+
+  \vspace{2cm}
+
+  {\normalsize\color{PoetGold}
+    \begin{otherlanguage}{arabic}
+      مرجع شامل لأنظمة الذكاء الاصطناعي الشعري العربي\\[0.3em]
+      الأشكال والبحور والأغراض وقواعد التوليد\\[0.2em]
+      عبر التقاليد الكلاسيكية والعامية والأدائية والحديثة
+    \end{otherlanguage}
+  }
+
+  \vspace{2.5cm}
+
+  \color{PoetGold}\rule{0.6\textwidth}{0.4pt}
+
+  \vspace{1cm}
+
+  {\small\color{PoetSand}
+    Version 1.0 \quad|\quad April 2026\\[0.4em]
+    Internal Development Reference
+  }
+
+  \vfill
+
+  \color{PoetGold}\rule{0.8\textwidth}{0.2pt}
+
+  \nopagecolor
+\end{titlepage}
+
+% --- Front Matter ---
+\pagenumbering{roman}
+
+\tableofcontents
+\newpage
+\listoftables
+\newpage
+
+% --- Main Matter ---
+\pagenumbering{arabic}
+
+\include{chapters/ch01_poetry_landscape}
+\include{chapters/ch02_classical_poetry}
+\include{chapters/ch03_nabati_poetry}
+\include{chapters/ch04_performance_forms}
+\include{chapters/ch05_modern_forms}
+
+% --- Bibliography ---
+\printbibliography[heading=bibintoc,title={References / المراجع}]
+
+% --- Appendices ---
+\appendix
+\include{appendices/appA_meters_reference}
+\include{appendices/appB_glossary}
+
+\end{document}

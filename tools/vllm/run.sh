@@ -1,16 +1,16 @@
 #!/bin/bash
 
-MODEL="meta-llama/Meta-Llama-3-8B"
+MODEL="meta-llama/Llama-4-Scout-17B-16E-Instruct"
 PORT=8000
 HOST=127.0.0.1
 tp=4
 dp=1
 pp=1
 dtype="bfloat16"
-max_model_len=8192
+max_model_len=32000
 
 # Default values
-BACKGROUND=true
+BACKGROUND=false
 OUTPUT_FILE=""
 LOG_FILE="vllm.log"
 
@@ -56,17 +56,12 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# Build the command
-if [ "$LOCAL_SERVER" = true ]; then
-    # Local vLLM server mode - no API key required
-    echo "Starting local vLLM server mode..."
-    echo "API Base: $API_BASE"
-    echo "No API key required for local server"
-    CMD="python3 -m vllm.entrypoints.openai.api_server --model $MODEL --runner auto --convert auto --tokenizer-mode auto --dtype $dtype --max-model-len $max_model_len --pipeline-parallel-size $pp --tensor-parallel-size $tp --data-parallel-size $dp --host $HOST --port $PORT --served-model-name $MODEL"
-else
-    # Standard vLLM server mode
-    CMD="python3 -m vllm.entrypoints.openai.api_server --model $MODEL --runner auto --convert auto --tokenizer-mode auto --dtype $dtype --max-model-len $max_model_len --pipeline-parallel-size $pp --tensor-parallel-size $tp --data-parallel-size $dp --host $HOST --port $PORT"
-fi
+
+echo "Starting local vLLM server mode..."
+echo "API Base: $API_BASE"
+echo "No API key required for local server"
+CMD="python3 -m vllm.entrypoints.openai.api_server --model $MODEL --runner auto --convert auto --tokenizer-mode auto --dtype $dtype --max-model-len $max_model_len --pipeline-parallel-size $pp --tensor-parallel-size $tp --data-parallel-size $dp --host $HOST --port $PORT --served-model-name $MODEL --chat-template-content-format string"
+
 
 # Add output redirection if specified
 if [ -n "$OUTPUT_FILE" ]; then

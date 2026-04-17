@@ -1,0 +1,808 @@
+% ============================================================================
+% Chapter 2 — Classical Arabic Poetry (الشعر الفصيح)
+% ============================================================================
+\chapter{Classical Arabic Poetry}
+\label{ch:classical}
+
+Classical Arabic poetry (\ar{الشعر العربي الفصيح}) is governed by one of the most rigorously codified prosodic systems in literary history. This chapter documents that system in full, as required for AI generation and evaluation.
+
+% ============================================================================
+\section{Foundations of Arabic Prosody (\ar{علم العروض})}
+\label{sec:classical_prosody_foundations}
+
+Arabic prosody was codified by \textbf{al-Khalil ibn Ahmad al-Farahidi} (718–786 CE) in his treatise \textit{Kitab al-'Arud}. His system describes all valid Arabic poetic meters through combinations of three fundamental prosodic units:
+
+\subsection{The Three Prosodic Building Blocks}
+\label{subsec:building_blocks}
+
+\begin{table}[H]
+\centering
+\caption{Fundamental prosodic units (\ar{مكونات العروض})}
+\label{tab:prosodic_units}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{llXll}
+\toprule
+\textbf{Unit} & \textbf{Arabic} & \textbf{Definition} & \textbf{Pattern} & \textbf{Example} \\
+\midrule
+Sabab Khafif & \ar{سبب خفيف} & Moving + quiescent & 1\,0 & \ar{مَنْ} \\
+Sabab Thaqil & \ar{سبب ثقيل} & Moving + moving & 1\,1 & \ar{مَعَ} (rare) \\
+Watad Majmu' & \ar{وتد مجموع} & Moving + moving + quiescent & 1\,1\,0 & \ar{فَعُو} \\
+Watad Mafruq & \ar{وتد مفروق} & Moving + quiescent + moving & 1\,0\,1 & \ar{مَفْعُ} \\
+Fasila Sughra & \ar{فاصلة صغرى} & Three moving + quiescent & 1\,1\,1\,0 & \ar{فَعِلُنْ} \\
+Fasila Kubra & \ar{فاصلة كبرى} & Four moving + quiescent & 1\,1\,1\,1\,0 & \ar{فَعَلَتُنْ} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Binary notation convention:} Throughout this document, \textbf{1} denotes a moving (\ar{متحرك}) position (a consonant bearing any short vowel), and \textbf{0} denotes a quiescent (\ar{ساكن}) position (a consonant bearing sukun, or a long vowel \ar{ا/و/ي}). Long vowels are inherently quiescent in the scan.
+
+\subsection{The Eight Tafeelat}
+\label{subsec:eight_tafeelat}
+
+Al-Khalil derived eight canonical feet (\ar{تفعيلات}) from these building blocks. All sixteen meters are constructed from these eight feet:
+
+\begin{table}[H]
+\centering
+\caption{The eight canonical feet (\ar{التفعيلات الثمانية})}
+\label{tab:eight_tafeelat}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabularx}{\textwidth}{lllXl}
+\toprule
+\textbf{Name (Arabic)} & \textbf{Name (Transcription)} & \textbf{Pattern} & \textbf{Components} & \textbf{Used In} \\
+\midrule
+\ar{فَعُولُنْ} & Fa'ulun & 1\,1\,0\,1\,0 & Watad majmu' + sabab khafif & Taweel, Mutakareb \\
+\ar{مَفَاعِيلُنْ} & Mafa'ilun & 1\,1\,0\,1\,1\,0 & Watad majmu' + sabab thaqil + sabab khafif & Taweel, Hazaj \\
+\ar{مَفَاعَلَتُنْ} & Mafa'alatun & 1\,1\,0\,1\,1\,1\,0 & Watad majmu' + fasila sughra + ... & Wafir \\
+\ar{فَاعِلُنْ} & Fa'ilun & 1\,0\,1\,1\,0 & Sabab khafif + watad majmu' & Baseet, Taweel \\
+\ar{فَاعِلَاتُنْ} & Fa'ilatun & 1\,0\,1\,1\,0\,1\,0 & Sabab khafif + watad majmu' + sabab khafif & Ramal, Khafeef \\
+\ar{مُسْتَفْعِلُنْ} & Mustaf'ilun & 1\,0\,1\,0\,1\,1\,0 & Sabab khafif + sabab khafif + watad majmu' & Baseet, Rajaz, Saree \\
+\ar{مُتَفَاعِلُنْ} & Mutafa'ilun & 1\,1\,1\,0\,1\,1\,0 & Fasila sughra + watad majmu' & Kamel \\
+\ar{مُسْتَفْعِ لُنْ} & Mustaf'i lun & 1\,0\,1\,0\,1\,0 & Watad mafruq + sabab khafif & Khafeef, Mujtath \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{The Five Prosodic Circles}
+\label{subsec:five_circles}
+
+Al-Khalil organised the meters into five abstract \textbf{prosodic circles} (\ar{الدوائر العروضية الخمس}). Meters in the same circle share the same cyclic root and differ only in the starting point of the reading:
+
+\begin{table}[H]
+\centering
+\caption{The five Khalilian prosodic circles}
+\label{tab:five_circles}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{llXl}
+\toprule
+\textbf{Circle} & \textbf{Arabic Name} & \textbf{Meters} & \textbf{Dominant Foot Type} \\
+\midrule
+1 & \ar{دائرة المختلف} & Taweel, Madeed, Baseet & Mixed (watad + sababaan) \\
+2 & \ar{دائرة المؤتلف} & Wafir, Kamel & Fasila-based \\
+3 & \ar{دائرة المجتلب} & Hazaj, Rajaz, Ramal & Repeated sabab-watad \\
+4 & \ar{دائرة المشتبه} & Saree, Munsareh, Khafeef, Mudhare, Muqtadheb, Mujtath & Contains watad mafruq \\
+5 & \ar{دائرة المتفق} & Mutakareb, Mutadarak & Pure trisyllabic feet \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================================
+\section{The Sixteen Khalilian Meters}
+\label{sec:sixteen_meters}
+
+Each meter entry below provides: (1) the canonical tafeelat for both hemistichs; (2) the binary pattern; (3) the main zehafs and their effect; (4) the valid aruz/dharb combinations; (5) typical themes; and (6) a famous example verse with full diacritics.
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر الطويل} — Bahr al-Taweel (``The Long'')}
+\label{subsec:taweel}
+
+\begin{table}[H]
+\centering
+\caption{Al-Taweel structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich (Sadr/Ajuz)} & \ar{فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ} \\
+\textbf{Pattern} & 1\,1\,0\,1\,0 \; 1\,1\,0\,1\,1\,0 \; 1\,1\,0\,1\,0 \; 1\,1\,0\,1\,1\,0 \\
+\textbf{Circle} & \ar{دائرة المختلف} (1) \\
+\textbf{Aruz (عروض)} & \ar{مقبوضة} (Qabadh: 5th element quiescent) → \ar{فَعُولُ} \\
+\textbf{Dharb (ضرب)} & \ar{مقبوض}: \ar{فَعُولُ} \quad\textbar\quad \ar{محذوف}: \ar{فَعَلْ} \quad\textbar\quad \ar{صحيح}: \ar{مَفَاعِيلُنْ} \\
+\textbf{Main Zehafs} & \ar{القبض}: removes 5th element of \ar{فَعُولُنْ} → \ar{فَعُولُ}\newline \ar{الثلم}: removes 1st element → \ar{مَفَاعِيلُنْ} → \ar{فَاعِيلُنْ} (rare) \\
+\textbf{Frequency} & Most common meter in classical Arabic poetry (\textgreater40\% of Diwan) \\
+\textbf{Typical Themes} & All purposes — this is the ``default'' meter for serious poetry \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{verseframe}
+\centering
+\ar{قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ \quad بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ}\\[4pt]
+\small\textit{Imru' al-Qays, Mu'allaqah (opening verse)}
+\end{verseframe}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر البسيط} — Bahr al-Baseet (``The Simple'')}
+\label{subsec:baseet}
+
+\begin{table}[H]
+\centering
+\caption{Al-Baseet structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{مُسْتَفْعِلُنْ فَاعِلُنْ مُسْتَفْعِلُنْ فَاعِلُنْ} \\
+\textbf{Pattern} & 1\,0\,1\,0\,1\,1\,0 \; 1\,0\,1\,1\,0 \; 1\,0\,1\,0\,1\,1\,0 \; 1\,0\,1\,1\,0 \\
+\textbf{Circle} & \ar{دائرة المختلف} (1) \\
+\textbf{Aruz} & \ar{مخبونة}: \ar{مُفَاعِلُنْ} (Khaban on \ar{مُسْتَفْعِلُنْ}) \\
+\textbf{Dharb} & \ar{مخبون}: \ar{فَعِلُنْ} \quad\textbar\quad \ar{مقطوع}: \ar{فَعْلُنْ} \\
+\textbf{Main Zehafs} & \ar{الخبن}: removes 2nd element (\ar{مُسْتَفْعِلُنْ} → \ar{مُفَاعِلُنْ})\newline \ar{الطي}: removes 4th element (\ar{مُسْتَفْعِلُنْ} → \ar{مُسْتَعِلُنْ}) \\
+\textbf{Frequency} & Second most common meter \\
+\textbf{Typical Themes} & Lament (\ar{رثاء}), description (\ar{وصف}), wisdom (\ar{حكمة}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{verseframe}
+\centering
+\ar{أَنَا الَّذِي نَظَرَ الأَعْمَى إِلَى أَدَبِي \quad وَأَسْمَعَتْ كَلِمَاتِي مَنْ بِهِ صَمَمُ}\\[4pt]
+\small\textit{Al-Mutanabbi}
+\end{verseframe}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر الكامل} — Bahr al-Kamel (``The Complete'')}
+\label{subsec:kamel}
+
+\begin{table}[H]
+\centering
+\caption{Al-Kamel structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ} \\
+\textbf{Pattern} & 1\,1\,1\,0\,1\,1\,0 \; 1\,1\,1\,0\,1\,1\,0 \; 1\,1\,1\,0\,1\,1\,0 \\
+\textbf{Circle} & \ar{دائرة المؤتلف} (2) \\
+\textbf{Aruz} & \ar{صحيحة}: \ar{مُتَفَاعِلُنْ} \quad\textbar\quad \ar{مُضمَرة}: \ar{مُتْفَاعِلُنْ} \\
+\textbf{Dharb} & \ar{صحيح}, \ar{مُضمَر}, \ar{مقطوع}: \ar{مُتَفَاعِلْ}, \ar{أَحَث}: \ar{فَعِلَاتُنْ} \\
+\textbf{Main Zehafs} & \ar{الإضمار}: vowels 2nd element (\ar{مُتَفَاعِلُنْ} → \ar{مُتْفَاعِلُنْ})\newline \ar{الوقص}: removes 2nd element (rare, only in hashw)\newline \ar{الحث}: combines إضمار + وقص on fasila \\
+\textbf{Frequency} & Third most common; the meter of al-Mutanabbi's great odes \\
+\textbf{Typical Themes} & Panegyric (\ar{مديح}), martial (\ar{حماسة}), boasting (\ar{فخر}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{verseframe}
+\centering
+\ar{وَعَلَى الرِّيَاحِ يَرُودُ نَبْلِي أَنَّنِي \quad قَوَّمْتُ مِنْ عِوَجِ الرَّدَى سَهْمًا مُقِيمَا}\\[4pt]
+\small\textit{Al-Mutanabbi, from his Kafur odes}
+\end{verseframe}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر الوافر} — Bahr al-Wafir (``The Abundant'')}
+\label{subsec:wafir}
+
+\begin{table}[H]
+\centering
+\caption{Al-Wafir structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{مُفَاعَلَتُنْ مُفَاعَلَتُنْ مُفَاعَلَتُنْ} (full) \\
+\textbf{Pattern} & 1\,1\,0\,1\,1\,1\,0 \; 1\,1\,0\,1\,1\,1\,0 \; (aruz variant) \\
+\textbf{Circle} & \ar{دائرة المؤتلف} (2) \\
+\textbf{Aruz/Dharb} & Always \ar{عصب} (\ar{مَقْطُوفة}): 5th + 6th elements quiescent → \ar{مُفَاعَلْتُنْ} → \ar{مَفَاعِيلُنْ} \\
+\textbf{Main Zehafs} & \ar{العصب}: suppresses 5th element in \ar{مُفَاعَلَتُنْ} → \ar{مُفَاعِلْتُنْ} (mandatory in aruz/dharb) \\
+\textbf{Note} & The \ar{عصب} modification makes the full form of \ar{مُفَاعَلَتُنْ} extremely rare in the last foot \\
+\textbf{Frequency} & Common; associated with emotional and lyric poetry \\
+\textbf{Typical Themes} & Love (\ar{غزل}), longing (\ar{شوق}), elegy (\ar{رثاء}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر الرجز} — Bahr al-Rajaz (``The Trembling'')}
+\label{subsec:rajaz}
+
+\begin{table}[H]
+\centering
+\caption{Al-Rajaz structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{مُسْتَفْعِلُنْ مُسْتَفْعِلُنْ مُسْتَفْعِلُنْ} \\
+\textbf{Pattern} & 1\,0\,1\,0\,1\,1\,0 \; (× 3 per hemistich) \\
+\textbf{Circle} & \ar{دائرة المجتلب} (3) \\
+\textbf{Special Forms} & \ar{مجزوء}: 2 feet per hemistich \quad\textbar\quad \ar{مشطور}: 3 feet total (single shatr) \quad\textbar\quad \ar{منهوك}: 2 feet total \\
+\textbf{Unique Feature} & The only meter in which a poet may compose alone (using \ar{مشطور}/\ar{منهوك} forms) without a response partner; this makes it the meter of \ar{الأراجيز} (didactic solo verse) \\
+\textbf{Main Zehafs} & \ar{الخبن}, \ar{الطي}, \ar{الخبل} (= خبن + طي simultaneously) \\
+\textbf{Frequency} & Very common; the original meter of \ar{حداء} (camel-driver's song) \\
+\textbf{Typical Themes} & Didactic poetry (\ar{الأراجيز التعليمية}), warrior/martial, improvised verse \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر الرمل} — Bahr al-Ramal (``The Sand'')}
+\label{subsec:ramal}
+
+\begin{table}[H]
+\centering
+\caption{Al-Ramal structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{فَاعِلَاتُنْ فَاعِلَاتُنْ فَاعِلَاتُنْ} \\
+\textbf{Pattern} & 1\,0\,1\,1\,0\,1\,0 \; (× 3 per hemistich) \\
+\textbf{Circle} & \ar{دائرة المجتلب} (3) \\
+\textbf{Aruz} & Always truncated (\ar{محذوف}): \ar{فَاعِلَاتُنْ} → \ar{فَاعِلَا} (= \ar{فَاعِلَاتٌ} with last element dropped) \\
+\textbf{Dharb} & \ar{محذوف}: \ar{فَاعِلَا} \quad\textbar\quad \ar{مخبون}: \ar{فَعِلَاتُنْ} and variants \\
+\textbf{Main Zehafs} & \ar{الخبن}: removes 2nd element \quad\textbar\quad \ar{الكف}: removes 7th element \\
+\textbf{Frequency} & Common, especially in Andalusian and post-classical poetry \\
+\textbf{Typical Themes} & Lyric poetry (\ar{غزل}), description (\ar{وصف}), Sufi poetry \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر الهزج} — Bahr al-Hazaj (``The Buzzing'')}
+\label{subsec:hazaj}
+
+\begin{table}[H]
+\centering
+\caption{Al-Hazaj structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{مَفَاعِيلُنْ مَفَاعِيلُنْ} \\
+\textbf{Pattern} & 1\,1\,0\,1\,1\,0 \; 1\,1\,0\,1\,1\,0 \\
+\textbf{Circle} & \ar{دائرة المجتلب} (3) \\
+\textbf{Aruz} & Intact (\ar{سالمة}) or with kaf (\ar{مكفوفة}): \ar{مَفَاعِيلُ} \\
+\textbf{Dharb} & \ar{سالم}: \ar{مَفَاعِيلُنْ} \quad\textbar\quad \ar{محذوف}: \ar{مَفَاعِيلْ} \\
+\textbf{Main Zehafs} & \ar{الكف}: removes 7th element (position 6 of \ar{مَفَاعِيلُنْ}) \quad\textbar\quad \ar{القبض} disallowed in hashw \\
+\textbf{Note} & The simplest meter — only two feet per hemistich; often used for songs \\
+\textbf{Typical Themes} & Light songs (\ar{أغاني}), love (\ar{غزل}), folk verse \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر الخفيف} — Bahr al-Khafeef (``The Light'')}
+\label{subsec:khafeef}
+
+\begin{table}[H]
+\centering
+\caption{Al-Khafeef structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{فَاعِلَاتُنْ مُسْتَفْعِ لُنْ فَاعِلَاتُنْ} \\
+\textbf{Pattern} & 1\,0\,1\,1\,0\,1\,0 \; 1\,0\,1\,0\,1\,0 \; 1\,0\,1\,1\,0\,1\,0 \\
+\textbf{Circle} & \ar{دائرة المشتبه} (4) — contains watad mafruq \\
+\textbf{Aruz} & Intact (\ar{سالمة}) or khabun: \ar{فَعِلَاتُنْ} \\
+\textbf{Dharb} & \ar{سالم} \quad\textbar\quad \ar{مشعوث}: \ar{فَاعِلَاتُ} \quad\textbar\quad \ar{محذوف}: \ar{فَاعِلَا} \\
+\textbf{Main Zehafs} & \ar{الخبن} on \ar{فَاعِلَاتُنْ} (positions 1,2) \\
+\textbf{Note} & The watad mafruq (1\,0\,1) in \ar{مُسْتَفْعِ لُنْ} is a fixed constraint — its 2nd element (position 2 of the foot = position 2 of the bayt-middle foot) must remain quiescent \\
+\textbf{Typical Themes} & Social/occasional verse, wisdom, religious poetry \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر السريع} — Bahr al-Saree' (``The Fast'')}
+\label{subsec:saree}
+
+\begin{table}[H]
+\centering
+\caption{Al-Saree' structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{مُسْتَفْعِلُنْ مُسْتَفْعِلُنْ مَفْعُولَاتُ} \\
+\textbf{Pattern} & 1\,0\,1\,0\,1\,1\,0 \; 1\,0\,1\,0\,1\,1\,0 \; 1\,0\,1\,0\,1\,1\,0 \\
+\textbf{Circle} & \ar{دائرة المشتبه} (4) \\
+\textbf{Note on mafoolat} & \ar{مَفْعُولَاتُ} contains a watad mafruq; this foot only appears at the end \\
+\textbf{Aruz/Dharb} & \ar{مَكْشُوفة/مَوْقُوفة}: \ar{مَفْعُولاتُ} takes \ar{وقف} (position 6 quiescent) → \ar{مَفْعُولَاتْ}; or \ar{كسف} (removes last element) → \ar{مَفْعُولَا} \\
+\textbf{Main Zehafs} & \ar{الطي} on \ar{مُسْتَفْعِلُنْ} (removes 4th element) \quad\textbar\quad \ar{الخبل} (= خبن + طي) \\
+\textbf{Typical Themes} & Heroic, panegyric \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر المتقارب} — Bahr al-Mutakareb (``The Approaching'')}
+\label{subsec:mutakareb}
+
+\begin{table}[H]
+\centering
+\caption{Al-Mutakareb structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{فَعُولُنْ فَعُولُنْ فَعُولُنْ فَعُولُنْ} \\
+\textbf{Pattern} & 1\,1\,0\,1\,0 \; (× 4 per hemistich) \\
+\textbf{Circle} & \ar{دائرة المتفق} (5) \\
+\textbf{Aruz} & \ar{مقبوضة}: \ar{فَعُولُ} \quad\textbar\quad \ar{محذوفة}: \ar{فَعُلْ} (= \ar{فَعَلْ}) \\
+\textbf{Dharb} & \ar{مقبوض}, \ar{محذوف}, \ar{أبتر}: \ar{فَعْلُنْ} \\
+\textbf{Main Zehafs} & \ar{القبض}: removes 5th element → \ar{فَعُولُ}\newline \ar{الثلم}: removes 1st element (rare)\newline \ar{الثرم}: removes 1st + 2nd (very rare) \\
+\textbf{Frequency} & Common in epic-narrative poetry; the meter of Ferdowsi's \textit{Shahnameh} equivalent in Arabic \\
+\textbf{Typical Themes} & Epics, heroic narrative, occasional \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{verseframe}
+\centering
+\ar{أَلَا لَيْتَ الشَّبَابَ يَعُودُ يَوْمًا \quad فَأُخْبِرَهُ بِمَا فَعَلَ الْمَشِيبُ}\\[4pt]
+\small\textit{Classical verse attributed to multiple poets}
+\end{verseframe}
+
+% -----------------------------------------------------------------------
+\subsection{\ar{البحر المتدارك / المحدث} — Bahr al-Mutadarak}
+\label{subsec:mutadarak}
+
+\begin{table}[H]
+\centering
+\caption{Al-Mutadarak structure}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Hemistich} & \ar{فَاعِلُنْ فَاعِلُنْ فَاعِلُنْ فَاعِلُنْ} \\
+\textbf{Pattern} & 1\,0\,1\,1\,0 \; (× 4 per hemistich) \\
+\textbf{Circle} & \ar{دائرة المتفق} (5) \\
+\textbf{Historical Note} & Added by al-Akhfash al-Awsat after al-Khalil's death, hence called \ar{المحدث} (the newly added); al-Khalil recognised it but didn't include it \\
+\textbf{Zehafs} & \ar{الخبن}: removes 2nd element → \ar{فَعِلُنْ} \\
+\textbf{Typical Themes} & Songs, light poetry, modern verse \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent The remaining six meters — \ar{المديد}, \ar{المنسرح}, \ar{المضارع}, \ar{المقتضب}, \ar{المجتث} — are summarised in Appendix~\ref{app:meters_reference} with full structural data. They are rare in the corpus and primarily appear in specific thematic contexts (mujtath: occasional verse; mudhare: very rare; maqtadheb: nearly extinct in practice).
+
+% ============================================================================
+\section{The Rhyme System (\ar{نظام القافية})}
+\label{sec:rhyme_system}
+
+\subsection{The Five Rhyme Letters}
+\label{subsec:five_rhyme_letters}
+
+Arabic rhyme is not simply end-rhyme. A classical qafiya is defined by up to five letters that form a structural unit at the end of each verse:
+
+\begin{table}[H]
+\centering
+\caption{The five qafiya letters (\ar{حروف القافية})}
+\label{tab:qafiya_letters}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{Letter} & \textbf{Arabic} & \textbf{Position} & \textbf{Definition} \\
+\midrule
+Al-Rawiy & \ar{الرَّوِيّ} & Mandatory & The main rhyme consonant; defines the rhyme entirely \\
+Al-Wasl & \ar{الوَصْل} & Optional & Follows the rawiy; can be \ar{هاء}, long vowel, or n. of tanwin \\
+Al-Khuruuj & \ar{الخُرُوج} & Optional & Vowel on the wasl consonant \\
+Al-Radf & \ar{الرِّدْف} & Optional & Precedes rawiy; must be a long vowel (\ar{ا، و، ي}) or hamza \\
+Al-Ta'siis & \ar{التَّأْسِيس} & Optional & \ar{أَلِف} two positions before rawiy, always with a consonant between \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Rhyme Vowel Types (\ar{حركات القافية})}
+
+\begin{description}
+  \item[\ar{المطلقة}] The rawiy bears a short vowel; the verse ends with an open syllable. Most common and musically richest.
+  \item[\ar{المُقَيَّدة}] The rawiy bears a sukun; the verse ends with a closed syllable. More austere.
+  \item[\ar{المُجَرَّدة}] The rawiy is bare (no radf, no ta'siis).
+  \item[\ar{المُرَدَّفة}] The rawiy is preceded by a radf (long vowel before the rhyme consonant).
+  \item[\ar{المُؤَسَّسة}] The rawiy is preceded by a ta'siis (alif two positions back).
+\end{description}
+
+\subsection{Qafiya Defects (\ar{عيوب القافية})}
+
+\begin{table}[H]
+\centering
+\caption{Classical qafiya defects}
+\label{tab:qafiya_defects}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Name} & \textbf{Arabic} & \textbf{Definition} \\
+\midrule
+Al-'Ita' & \ar{الإيطاء} & Repeating the exact same word as rawiy in two or more verses (the worst defect) \\
+Al-Ikfa' & \ar{الإكفاء} & Using two different letters that are similar in articulation as rawiy (\ar{ن/م} etc.) \\
+Al-Sinnad & \ar{السِّناد} & Inconsistency in the radf or ta'siis between verses \\
+Al-Iqwa' & \ar{الإقواء} & Mixing kasra and damma on the rawiy in the same poem \\
+Al-'Israf & \ar{الإصراف} & Mixing fatha with kasra or damma on the rawiy \\
+Al-Ijazah & \ar{الإجازة} & Changing the rawiy letter mid-poem \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Qafiya Type by Inter-Consonant Vowel Count}
+
+\begin{table}[H]
+\centering
+\caption{Qafiya types by vowel structure}
+\label{tab:qafiya_types}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{lllXl}
+\toprule
+\textbf{Type} & \textbf{Arabic} & \textbf{Vowels Between} & \textbf{Description} & \textbf{Example Ending} \\
+\midrule
+Mutawatir & \ar{مُتَوَاتِر} & One & One mutaharrik between the two saakins (long vowels) & \ar{شَجَنْ}، \ar{وَطَنْ}، \ar{عَزِيزَانِ}، \ar{حَبِيبَانِ} \\
+Mutadaarik & \ar{مُتَدَارِك} & Two & Two mutaharrikaat between the two saakins & \ar{الْعَنْبَرِ}، \ar{قَمَرٌ}، \ar{كِتَابَةٌ} \\
+Mutarakib & \ar{مُتَرَاكِب} & Three & Three mutaharrikaat between the two saakins & \ar{الْفَرَجِ}، \ar{الْحَسَبِ}، \ar{الْأَدَبِ} \\
+Mutakaasis & \ar{مُتَكَاوِس} & Four & Four mutaharrikaat between the two saakins — very rare & \ar{فَجُبِرْ} \\
+Mutaradif & \ar{مُتَرَادِف} & Zero & Two adjacent sukuns at the end — rawiy is maqayyada & \ar{دِينْ}، \ar{عَيْنْ}، \ar{جَوَادْ} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================================
+\section{Classical Qasida Structure (\ar{بنية القصيدة})}
+\label{sec:qasida_structure}
+
+The classical Arabic qasida (\ar{القصيدة الكلاسيكية}) follows a conventional tripartite or quadripartite structure, though not every poem adheres to it:
+
+\begin{enumerate}
+  \item \textbf{\ar{النسيب / المطلع}} — \textit{The amatory prelude / opening.} The poem traditionally opens with a lament at a deserted campsite (\ar{الوقوف على الأطلال}) or an evocation of the beloved's memory. This establishes an emotional key. The quality of the \ar{مطلع} (opening verse) was considered the most critical measure of a poem's success — it must arrest the listener immediately.
+
+  \item \textbf{\ar{الرحيل / التخلص}} — \textit{The journey / transition.} The poet shifts from the opening mood toward the poem's main purpose, often through the image of a desert journey or a description of the poet's camel/horse.
+
+  \item \textbf{\ar{الغرض الرئيسي}} — \textit{The main purpose section.} Panegyric, elegy, boasting, satire — this is where the declared purpose of the poem is fulfilled.
+
+  \item \textbf{\ar{الخاتمة}} — \textit{The conclusion.} Often a prayer, a maxim, or a return to the opening image.
+\end{enumerate}
+
+\begin{rulebox}{Rules for a \ar{مطلع حسن} (Excellent Opening Verse)}
+\begin{itemize}
+  \item The opening verse must be complete in meaning — it must not require the next verse to make sense.
+  \item It should establish the emotional tone of the entire poem.
+  \item It should exhibit \ar{براعة الاستهلال} (masterly beginning): an image, sound, or idea that captures the listener's full attention immediately.
+  \item It should avoid \ar{التعقيد اللفظي} (verbal complexity) — the opening must be immediately accessible.
+  \item The first hemistich (\ar{الصدر}) establishes the rhyme letter (\ar{الروي}) for the entire poem. The second hemistich (\ar{العجز}) also rhymes with it — the first \ar{بيت} is \ar{مُصَرَّع} (both hemistichs rhyme).
+\end{itemize}
+\end{rulebox}
+
+% ============================================================================
+\section{Poetic Purposes (\ar{أغراض الشعر})}
+\label{sec:aghard}
+
+\subsection{\ar{المديح} — Panegyric}
+\label{subsec:madih}
+
+The most commercially and politically significant غرض in the classical tradition. A panegyric poet praised rulers, tribal chiefs, or patrons in exchange for gifts and protection.
+
+\textbf{Structural Progression:} The classical \ar{مديحة} typically moves through: (1) an amatory or descriptive opening (\ar{نسيب}); (2) a transition (\ar{تخلص}) introducing the praised person; (3) the panegyric body enumerating the \textbf{four cardinal virtues}: generosity (\ar{الكرم}), valor (\ar{الشجاعة}), wisdom (\ar{الحلم}), justice (\ar{العدل}); (4) a supplicatory close.
+
+\textbf{Language \& Style:} Grand, elevated diction; extensive use of superlative forms; comparison with natural phenomena (the praised person's generosity = the sea; courage = a lion or eagle); hyperbole (\ar{المبالغة}) is not a defect but a required feature.
+
+\textbf{Meters Preferred:} al-Taweel, al-Baseet, al-Kamel, al-Wafir.
+
+\textbf{Key Poets:} al-Mutanabbi (Abu al-Tayyib Ahmad ibn al-Husayn), al-Buhturi, Abu Tammam, al-Farazdaq, Hassan ibn Thabit.
+
+\begin{verseframe}
+\centering\ar{لَكَ يَا مَنَازِلُ فِي الْقُلُوبِ مَنَازِلُ \quad أَقْفَرْتِ أَنْتِ وَهُنَّ مِنْكِ أَوَاهِلُ}\\[4pt]
+\small\textit{Al-Mutanabbi (Kamel meter)}
+\end{verseframe}
+
+\textbf{AI Generation Rules:}
+\begin{itemize}
+  \item The system must know \textit{who} is being praised and \textit{for what qualities} before generating.
+  \item The standard three-phase structure (nasib → takhallus → madih body) must be maintained unless the user specifies otherwise.
+  \item Hyperbole is correct in this غرض; the evaluator must not penalise it.
+\end{itemize}
+
+% ---
+\subsection{\ar{الهجاء} — Satire/Invective}
+\label{subsec:hija}
+
+The inverse of madih: systematic attack on an enemy's character, lineage, appearance, and moral failings. Among the most feared forms of speech in early Arab culture — powerful enough that certain pre-Islamic practices surrounded its delivery with protective ritual.
+
+\textbf{Sub-type — \ar{النقائض} (Poetic Flyting):} Two poets attack each other using the \textit{same meter and rhyme}, each poem a direct response to the other's. The great \ar{نقائض} exchanges of Jarir, al-Farazdaq, and al-Akhtal (c.700 CE) are the canonical examples. Rules: the responding poem \textit{must} use the same meter and rhyme as the poem being answered; the responding poet \textit{must} address every accusation before adding new ones.
+
+\textbf{AI Generation Rules:}
+\begin{itemize}
+  \item For \ar{هجاء} as a new composition: the target's failings (stinginess = \ar{البخل}, cowardice = \ar{الجبن}, low birth = \ar{لؤم الأصل}) must be specified.
+  \item For \ar{نقائض}: the system must read the original attack poem in full before generating the response; meter and rhyme are non-negotiable.
+\end{itemize}
+
+% ---
+\subsection{\ar{الغزل} — Love Poetry}
+\label{subsec:ghazal}
+
+Divided into two fundamentally different schools:
+
+\begin{description}
+  \item[\ar{الغزل العذري}] \textit{Udhri/Platonic love}: Chaste, idealised, often unrequited love. Named after the Banu Udhrah tribe of the Hijaz. Characterised by: absolute prohibition on describing the beloved's body; the lover as a willing martyr to love; the beloved as unattainable ideal. Canonical figures: Qays and Layla (\ar{مجنون ليلى}), Jamil and Buthayna (\ar{جميل بثينة}), Kuthayyir and Azza.
+  \item[\ar{الغزل الحسي / الصريح}] \textit{Sensual/explicit love}: Bold physical description; celebration of desire and consummation. The Hijazi/Umayyad school centred on \textbf{Umar ibn Abi Rabi'a} (d.~712 CE). Meters: Ramal, Sari', Hazaj preferred.
+\end{description}
+
+\textbf{AI Generation Rules:}
+\begin{itemize}
+  \item The system must distinguish between \ar{عذري} and \ar{حسي} modes — they have different constraints on body imagery.
+  \item In \ar{عذري}: body description is prohibited; emotional and psychological states are the content.
+  \item In \ar{حسي}: physical description is not only permitted but expected.
+  \item The meter itself often signals the mode: Taweel/Baseet → more likely \ar{عذري}; Ramal/Hazaj → more likely \ar{حسي}.
+\end{itemize}
+
+% ---
+\subsection{\ar{الرثاء} — Elegy}
+\label{subsec:ritha}
+
+Mourning poetry for the dead. Structurally, \ar{رثاء} is praise of the deceased combined with grief at the loss — it shares vocabulary and technique with \ar{مديح} but in a minor emotional key.
+
+\textbf{Key feature:} The best \ar{رثاء} alternates between \ar{الحزن} (grief) and \ar{التمجيد} (glorification). Pure lament without glorification is a defect.
+
+\textbf{Famous poetess:} \textbf{al-Khansa'} (\ar{الخنساء}) — her elegies for her brothers Sakhr and Mu'awiya remain the canonical model.
+
+\textbf{AI Generation Rules:}
+\begin{itemize}
+  \item The AI must know who is being mourned (person, relationship, qualities to glorify) and whether the tone should be personal grief or communal mourning.
+  \item Meter: al-Taweel and al-Baseet are traditional; al-Wafir is also common.
+\end{itemize}
+
+% ---
+\subsection{\ar{الفخر} — Boasting/Self-Glorification}
+\label{subsec:fakhr}
+
+Glorification of the self, one's tribe, and one's deeds. The dominant tone is elevated pride, not mere self-promotion. In pre-Islamic and Umayyad poetry, personal \ar{فخر} was inseparable from tribal identity.
+
+\subsection{\ar{الحكمة} — Wisdom Poetry}
+\label{subsec:hikma}
+
+Philosophical and moral aphorisms in verse. Brief, memorable, self-contained verses. Famous: Zuhair ibn Abi Sulma's \ar{معلقة}, Imru' al-Qays's philosophical lines, the gnomic verses of Labid.
+
+\textbf{AI generation note:} \ar{حكمة} verses are typically stand-alone — a two-hemistich \ar{بيت} that delivers a complete insight. The AI should generate complete, pithy, universal statements.
+
+\subsection{\ar{الزهد} — Asceticism}
+\label{subsec:zuhd}
+
+Renunciation of worldly pleasures and focus on the afterlife. Associated with: Abu al-Atahiya (d.~828 CE), the most prolific \ar{زهد} poet. Language is plain, direct, and rhythmically simple — deliberately avoiding the grandeur of \ar{مديح}.
+
+\subsection{\ar{الخمريات} — Wine Poetry}
+\label{subsec:khamriyyat}
+
+Celebration of wine and drinking culture. Abu Nuwas (d.~c.815 CE) is the supreme master. \textbf{Note for AI:} In Sufi poetry (Ibn al-Farid, Omar Khayyam in Arabic translation, etc.), wine lexicon (\ar{خمر}, \ar{كأس}, \ar{ساقي}) carries a spiritual allegorical meaning (wine = divine knowledge; the cup-bearer = the Sufi master). The AI must distinguish literal from allegorical register.
+
+\subsection{\ar{الشعر الصوفي} — Sufi/Mystical Poetry}
+\label{subsec:sufi}
+
+A major tradition from the 9th century onward. Key figures: al-Hallaj, Rabi'a al-Adawiyya, Ibn Arabi, Ibn al-Farid. Characteristics: deliberate ambiguity between human and divine love; lexical borrowing from \ar{غزل} and \ar{خمريات}; mystical paradox (\ar{شطح}).
+
+\textbf{Core Sufi symbolic system (for AI evaluation):}
+\begin{table}[H]
+\centering
+\caption{Sufi symbolic lexicon}
+\label{tab:sufi_symbols}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Literal Image} & \textbf{Arabic} & \textbf{Sufi Referent} \\
+\midrule
+Wine (\ar{الخمر}) & & Divine knowledge / gnosis \\
+Tavern (\ar{الحانة}) & & The Sufi tekke / path \\
+Cup-bearer (\ar{الساقي}) & & The Sufi master / God \\
+Drunkenness (\ar{السُّكر}) & & Ecstatic union (\ar{وجد}) \\
+The Beloved (\ar{الحبيب / المحبوب}) & & The Divine \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================================
+\section{Intertextual Compositional Forms (\ar{الأشكال التناصية})}
+\label{sec:intertextual}
+
+These forms are compositional operations that relate a new poem to an existing one. They are among the most technically demanding requests the system will receive.
+
+\subsection{\ar{المعارضة} — Response/Counter-Poem}
+\label{subsec:muarada}
+
+A new poem composed using the \textbf{same meter and same rhyme letter} as an existing poem, with the implicit or explicit claim of matching or surpassing the original.
+
+\begin{rulebox}{Rules for \ar{المعارضة}}
+\begin{enumerate}
+  \item \textbf{Meter}: Must be identical — the same Khalilian meter; even the sub-type (e.g., if original uses \ar{مجزوء البسيط}, the response must too).
+  \item \textbf{Rhyme}: Must use the \textit{exact same rawiy letter}. The harakah on the rawiy (the vowel type) must also match.
+  \item \textbf{Theme}: Can differ — the معارضة may take a completely different purpose (\ar{غرض}) from the original, or may engage with the same themes.
+  \item \textbf{Length}: Need not match the original exactly, but a معارضة shorter than the original is considered inferior by convention.
+  \item \textbf{Quality criterion}: The معارضة succeeds when it is judged to match or exceed the original's quality. This requires the AI to read the full source poem before generating.
+\end{enumerate}
+\end{rulebox}
+
+\textbf{Famous examples:} Al-Buhturi's معارضة of al-Mutanabbi; neo-classical poets Ahmad Shawqi and Hafiz Ibrahim wrote معارضات of Imru' al-Qays's Mu'allaqah.
+
+\subsection{\ar{المساجلة} — Poetic Competition}
+\label{subsec:musajala}
+
+Two or more poets exchange verses in turn, each attempting to outdo the other in wit, imagery, and prosodic mastery. A \ar{مساجلة} is not merely back-and-forth — it follows rules:
+
+\begin{rulebox}{Rules for \ar{المساجلة}}
+\begin{enumerate}
+  \item Both poets use the same meter and rhyme throughout the exchange.
+  \item Each poet's entry must respond to the specific \textit{argument} or \textit{image} of the previous poet — not simply continue the same subject.
+  \item The exchange continues until one poet is unable to respond or the agreed number of turns is complete.
+  \item A poet who changes the meter or rhyme mid-exchange concedes defeat.
+\end{enumerate}
+\end{rulebox}
+
+\subsection{\ar{التضمين} — Intertextual Borrowing}
+\label{subsec:tadmin}
+
+Incorporating a full verse or hemistich from another poet into one's own poem, where it becomes structurally integrated into the new poem's flow.
+
+\begin{description}
+  \item[\ar{تضمين}] Borrowing from another poet's verse. May be acknowledged (\ar{تضمين صريح}) or left for the reader to recognise (\ar{تضمين خفي}).
+  \item[\ar{اقتباس}] Borrowing from the Quran or Hadith. Treated differently — governed by additional literary and religious norms.
+  \item[\ar{تلميح}] Mere allusion to a famous text without direct quotation — the weakest form of intertextuality.
+\end{description}
+
+\textbf{AI rule:} The borrowed hemistich must fit seamlessly — same meter, same rhyme position if it's at the end of a verse. The surrounding context must make the borrowing feel intentional and meaningful, not forced.
+
+\subsection{\ar{التشطير} — Hemistichal Splitting}
+\label{subsec:tashtir}
+
+Taking an existing poem and inserting new hemistichs into each verse, effectively doubling the length of each \ar{بيت}. The original hemistichs are \textit{immutable}; the poet inserts a new hemistich before each original hemistich.
+
+\textbf{Structure of a تشطير verse:}
+\begin{verbatim}
+  [New hemistich A] + [Original hemistich 1 (sadr)] +
+  [New hemistich B] + [Original hemistich 2 (ajuz)]
+\end{verbatim}
+
+\begin{rulebox}{Rules for \ar{التشطير}}
+\begin{enumerate}
+  \item The original verses are reproduced without any modification.
+  \item New hemistichs use the same meter as the original.
+  \item New hemistichs may or may not rhyme with the original's rawiy — if they do, the effect is richer.
+  \item The semantic flow from new hemistich → original hemistich must be smooth and logical.
+  \item The inserted hemistichs must not contradict or undermine the meaning of the original.
+\end{enumerate}
+\end{rulebox}
+
+\subsection{\ar{التخميس} — Quintuple Form}
+\label{subsec:takhmiis}
+
+Adding three new hemistichs to each original \ar{بيت}, creating a five-line unit (\ar{خُمَاسية}). The structure is: AAA-BC where A = three new lines sharing an internal rhyme, B = original sadr, C = original ajuz.
+
+\begin{rulebox}{Rules for \ar{التخميس}}
+\begin{enumerate}
+  \item The three new lines (A, A, A) share a rhyme among themselves, different from the original poem's rhyme.
+  \item The third new line must lead naturally into the original \ar{صدر} — it is the transition.
+  \item The original \ar{صدر} (B) and \ar{عجز} (C) are reproduced exactly.
+  \item The new lines use the same meter as the original.
+\end{enumerate}
+\end{rulebox}
+
+\subsection{\ar{إكمال القصيدة} — Completing an Unfinished Poem}
+\label{subsec:ikmal}
+
+Completing a poem that the original poet left unfinished, or that exists only in fragmentary form.
+
+\begin{rulebox}{Rules for \ar{إكمال القصيدة}}
+\begin{enumerate}
+  \item \textbf{Meter and rhyme} must be maintained without exception.
+  \item \textbf{Emotional register and tone} must match the existing verses — if the opening is mournful, the completion cannot shift to celebration.
+  \item \textbf{Sentence length patterns}: if the original uses long, flowing sentences, the completion should not suddenly shift to short staccato hemistichs.
+  \item \textbf{Vocabulary level}: if the original uses archaic/Bedouin diction (\ar{لغة بدوية}), the completion must maintain this register.
+  \item \textbf{Imagery density}: if the original is rich in simile and metaphor, the completion must match that density.
+  \item The completion should provide a convincing \ar{خاتمة} — a sense of closure.
+\end{enumerate}
+\end{rulebox}
+
+\subsection{\ar{التصوير الشعري} — Poetic Visualization}
+\label{subsec:tasweer}
+
+Translating a scene, experience, or concept into verse using the full range of Arabic rhetorical devices (\ar{البلاغة}).
+
+\begin{table}[H]
+\centering
+\caption{Primary Arabic rhetorical devices (\ar{الأساليب البلاغية})}
+\label{tab:rhetorical_devices}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Device} & \textbf{Arabic} & \textbf{Definition and AI Generation Note} \\
+\midrule
+Simile & \ar{التشبيه} & Explicit comparison (A is like B); requires كأن, مثل, or equivalent. Most common device. \\
+Metaphor & \ar{الاستعارة} & Implicit comparison; A is called B without the comparison particle. \\
+Metonymy & \ar{الكناية} & Describing A by describing its characteristic attribute B (``heavy-handed'' for generous). \\
+Synecdoche & \ar{المجاز المرسل} & Part for whole or whole for part; figurative extension. \\
+Antithesis & \ar{الطباق} & Pairing contrasting concepts in the same verse. Highly valued in Abbasid poetry. \\
+Paranomasia & \ar{الجناس} & Wordplay on similar-sounding words with different meanings. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{\ar{شعر المناسبات} — Occasional Poetry}
+\label{subsec:munasabat}
+
+Poetry composed for specific social occasions. Subtypes:
+\begin{itemize}
+  \item \ar{التهنئة} (Congratulatory): Weddings, births, promotions, achievements. Tone: joyful, elevated.
+  \item \ar{العزاء / التعزية} (Condolence): Death, illness, misfortune. Tone: measured grief, comfort.
+  \item \ar{المديح الرسمي} (Official praise): State occasions, national days. Tone: formal, civic.
+  \item \ar{الوصف التصويري} (Descriptive occasion): Describing a place, event, season. Tone: varies.
+\end{itemize}
+
+% ============================================================================
+\clearpage
+\langsep{}
+
+% ============================================================================
+%  ARABIC VERSION
+% ============================================================================
+\begin{otherlanguage}{arabic}
+
+\section*{الشعر العربي الفصيح: النظام العروضي والأغراض}
+
+\subsection*{أسس علم العروض}
+
+علم العروض هو العلم الذي وضعه الخليل بن أحمد الفراهيدي (118–170هـ / 736–786م) لضبط أوزان الشعر العربي. يقوم هذا العلم على ثلاثة مفاهيم أساسية:
+
+\begin{description}
+  \item[\textbf{السبب الخفيف}] حرفان: الأول متحرك والثاني ساكن. مثل: مَنْ، هَلْ، قَدْ.
+  \item[\textbf{الوتد المجموع}] ثلاثة أحرف: متحرك + متحرك + ساكن. مثل: فَعُو، قَفَا.
+  \item[\textbf{الوتد المفروق}] ثلاثة أحرف: متحرك + ساكن + متحرك. مثل: مَفْعُ.
+\end{description}
+
+تتركب من هذه المكونات ثمانُ تفعيلاتٍ أساسية، ومن هذه التفعيلات تتشكل ستة عشر بحرًا خليليًا.
+
+\subsection*{البحور الخليلية الستة عشر}
+
+فيما يلي ملخص البحور الأكثر استخدامًا مع أمثلتها:
+
+\textbf{البحر الطويل} — أكثر البحور شيوعًا في الشعر العربي الكلاسيكي (أكثر من 40\% من الديوان الشعري). تفعيلاته: \textbf{فَعُولُنْ مَفَاعِيلُنْ فَعُولُنْ مَفَاعِيلُنْ} في كل شطر.
+
+مثال: \textbf{قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ --- بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ}
+
+(امرؤ القيس، مطلع المعلقة)
+
+\textbf{البحر الكامل} — ثالث البحور شيوعًا، متفعيلاته: \textbf{مُتَفَاعِلُنْ مُتَفَاعِلُنْ مُتَفَاعِلُنْ}. المتنبي نظم أعظم قصائده على هذا البحر.
+
+\textbf{البحر البسيط} — تفعيلاته: \textbf{مُسْتَفْعِلُنْ فَاعِلُنْ مُسْتَفْعِلُنْ فَاعِلُنْ}. يُستخدم كثيرًا في الرثاء والحكمة.
+
+\subsection*{نظام القافية}
+
+القافية في الشعر العربي الكلاسيكي ليست مجرد جناس صوتي في نهاية الشطر، بل هي منظومة دقيقة من الحروف والحركات:
+
+\begin{description}
+  \item[\textbf{الرَّوِيّ}] الحرف الأساسي للقافية؛ يحدد هوية القصيدة كلها.
+  \item[\textbf{الوَصْل}] ما يلي الروي من هاء أو مدّ أو نون تنوين.
+  \item[\textbf{الرِّدْف}] مدّ يسبق الروي مباشرة (ألف أو واو أو ياء).
+  \item[\textbf{التَّأْسِيس}] ألف تفصلها عن الروي حرف واحد.
+\end{description}
+
+\textbf{عيوب القافية الكبرى:}
+\begin{itemize}
+  \item \textbf{الإيطاء}: تكرار كلمة الروي نفسها في أكثر من بيت (أقبح العيوب).
+  \item \textbf{الإقواء}: الخلط بين الكسرة والضمة على الروي.
+  \item \textbf{السناد}: التناقض في الردف أو التأسيس بين الأبيات.
+\end{itemize}
+
+\subsection*{أغراض الشعر العربي الكلاسيكي}
+
+\textbf{المديح} — أعظم الأغراض وأوسعها في الشعر الكلاسيكي. يمر عبر ثلاث مراحل: النسيب (التمهيد)، ثم التخلص (الانتقال إلى الممدوح)، ثم جسم المديح (ذكر الكرم والشجاعة والحلم والعدل). قاعدة للذكاء الاصطناعي: يجب أن يعرف النظام بوضوح مَن يُمدَح ولأي صفات.
+
+\textbf{الهجاء} — نقيض المديح؛ هجاء الأعداء وفضح عيوبهم. أهم أشكاله الخاصة: \textbf{النقائض} بين الشعراء؛ وفيها يجب أن يستخدم الشاعر المجيب نفس الوزن والقافية.
+
+\textbf{الغزل العذري} — الحب العفيف المحتشم. يُحرَّم فيه وصف جسد المحبوب. نماذجه: مجنون ليلى، جميل بثينة.
+
+\textbf{الغزل الحسي} — الحب الجريء الصريح. مدرسة عمر بن أبي ربيعة الحجازية. يُجيز وصف الجسد صراحة.
+
+\textbf{الرثاء} — الحزن على الميت مع تمجيد مناقبه. الخنساء أعظم رثّاءة في تاريخ الشعر العربي.
+
+\textbf{الزهد} — التبرؤ من الدنيا والتزهد فيها. أبو العتاهية سيد هذا الغرض.
+
+\textbf{الخمريات} — الاحتفاء بالخمر والشرب. أبو نواس إمامها. تنبيه للذكاء الاصطناعي: في الشعر الصوفي، لغة الخمر رمزية روحانية لا حرفية.
+
+\textbf{الشعر الصوفي} — الشعر الروحاني والعرفاني. الخمر = المعرفة الإلهية؛ الساقي = الشيخ أو الحق؛ السُّكر = حال الوجد.
+
+\subsection*{الأشكال التناصية}
+
+\textbf{المعارضة}: قصيدة جديدة على نفس وزن وقافية قصيدة أخرى. القاعدة الذهبية: الوزن والروي \textit{واجبان} لا خيار فيهما.
+
+\textbf{التشطير}: أخذ قصيدة موجودة وإضافة شطر جديد قبل كل شطر من أشطارها الأصلية. الشروط: الشطور الأصلية لا تُعدَّل، والشطور الجديدة على نفس الوزن.
+
+\textbf{التخميس}: إضافة ثلاثة أشطار جديدة لكل بيت أصلي، لتصبح الوحدة خمسة أشطار (أبب --- جج). الأشطار الثلاثة الجديدة تتقافى فيما بينها بقافية مختلفة عن قافية القصيدة الأصلية.
+
+\textbf{إكمال القصيدة}: إتمام قصيدة ناقصة. الشروط: الوزن والقافية والنبرة العاطفية ومستوى اللغة والكثافة البلاغية كلها يجب أن تتطابق مع ما هو موجود.
+
+\end{otherlanguage}
+

@@ -1,0 +1,15 @@
+pyproject.toml
+src/etl/__init__.py
+src/etl/dedup.py
+src/etl/load.py
+src/etl/normalize.py
+src/etl/run.py
+src/etl.egg-info/PKG-INFO
+src/etl.egg-info/SOURCES.txt
+src/etl.egg-info/dependency_links.txt
+src/etl.egg-info/entry_points.txt
+src/etl.egg-info/requires.txt
+src/etl.egg-info/top_level.txt
+src/etl/pipelines/__init__.py
+src/etl/pipelines/ashaar.py
+src/etl/pipelines/dwianai.py

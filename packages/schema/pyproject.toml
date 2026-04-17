@@ -1,0 +1,11 @@
+[project]
+name = "schema"
+version = "0.1.0"
+description = "Canonical data models for الشاعر"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.10",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

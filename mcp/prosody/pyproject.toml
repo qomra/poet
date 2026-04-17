@@ -1,0 +1,14 @@
+[project]
+name = "mcp-prosody"
+version = "0.1.0"
+description = "MCP server: prosody"
+requires-python = ">=3.12"
+dependencies = [
+    "schema",
+    "db",
+    "store",
+    "mcp>=1.6",
+]
+
+[project.scripts]
+mcp-prosody = "mcp.prosody.server:main"

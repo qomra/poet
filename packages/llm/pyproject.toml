@@ -1,0 +1,14 @@
+[project]
+name = "llm"
+version = "0.1.0"
+description = "LLM provider abstraction — Anthropic, OpenAI, Groq, vLLM"
+requires-python = ">=3.12"
+dependencies = [
+    "schema",
+    "anthropic>=0.50",
+    "openai>=1.75",
+    "httpx>=0.28",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

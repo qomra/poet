@@ -1,0 +1,65 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: alshaer-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: alshaer
+      POSTGRES_PASSWORD: alshaer
+      POSTGRES_DB: alshaer
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - alshaer
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alshaer -d alshaer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: alshaer-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - alshaer
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:6333/healthz || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  qafiya-annotator:
+    build:
+      context: ..
+      dockerfile: tools/qafiya_annotator/Dockerfile
+    container_name: alshaer-qafiya-annotator
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      DATABASE_URL: postgresql+psycopg://alshaer:alshaer@postgres:5432/alshaer
+    volumes:
+      # Mount static dir so HTML/CSS/JS changes reflect without rebuild
+      - ../tools/qafiya_annotator/static:/app/tools/qafiya_annotator/static:ro
+    networks:
+      - alshaer
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  qdrant_data:
+
+networks:
+  alshaer:
+    driver: bridge

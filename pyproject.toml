@@ -1,0 +1,46 @@
+[project]
+name = "alshaer"
+version = "0.1.0"
+description = "الشاعر — Arabic Poetry AI System"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "packages/schema",
+    "packages/db",
+    "packages/store",
+    "packages/llm",
+    "etl",
+    "agent",
+    "mcp/poetry_search",
+    "mcp/generation",
+    "mcp/prosody",
+    "mcp/poet_lookup",
+    "api",
+]
+
+[tool.uv.sources]
+schema       = { workspace = true }
+db           = { workspace = true }
+store        = { workspace = true }
+llm          = { workspace = true }
+etl          = { workspace = true }
+agent        = { workspace = true }
+api          = { workspace = true }
+mcp-poetry-search = { workspace = true }
+mcp-generation    = { workspace = true }
+mcp-prosody       = { workspace = true }
+mcp-poet-lookup   = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true

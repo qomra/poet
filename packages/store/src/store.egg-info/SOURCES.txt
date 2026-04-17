@@ -1,0 +1,7 @@
+pyproject.toml
+src/store/__init__.py
+src/store.egg-info/PKG-INFO
+src/store.egg-info/SOURCES.txt
+src/store.egg-info/dependency_links.txt
+src/store.egg-info/requires.txt
+src/store.egg-info/top_level.txt

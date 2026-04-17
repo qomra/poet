@@ -1,0 +1,17 @@
+[project]
+name = "agent"
+version = "0.1.0"
+description = "Agent harness — conversation loop, tool dispatch, MCP integration"
+requires-python = ">=3.12"
+dependencies = [
+    "schema",
+    "db",
+    "store",
+    "llm",
+    "mcp>=1.6",
+    "pydantic>=2.10",
+    "anyio>=4.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

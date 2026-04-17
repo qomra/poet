@@ -1,0 +1,9 @@
+pyproject.toml
+schema/__init__.py
+schema/poem.py
+schema/session.py
+schema.egg-info/PKG-INFO
+schema.egg-info/SOURCES.txt
+schema.egg-info/dependency_links.txt
+schema.egg-info/requires.txt
+schema.egg-info/top_level.txt
