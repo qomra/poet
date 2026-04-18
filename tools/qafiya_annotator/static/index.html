@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>الشاعر — مُحقِّق القافية</title>
+<title>الشاعر — صياغة قواعد القافية</title>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
@@ -11,7 +11,7 @@
 :root{
   --gold:#b8860b;--dark:#1a1a2e;--mid:#2d2d44;
   --panel:#f7f5f2;--border:#e0dbd4;--text:#1e1e1e;--muted:#888;
-  --accept:#1a7a4a;--reject:#b02a2a;--partial:#c47a1a;--skip:#6b7280;
+  --ok:#1a7a4a;--warn:#c47a1a;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:'IBM Plex Sans Arabic',Arial,sans-serif;background:#eae6e0;
@@ -21,22 +21,22 @@ body{font-family:'IBM Plex Sans Arabic',Arial,sans-serif;background:#eae6e0;
 header{background:var(--dark);color:#fff;height:46px;flex-shrink:0;
        display:flex;align-items:center;gap:12px;padding:0 14px;min-width:0}
 .logo{font-family:'Amiri',serif;font-size:1rem;color:var(--gold);white-space:nowrap;flex-shrink:0}
-.stats{display:flex;gap:10px;font-size:.68rem;color:#aaa;flex:1;min-width:0;overflow:hidden}
+.stats{display:flex;gap:12px;font-size:.68rem;color:#aaa;flex:1;min-width:0;overflow:hidden}
 .stats b{color:#fff}
 .hctrl{display:flex;gap:6px;flex-shrink:0}
-select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
-          border-radius:4px;padding:3px 6px;font-size:.7rem;cursor:pointer}
 .hbtn{background:none;color:#aaa;border:1px solid #3a3a55;border-radius:4px;
       padding:3px 10px;font-size:.7rem;cursor:pointer;white-space:nowrap;
       transition:all .15s}
 .hbtn:hover{color:var(--gold);border-color:var(--gold)}
+.hbtn.primary{color:var(--gold);border-color:var(--gold)}
+.hbtn.primary:hover{background:var(--gold);color:var(--dark)}
 
-/* BODY — 3 columns, no scroll */
+/* BODY — 3 columns */
 .body{display:flex;flex:1;min-height:0;overflow:hidden}
 .col-poem{flex:0 0 44%;min-width:0;display:flex;flex-direction:column;
           background:#fff;border-left:1px solid var(--border);overflow:hidden}
-.col-ann{flex:0 0 34%;min-width:0;display:flex;flex-direction:column;
-         background:var(--panel);border-left:1px solid var(--border);overflow-y:auto}
+.col-rule{flex:0 0 34%;min-width:0;display:flex;flex-direction:column;
+          background:var(--panel);border-left:1px solid var(--border);overflow-y:auto}
 .col-rules{flex:0 0 22%;min-width:0;display:flex;flex-direction:column;
            background:var(--dark);color:#ccc;overflow-y:auto}
 
@@ -53,66 +53,52 @@ select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
 .vs{color:#222}
 .va{color:#555;padding-right:14px;border-right:2px solid #f5e6c8;margin-right:6px}
 .vsep{height:4px}
+.poem-content{display:flex;flex-direction:column;height:100%;overflow:hidden}
 
-/* Annotation column */
+/* Rule-proposal column */
 .sec{padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
 .sec-t{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-       color:var(--muted);margin-bottom:7px;direction:ltr;text-align:left;
-       display:flex;justify-content:space-between;align-items:center}
-.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.cc{background:#fff;border:1px solid var(--border);border-radius:4px;padding:5px 7px;min-width:0}
-.ccl{font-size:.58rem;color:var(--muted);direction:ltr;text-align:left}
-.ccv{font-family:'Amiri',serif;font-size:1rem;font-weight:700;color:var(--dark);
-     direction:rtl;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ccv.e{color:#ccc;font-size:.8rem}
-.ccv.pat{color:var(--gold);font-size:1.1rem}
-.cpill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.65rem;font-weight:700;direction:ltr}
-.cp-high{background:#d1fae5;color:#1a7a4a}
-.cp-medium{background:#fef3c7;color:#b7791f}
-.cp-low{background:#fee2e2;color:#b02a2a}
-.cp-none{background:#f3f4f6;color:#999}
-
-/* Form */
+       color:var(--muted);margin-bottom:7px;direction:ltr;text-align:left}
 .frow{display:flex;gap:5px;margin-bottom:5px}
 .fg{flex:1;min-width:0}
 .fg label{font-size:.6rem;color:var(--muted);font-weight:600;display:block;
           margin-bottom:2px;direction:ltr;text-align:left}
 .fg input,.fg select,.fg textarea{width:100%;background:#fff;border:1px solid var(--border);
-  border-radius:4px;padding:4px 6px;font-size:.8rem;color:var(--dark);direction:rtl;
+  border-radius:4px;padding:5px 7px;font-size:.85rem;color:var(--dark);direction:rtl;
   font-family:'IBM Plex Sans Arabic',Arial,sans-serif;transition:border-color .12s}
 .fg input:focus,.fg select:focus,.fg textarea:focus{
   outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(184,134,11,.12)}
-.fg textarea{resize:vertical;min-height:46px}
+.fg textarea{resize:vertical;min-height:60px;font-family:'Amiri',serif;font-size:.95rem;line-height:1.6}
 
-/* Verdict */
-.vrow{display:flex;gap:5px}
-.vb{flex:1;padding:6px 2px;border-radius:4px;border:1.5px solid var(--border);
-    font-size:.73rem;font-weight:600;cursor:pointer;background:#fff;color:var(--muted);
-    transition:all .12s;font-family:'IBM Plex Sans Arabic',Arial,sans-serif}
-.vb:hover{border-color:currentColor}
-.vb.va{color:var(--accept)}.vb.vp{color:var(--partial)}
-.vb.vr{color:var(--reject)}.vb.vs{color:var(--skip)}
-.vb.on{color:#fff!important}
-.vb.va.on{background:var(--accept);border-color:var(--accept)}
-.vb.vp.on{background:var(--partial);border-color:var(--partial)}
-.vb.vr.on{background:var(--reject);border-color:var(--reject)}
-.vb.vs.on{background:var(--skip);border-color:var(--skip)}
-
-/* Actions */
-.arow{display:flex;gap:5px}
+.arow{display:flex;gap:5px;margin-top:4px}
 .bsave{flex:1;background:var(--dark);color:#fff;border:none;border-radius:4px;
-       padding:8px;font-size:.8rem;font-weight:600;cursor:pointer;
+       padding:9px;font-size:.85rem;font-weight:600;cursor:pointer;
        font-family:'IBM Plex Sans Arabic',Arial,sans-serif;transition:background .12s}
 .bsave:hover:not(:disabled){background:var(--mid)}
 .bsave:disabled{opacity:.4;cursor:not-allowed}
-.bnext{background:#fff;color:var(--muted);border:1px solid var(--border);
-       border-radius:4px;padding:8px 12px;font-size:.8rem;cursor:pointer;
-       transition:all .12s;font-family:'IBM Plex Sans Arabic',Arial,sans-serif}
-.bnext:hover{border-color:var(--gold);color:var(--gold)}
+.bsave.editing{background:var(--warn)}
+.bsave.editing:hover:not(:disabled){background:#a6681a}
+.bcancel{background:#fff;color:var(--muted);border:1px solid var(--border);
+         border-radius:4px;padding:9px 14px;font-size:.8rem;cursor:pointer;
+         font-family:inherit;transition:all .12s}
+.bcancel:hover{border-color:var(--muted);color:var(--dark)}
+.toast{font-size:.7rem;color:var(--ok);margin-top:6px;direction:rtl;text-align:right}
+.toast.err{color:#b02a2a}
+.edit-banner{background:#fef3c7;border:1px solid #e5c370;border-radius:4px;
+             padding:6px 10px;font-size:.72rem;color:#7a5a1a;margin-bottom:8px;direction:rtl;
+             display:flex;justify-content:space-between;align-items:center;gap:8px}
+.edit-banner code{font-family:'Courier New',monospace;font-size:.68rem}
 
-/* Rules column */
-.rhdr{padding:8px 12px;font-size:.62rem;font-weight:700;text-transform:uppercase;
-      letter-spacing:.07em;color:var(--gold);border-bottom:1px solid #2a2a40;flex-shrink:0}
+/* Right column — tabs + content */
+.rtabs{display:flex;border-bottom:1px solid #2a2a40;flex-shrink:0}
+.rtab{flex:1;background:none;color:#888;border:none;padding:9px 6px;
+      font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+      cursor:pointer;font-family:inherit;transition:all .12s;border-bottom:2px solid transparent}
+.rtab:hover{color:#ccc}
+.rtab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.rtab .cnt{color:#555;font-weight:400;margin-right:4px}
+
+/* Qafiya reference (tab 1) */
 .rule{border-bottom:1px solid #232335;padding:9px 12px}
 .rar{font-family:'Amiri',serif;font-size:.95rem;color:var(--gold);direction:rtl}
 .ren{font-size:.6rem;color:#555;direction:ltr;margin-bottom:5px;font-style:italic}
@@ -124,6 +110,24 @@ select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
 .rx{font-family:'Amiri',serif;font-size:.78rem;background:#1a1a32;
     color:#e0c97a;padding:1px 5px;border-radius:3px;direction:rtl}
 
+/* Proposed rules list (tab 2) */
+.rule-item{border-bottom:1px solid #232335;padding:8px 12px}
+.ri-hdr{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:3px}
+.ri-code{font-family:'Courier New',monospace;font-size:.7rem;color:var(--gold)}
+.ri-status{font-size:.56rem;text-transform:uppercase;padding:1px 6px;border-radius:8px;letter-spacing:.05em}
+.ri-status.proposed{background:#2a2340;color:#d4a574}
+.ri-status.coded{background:#24322a;color:#7acb9e}
+.ri-status.applied{background:#1a3a50;color:#6fb3d4}
+.ri-title{font-family:'Amiri',serif;font-size:.88rem;color:#e6ddc8;direction:rtl;line-height:1.4;margin-bottom:3px}
+.ri-desc{font-size:.66rem;color:#888;direction:rtl;line-height:1.5;max-height:52px;overflow:hidden}
+.ri-matched{font-size:.62rem;color:#6fb3d4;margin-top:3px;direction:ltr;text-align:left}
+.ri-actions{display:flex;gap:6px;margin-top:5px;justify-content:flex-end}
+.ri-btn{background:none;border:1px solid #3a3a55;color:#aaa;border-radius:3px;
+        padding:2px 8px;font-size:.62rem;cursor:pointer;font-family:inherit;transition:all .12s}
+.ri-btn:hover{color:var(--gold);border-color:var(--gold)}
+.ri-btn.del:hover{color:#d46a6a;border-color:#d46a6a}
+.ri-btn:disabled{opacity:.3;cursor:not-allowed}
+
 /* Empty/spinner */
 .empty{display:flex;align-items:center;justify-content:center;height:100%;
        flex-direction:column;gap:8px;color:var(--muted);font-size:.82rem}
@@ -133,33 +137,23 @@ select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 .col-rules ::-webkit-scrollbar-thumb{background:#3a3a55}
-.poem-content{display:flex;flex-direction:column;height:100%;overflow:hidden}
+
+.example-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 </style>
 </head>
 <body x-data="app()" x-init="init()">
 
 <header>
-  <div class="logo">📜 الشاعر — مُحقِّق القافية</div>
+  <div class="logo">📜 الشاعر — صياغة قواعد القافية</div>
   <div class="stats" x-show="stats">
-    <span>✓ <b x-text="stats?.done??'…'"></b></span>
-    <span>● <b x-text="stats?.high??'…'"></b> عالٍ</span>
-    <span>◑ <b x-text="stats?.medium??'…'"></b> متوسط</span>
-    <span>○ <b x-text="stats?.low??'…'"></b> ضعيف</span>
-    <span>✕ <b x-text="stats?.unclassified??'…'"></b> غير مصنَّف</span>
+    <span>الإجمالي: <b x-text="stats?.total?.toLocaleString()??'…'"></b></span>
+    <span>مُصنَّف: <b x-text="stats?.classified?.toLocaleString()??'…'"></b></span>
+    <span>غير مُصنَّف: <b x-text="stats?.unclassified?.toLocaleString()??'…'"></b></span>
+    <span>قواعد: <b x-text="stats?.rules_applied??0"></b>/<b x-text="stats?.rules_total??0"></b></span>
   </div>
   <div class="hctrl">
-    <select class="hs" x-model="mode" @change="load()">
-      <option value="classified">مصنَّف</option>
-      <option value="unclassified">غير مصنَّف</option>
-      <option value="both">الكل</option>
-    </select>
-    <select class="hs" x-model="conf" @change="load()" :disabled="mode!=='classified'">
-      <option value="all">كل الثقة</option>
-      <option value="high">عالٍ</option>
-      <option value="medium">متوسط</option>
-      <option value="low">ضعيف</option>
-    </select>
-    <button class="hbtn" @click="load()">🔀 جديد</button>
+    <button class="hbtn" @click="refreshAll()">⟳ تحديث</button>
+    <button class="hbtn primary" @click="load()">🔀 قصيدة أخرى</button>
   </div>
 </header>
 
@@ -168,7 +162,7 @@ select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
   <!-- Poem -->
   <div class="col-poem">
     <div x-show="loading" class="empty"><div class="spin"></div><span>جارٍ التحميل…</span></div>
-    <div x-show="!loading && !poem" class="empty">لا توجد قصائد</div>
+    <div x-show="!loading && !poem" class="empty">لا توجد قصائد غير مُصنَّفة</div>
     <div x-show="!loading && poem" class="poem-content">
       <div class="poem-hdr">
         <div class="poem-title" x-text="poem?.title||'بدون عنوان'"></div>
@@ -178,7 +172,7 @@ select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
           <span class="ptag" x-show="poem?.meter && poem.meter!=='unknown'">⚖ <b x-text="poem?.meter"></b></span>
           <span class="ptag">📜 <b x-text="poem?.verse_count"></b> شطر</span>
           <span class="ptag" x-show="poem?.rhyme_letter">
-            روي: <b style="color:var(--gold)" x-text="poem?.rhyme_letter"></b>
+            روي أشعار: <b style="color:var(--gold)" x-text="poem?.rhyme_letter"></b>
           </span>
         </div>
       </div>
@@ -193,59 +187,38 @@ select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
     </div>
   </div>
 
-  <!-- Annotation -->
-  <div class="col-ann">
+  <!-- Rule proposal -->
+  <div class="col-rule">
 
     <div class="sec">
-      <div class="sec-t">
-        <span>Classifier</span>
-        <span x-show="poem" :class="'cpill cp-'+(poem?.qafiya_confidence||'none')"
-          x-text="{'high':'● عالٍ','medium':'◑ متوسط','low':'○ ضعيف','none':'✕ لا يوجد'}[poem?.qafiya_confidence]||'—'"></span>
+      <div class="sec-t" x-text="editingId ? 'Editing rule' : 'Propose a new rule'"></div>
+      <div x-show="editingId" class="edit-banner">
+        <span>⚠ تعديل قاعدة قائمة</span>
+        <button class="bcancel" style="padding:3px 10px;font-size:.68rem" @click="cancelEdit()">× إلغاء</button>
       </div>
-      <div class="cgrid" x-show="poem">
-        <div class="cc" style="grid-column:span 3">
-          <div class="ccl">النمط المرصود</div>
-          <div class="ccv pat" x-text="poem?.qafiya_pattern||'—'"></div>
-        </div>
-        <div class="cc">
-          <div class="ccl">الرَّوِيّ</div>
-          <div class="ccv" :class="poem?.qafiya_rawiy?'':'e'" x-text="poem?.qafiya_rawiy||'—'"></div>
-        </div>
-        <div class="cc">
-          <div class="ccl">الرِّدْف</div>
-          <div class="ccv" :class="poem?.qafiya_radf?'':'e'" x-text="poem?.qafiya_radf||'—'"></div>
-        </div>
-        <div class="cc">
-          <div class="ccl">الوَصْل</div>
-          <div class="ccv" :class="poem?.qafiya_wasl?'':'e'" x-text="poem?.qafiya_wasl||'—'"></div>
-        </div>
-        <div class="cc" style="grid-column:span 2">
-          <div class="ccl">الحَرَكة</div>
-          <div class="ccv" :class="poem?.qafiya_harakah?'':'e'"
-            x-text="{'maftouha':'مفتوحة','maksura':'مكسورة','madmouma':'مضمومة','muqayyada':'مقيدة'}[poem?.qafiya_harakah]||'—'"></div>
-        </div>
-        <div class="cc">
-          <div class="ccl">النَّوع</div>
-          <div class="ccv" :class="poem?.qafiya_type?'':'e'"
-            x-text="{'mutawatir':'متواتر','mutadaarik':'متدارك','mutarakib':'متراكب','mutakaasis':'متكاوس','mutaradif':'مترادف','indeterminate':'غير محدد'}[poem?.qafiya_type]||'—'"></div>
-        </div>
-      </div>
+      <div class="frow"><div class="fg">
+        <label>عنوان القاعدة (مختصر)</label>
+        <input x-model="f.title" placeholder="مثال: قافية تنتهي بألف مقصورة وراء نون"/>
+      </div></div>
+      <div class="frow"><div class="fg">
+        <label>وصف القاعدة (بالتفصيل — كيف نتعرف على القصائد التي تنطبق عليها، وما نتيجتها)</label>
+        <textarea x-model="f.description" rows="6"
+          placeholder="مثال: إذا كانت آخر كلمة في كل عجز تنتهي بـ ـان فإن الروي هو ن، والوصل ألف، والحركة مفتوحة، والنوع متواتر…"></textarea>
+      </div></div>
     </div>
 
     <div class="sec">
-      <div class="sec-t">تصحيحك (اختياري)</div>
-      <div class="frow">
-        <div class="fg" style="max-width:60px"><label>الرَّوِيّ</label>
+      <div class="sec-t">Expected qafiya for THIS poem (as the canonical example)</div>
+      <div class="example-grid">
+        <div class="fg"><label>الرَّوِيّ</label>
           <input x-model="f.rawiy" maxlength="2" placeholder="ن"/></div>
-        <div class="fg" style="max-width:75px"><label>الرِّدْف</label>
+        <div class="fg"><label>الرِّدْف</label>
           <select x-model="f.radf"><option value="">—</option>
             <option value="ا">ا</option><option value="و">و</option><option value="ي">ي</option></select></div>
-        <div class="fg" style="max-width:75px"><label>الوَصْل</label>
+        <div class="fg"><label>الوَصْل</label>
           <select x-model="f.wasl"><option value="">—</option>
-            <option value="ا">ا</option><option value="و">و</option>
-            <option value="ي">ي</option><option value="ن">ن</option><option value="ه">ه</option></select></div>
-      </div>
-      <div class="frow">
+            <option value="ا">ا</option><option value="و">و</option><option value="ي">ي</option>
+            <option value="ن">ن</option><option value="ه">ه</option></select></div>
         <div class="fg"><label>الحَرَكة</label>
           <select x-model="f.harakah"><option value="">—</option>
             <option value="maftouha">مفتوحة</option><option value="maksura">مكسورة</option>
@@ -259,162 +232,330 @@ select.hs{background:var(--mid);color:#ddd;border:1px solid #3a3a55;
     </div>
 
     <div class="sec">
-      <div class="sec-t">الحُكم</div>
-      <div class="vrow">
-        <button class="vb va" :class="verdict==='accept'?'on':''"  @click="verdict='accept'">✓ صحيح</button>
-        <button class="vb vp" :class="verdict==='partial'?'on':''" @click="verdict='partial'">~ جزئي</button>
-        <button class="vb vr" :class="verdict==='reject'?'on':''"  @click="verdict='reject'">✗ خطأ</button>
-        <button class="vb vs" :class="verdict==='skip'?'on':''"    @click="verdict='skip'">⊘ تخطِّ</button>
-      </div>
-    </div>
-
-    <div class="sec">
-      <div class="frow"><div class="fg">
-        <label>ملاحظات</label>
-        <textarea x-model="f.notes" placeholder="أي ملاحظة…"></textarea>
-      </div></div>
-      <div class="frow"><div class="fg">
-        <label>📌 قاعدة للمُصنِّف</label>
-        <textarea x-model="f.guideline" placeholder="مثال: النمط ـنا يعني روي=ن والألف وصل مفتوح"></textarea>
-      </div></div>
-    </div>
-
-    <div class="sec">
       <div class="arow">
-        <button class="bsave" @click="save()" :disabled="!verdict||saving">
-          <span x-show="!saving">💾 حفظ</span>
-          <span x-show="saving">جارٍ…</span>
+        <button class="bsave" :class="editingId?'editing':''"
+                @click="editingId ? updateRule() : saveRule()"
+                :disabled="!canSave||saving">
+          <span x-show="!saving && !editingId">➕ أضف القاعدة</span>
+          <span x-show="!saving && editingId">💾 حفظ التعديلات</span>
+          <span x-show="saving">جارٍ الحفظ…</span>
         </button>
-        <button class="bnext" @click="load()">🔀</button>
+        <button x-show="editingId" class="bcancel" @click="cancelEdit()">إلغاء</button>
       </div>
-      <p x-show="!verdict" style="font-size:.65rem;color:var(--muted);margin-top:4px;direction:rtl">اختر حُكمًا أولاً</p>
+      <div class="toast" :class="toastErr?'err':''" x-show="toast" x-text="toast"></div>
+      <p x-show="!canSave && !saving" style="font-size:.65rem;color:var(--muted);margin-top:5px;direction:rtl">
+        العنوان والوصف مطلوبان
+      </p>
     </div>
 
   </div>
 
-  <!-- Rules — always visible -->
+  <!-- Right column — tabs: qafiya reference / proposed rules -->
   <div class="col-rules">
-    <div class="rhdr">مرجع القافية</div>
+    <div class="rtabs">
+      <button class="rtab" :class="tab==='ref'?'on':''" @click="tab='ref'">مرجع القافية</button>
+      <button class="rtab" :class="tab==='rules'?'on':''" @click="tab='rules'">
+        القواعد <span class="cnt" x-text="'('+rules.length+')'"></span>
+      </button>
+    </div>
 
-    <div class="rule">
-      <div class="rar">الرَّوِيّ</div><div class="ren">Rawiy — main rhyme consonant</div>
-      <div class="rdef">آخر حرف صامت جوهري في نهاية كل شطر عجز. يجب تكراره في جميع الأبيات.</div>
-      <div class="rex">
-        <span class="rx">مَنْزِلِ ← ل</span><span class="rx">الأَمِيرُ ← ر</span>
+    <!-- Tab 1: qafiya reference (always useful while drafting rules) -->
+    <div x-show="tab==='ref'">
+      <div class="rule">
+        <div class="rar">الرَّوِيّ</div><div class="ren">Rawiy — main rhyme consonant</div>
+        <div class="rdef">آخر حرف صامت جوهري في نهاية كل شطر عجز. يجب تكراره في جميع الأبيات.</div>
+        <div class="rex">
+          <span class="rx">مَنْزِلِ ← ل</span><span class="rx">الأَمِيرُ ← ر</span>
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rar">الرِّدْف</div><div class="ren">Radf — long vowel before rawiy</div>
+        <div class="rdef">حرف مدٍّ (ا،و،ي) يسبق الرَّوِيّ مباشرةً. إذا وُجد في بيت لزم في جميع الأبيات.</div>
+        <div class="rex">
+          <span class="rx">نَارُ ← ردف ا</span><span class="rx">نُورُ ← ردف و</span><span class="rx">سَيْرُ ← ردف ي</span>
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rar">الوَصْل</div><div class="ren">Wasl — letter after rawiy</div>
+        <div class="rdef">حرف يلحق الرَّوِيّ — يكشف حركته بقانون صوتي صارم:</div>
+        <div class="rlaw">
+          <b>و</b> بعد الروي ← ضمة<br/>
+          <b>ي</b> بعد الروي ← كسرة<br/>
+          <b>ا</b> بعد الروي ← فتحة<br/>
+          <b>ن</b> بعد الروي ← تنوين<br/>
+          <b>ه</b> بعد الروي ← وصل بالهاء
+        </div>
+        <div class="rex">
+          <span class="rx">يَقُولُونَ ← روي ل + وصل و</span>
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rar">الحَرَكة</div><div class="ren">Harakah — vowel on rawiy</div>
+        <div class="rlaw">
+          <b>مفتوحة</b>: فتحة (وصل ا أو ن)<br/>
+          <b>مكسورة</b>: كسرة (وصل ي)<br/>
+          <b>مضمومة</b>: ضمة (وصل و)<br/>
+          <b>مقيدة</b>: سكون — لا وصل
+        </div>
+        <div class="rex">
+          <span class="rx">ـون ← مضمومة</span><span class="rx">ـين ← مكسورة</span>
+          <span class="rx">ـان ← مفتوحة</span><span class="rx">ـلْ ← مقيدة</span>
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rar">التَّأْسِيس</div><div class="ren">Ta'siis — alif two before rawiy</div>
+        <div class="rdef">ألف قبل الرَّوِيّ بحرف واحد — إذا وُجد وجب في كل الأبيات.</div>
+        <div class="rex"><span class="rx">عَاقِلْ ← ع+ا+ق+ل</span></div>
+      </div>
+
+      <div class="rule">
+        <div class="rar">النَّوع</div><div class="ren">Type — mutaharrikaat between last two saakins</div>
+        <div class="rlaw">
+          <b>متواتر</b>: ١ متحرك — شَجَنْ، عَزِيزَانِ<br/>
+          <b>متدارك</b>: ٢ متحرك — الْعَنْبَرِ، قَمَرٌ<br/>
+          <b>متراكب</b>: ٣ متحركات — الْفَرَجِ، الْأَدَبِ<br/>
+          <b>متكاوس</b>: ٤ متحركات — فَجُبِرْ (نادر)<br/>
+          <b>مترادف</b>: ساكنان متلاصقان — دِينْ، عَيْنْ
+        </div>
+        <div class="rex">
+          <span class="rx">عَزِيزَانِ ← متواتر ✓</span>
+          <span class="rx">الْفَرَجِ ← متراكب</span>
+          <span class="rx">دِينْ ← مترادف</span>
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rar">عيوب القافية</div><div class="ren">Defects</div>
+        <div class="rlaw">
+          <b>الإيطاء</b>: تكرار كلمة الروي<br/>
+          <b>الإقواء</b>: خلط الكسر والضم<br/>
+          <b>الإصراف</b>: خلط الفتح مع غيره<br/>
+          <b>السِّناد</b>: تناقض الردف<br/>
+          <b>الإجازة</b>: تغيير حرف الروي
+        </div>
       </div>
     </div>
 
-    <div class="rule">
-      <div class="rar">الرِّدْف</div><div class="ren">Radf — long vowel before rawiy</div>
-      <div class="rdef">حرف مدٍّ (ا،و،ي) يسبق الرَّوِيّ مباشرةً. إذا وُجد في بيت لزم في جميع الأبيات.</div>
-      <div class="rex">
-        <span class="rx">نَارُ ← ردف ا</span><span class="rx">نُورُ ← ردف و</span><span class="rx">سَيْرُ ← ردف ي</span>
+    <!-- Tab 2: proposed rules list -->
+    <div x-show="tab==='rules'">
+      <div x-show="rules.length === 0" class="empty" style="color:#666;font-size:.7rem;padding:20px">
+        لا توجد قواعد بعد
       </div>
+      <template x-for="r in rules" :key="r.id">
+        <div class="rule-item" :style="editingId===r.id ? 'background:#24201a' : ''">
+          <div class="ri-hdr">
+            <span class="ri-code" x-text="r.code || '—'"></span>
+            <span class="ri-status" :class="r.status" x-text="r.status"></span>
+          </div>
+          <div class="ri-title" x-text="r.title_ar"></div>
+          <div class="ri-desc" x-text="r.description_ar"></div>
+          <div class="ri-matched" x-show="r.poems_matched > 0">
+            ✓ matched <b x-text="r.poems_matched.toLocaleString()"></b> poems
+          </div>
+          <div class="ri-actions">
+            <button class="ri-btn" @click="copyRule(r)">⧉ نسخ</button>
+            <template x-if="r.status === 'proposed'">
+              <span style="display:flex;gap:6px">
+                <button class="ri-btn" @click="editRule(r)" :disabled="editingId===r.id">✎ تعديل</button>
+                <button class="ri-btn del" @click="deleteRule(r)">× حذف</button>
+              </span>
+            </template>
+          </div>
+        </div>
+      </template>
     </div>
-
-    <div class="rule">
-      <div class="rar">الوَصْل</div><div class="ren">Wasl — letter after rawiy</div>
-      <div class="rdef">حرف يلحق الرَّوِيّ — يكشف حركته بقانون صوتي صارم:</div>
-      <div class="rlaw">
-        <b>و</b> بعد الروي ← ضمة<br/>
-        <b>ي</b> بعد الروي ← كسرة<br/>
-        <b>ا</b> بعد الروي ← فتحة<br/>
-        <b>ن</b> بعد الروي ← تنوين<br/>
-        <b>ه</b> بعد الروي ← وصل بالهاء
-      </div>
-      <div class="rex">
-        <span class="rx">يَقُولُونَ ← روي ل + وصل و</span>
-      </div>
-    </div>
-
-    <div class="rule">
-      <div class="rar">الحَرَكة</div><div class="ren">Harakah — vowel on rawiy</div>
-      <div class="rlaw">
-        <b>مفتوحة</b>: فتحة (وصل ا أو ن)<br/>
-        <b>مكسورة</b>: كسرة (وصل ي)<br/>
-        <b>مضمومة</b>: ضمة (وصل و)<br/>
-        <b>مقيدة</b>: سكون — لا وصل
-      </div>
-      <div class="rex">
-        <span class="rx">ـون ← مضمومة</span><span class="rx">ـين ← مكسورة</span>
-        <span class="rx">ـان ← مفتوحة</span><span class="rx">ـلْ ← مقيدة</span>
-      </div>
-    </div>
-
-    <div class="rule">
-      <div class="rar">التَّأْسِيس</div><div class="ren">Ta'siis — alif two before rawiy</div>
-      <div class="rdef">ألف قبل الرَّوِيّ بحرف واحد — إذا وُجد وجب في كل الأبيات.</div>
-      <div class="rex"><span class="rx">عَاقِلْ ← ع+ا+ق+ل</span></div>
-    </div>
-
-    <div class="rule">
-      <div class="rar">النَّوع</div><div class="ren">Type — mutaharrikaat between last two saakins</div>
-      <div class="rlaw">
-        <b>متواتر</b>: ١ متحرك — شَجَنْ، عَزِيزَانِ<br/>
-        <b>متدارك</b>: ٢ متحرك — الْعَنْبَرِ، قَمَرٌ<br/>
-        <b>متراكب</b>: ٣ متحركات — الْفَرَجِ، الْأَدَبِ<br/>
-        <b>متكاوس</b>: ٤ متحركات — فَجُبِرْ (نادر)<br/>
-        <b>مترادف</b>: ساكنان متلاصقان — دِينْ، عَيْنْ
-      </div>
-      <div class="rex">
-        <span class="rx">عَزِيزَانِ ← متواتر ✓</span>
-        <span class="rx">الْفَرَجِ ← متراكب</span>
-        <span class="rx">دِينْ ← مترادف</span>
-      </div>
-    </div>
-
-    <div class="rule">
-      <div class="rar">عيوب القافية</div><div class="ren">Defects</div>
-      <div class="rlaw">
-        <b>الإيطاء</b>: تكرار كلمة الروي<br/>
-        <b>الإقواء</b>: خلط الكسر والضم<br/>
-        <b>الإصراف</b>: خلط الفتح مع غيره<br/>
-        <b>السِّناد</b>: تناقض الردف<br/>
-        <b>الإجازة</b>: تغيير حرف الروي
-      </div>
-    </div>
-
   </div>
+
 </div>
 
 <script>
 function app(){return{
   poem:null,loading:false,saving:false,
-  mode:'classified',conf:'all',
-  verdict:null,stats:null,
-  f:{rawiy:'',radf:'',wasl:'',harakah:'',type:'',notes:'',guideline:''},
+  stats:null,rules:[],toast:'',toastErr:false,tab:'ref',
+  editingId:null,
+  f:{title:'',description:'',rawiy:'',radf:'',wasl:'',harakah:'',type:''},
+
+  get canSave(){
+    return !!(this.f.title.trim() && this.f.description.trim());
+  },
+
+  _clearForm(){
+    this.f = {title:'',description:'',rawiy:'',radf:'',wasl:'',harakah:'',type:''};
+    this.toast = ''; this.toastErr = false;
+  },
+
+  _setToast(msg, isErr=false){
+    this.toast = msg; this.toastErr = isErr;
+    setTimeout(() => { this.toast = ''; }, 3500);
+  },
 
   async init(){
-    await Promise.all([this.load(),this.loadStats()]);
+    await this.refreshAll();
   },
+
+  async refreshAll(){
+    await Promise.all([this.load(), this.loadStats(), this.loadRules()]);
+  },
+
   async load(){
-    this.loading=true;this.poem=null;this.verdict=null;
-    this.f={rawiy:'',radf:'',wasl:'',harakah:'',type:'',notes:'',guideline:''};
-    try{
-      const r=await fetch(`/api/poem?mode=${this.mode}&confidence=${this.conf}`);
-      if(r.ok)this.poem=await r.json();
-    }finally{this.loading=false;}
+    this.loading = true;
+    this.poem = null;
+    this.editingId = null;
+    this._clearForm();
+    try {
+      const r = await fetch('/api/poem');
+      if (r.ok) this.poem = await r.json();
+    } finally {
+      this.loading = false;
+    }
   },
+
   async loadStats(){
-    const r=await fetch('/api/stats');
-    if(r.ok)this.stats=await r.json();
+    const r = await fetch('/api/stats');
+    if (r.ok) this.stats = await r.json();
   },
-  async save(){
-    if(!this.verdict||!this.poem)return;
-    this.saving=true;
-    try{
-      await fetch('/api/annotate',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          poem_id:this.poem.id,verdict:this.verdict,
-          notes:this.f.notes||null,guideline:this.f.guideline||null,
-          correct_rawiy:this.f.rawiy||null,correct_radf:this.f.radf||null,
-          correct_wasl:this.f.wasl||null,
-          correct_harakah:this.f.harakah||null,correct_type:this.f.type||null,
+
+  async loadRules(){
+    const r = await fetch('/api/rules');
+    if (r.ok) this.rules = await r.json();
+  },
+
+  async saveRule(){
+    if (!this.canSave || !this.poem) return;
+    this.saving = true;
+    try {
+      const r = await fetch('/api/rules', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title_ar: this.f.title.trim(),
+          description_ar: this.f.description.trim(),
+          example_poem_id: this.poem.id,
+          example_rawiy: this.f.rawiy || null,
+          example_radf: this.f.radf || null,
+          example_wasl: this.f.wasl || null,
+          example_harakah: this.f.harakah || null,
+          example_type: this.f.type || null,
         }),
       });
-      await this.loadStats();
-    }finally{this.saving=false;}
+      if (r.ok) {
+        this._setToast('✓ تمت إضافة القاعدة');
+        await Promise.all([this.loadRules(), this.loadStats()]);
+      } else {
+        const err = await r.json().catch(() => ({}));
+        this._setToast('✕ ' + (err.detail || 'فشل الحفظ'), true);
+      }
+    } finally {
+      this.saving = false;
+    }
+  },
+
+  async editRule(r){
+    this.saving = true;
+    try {
+      const res = await fetch('/api/rules/' + r.id);
+      if (!res.ok) { this._setToast('✕ فشل تحميل القاعدة', true); return; }
+      const rule = await res.json();
+      const ex = rule.example_qafiya_json ? JSON.parse(rule.example_qafiya_json) : {};
+
+      this.editingId = rule.id;
+      this.f = {
+        title: rule.title_ar || '',
+        description: rule.description_ar || '',
+        rawiy: ex.rawiy || '',
+        radf: ex.radf || '',
+        wasl: ex.wasl || '',
+        harakah: ex.harakah || '',
+        type: ex.type || '',
+      };
+      this.toast = ''; this.toastErr = false;
+
+      // Load the example poem into the left col (if any)
+      if (rule.example_poem_id) {
+        this.loading = true;
+        this.poem = null;
+        try {
+          const pr = await fetch('/api/poem/' + rule.example_poem_id);
+          if (pr.ok) this.poem = await pr.json();
+        } finally {
+          this.loading = false;
+        }
+      }
+    } finally {
+      this.saving = false;
+    }
+  },
+
+  cancelEdit(){
+    this.editingId = null;
+    this._clearForm();
+    this.load();
+  },
+
+  async updateRule(){
+    if (!this.canSave || !this.editingId) return;
+    this.saving = true;
+    try {
+      const r = await fetch('/api/rules/' + this.editingId, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title_ar: this.f.title.trim(),
+          description_ar: this.f.description.trim(),
+          example_poem_id: this.poem ? this.poem.id : null,
+          example_rawiy: this.f.rawiy || null,
+          example_radf: this.f.radf || null,
+          example_wasl: this.f.wasl || null,
+          example_harakah: this.f.harakah || null,
+          example_type: this.f.type || null,
+        }),
+      });
+      if (r.ok) {
+        this._setToast('✓ تم حفظ التعديلات');
+        await this.loadRules();
+      } else {
+        const err = await r.json().catch(() => ({}));
+        this._setToast('✕ ' + (err.detail || 'فشل التعديل'), true);
+      }
+    } finally {
+      this.saving = false;
+    }
+  },
+
+  async copyRule(r){
+    const parts = [r.title_ar || '', '', r.description_ar || ''];
+    const text = parts.join('\n').trim();
+    try {
+      await navigator.clipboard.writeText(text);
+      this._setToast('✓ نُسخ نص القاعدة');
+    } catch (e) {
+      // Fallback for non-secure contexts
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); this._setToast('✓ نُسخ نص القاعدة'); }
+      catch { this._setToast('✕ تعذَّر النسخ', true); }
+      finally { document.body.removeChild(ta); }
+    }
+  },
+
+  async deleteRule(r){
+    if (!confirm(`حذف القاعدة: "${r.title_ar}"؟`)) return;
+    const res = await fetch('/api/rules/' + r.id, { method: 'DELETE' });
+    if (res.ok) {
+      this._setToast('✓ تم الحذف');
+      if (this.editingId === r.id) this.cancelEdit();
+      await Promise.all([this.loadRules(), this.loadStats()]);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      this._setToast('✕ ' + (err.detail || 'فشل الحذف'), true);
+    }
   },
 }}
 </script>

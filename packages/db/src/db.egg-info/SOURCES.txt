@@ -1,7 +1,0 @@
-pyproject.toml
-src/db/__init__.py
-src/db.egg-info/PKG-INFO
-src/db.egg-info/SOURCES.txt
-src/db.egg-info/dependency_links.txt
-src/db.egg-info/requires.txt
-src/db.egg-info/top_level.txt

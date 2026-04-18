@@ -1,5 +1,0 @@
-schema
-sqlalchemy[asyncio]>=2.0
-alembic>=1.14
-asyncpg>=0.30
-psycopg[binary]>=3.2

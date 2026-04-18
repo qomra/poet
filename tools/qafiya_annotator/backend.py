@@ -1,12 +1,13 @@
-"""FastAPI backend for the Qafiya Annotator."""
+"""FastAPI backend for the Qafiya Annotator (rule-proposal workflow)."""
 
 from __future__ import annotations
 
+import json
 import os
 import uuid
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -26,28 +27,19 @@ STATIC = Path(__file__).parent / "static"
 # ── API ───────────────────────────────────────────────────────────────────────
 
 @app.get("/api/poem")
-def get_poem(mode: str = "classified", confidence: str = "all"):
-    where = ["p.verse_count >= 6"]
-
-    if mode == "classified":
-        where.append("p.qafiya_confidence IS NOT NULL AND p.qafiya_confidence != 'none'")
-        if confidence != "all":
-            where.append(f"p.qafiya_confidence = '{confidence}'")
-    elif mode == "unclassified":
-        where.append("(p.qafiya_confidence IS NULL OR p.qafiya_confidence = 'none')")
-
-    where.append("NOT EXISTS (SELECT 1 FROM qafiya_annotations qa WHERE qa.poem_id = p.id)")
-
+def get_poem():
+    """Random unclassified poem (qafiya_rule_id IS NULL) with at least 6 verses."""
     with engine.connect() as conn:
-        row = conn.execute(text(f"""
+        row = conn.execute(text("""
             SELECT p.id, p.title, p.poet_name, p.meter, p.rhyme_letter,
-                   p.verse_count, p.era, p.qafiya_rawiy, p.qafiya_radf,
-                   p.qafiya_wasl, p.qafiya_harakah, p.qafiya_type,
-                   p.qafiya_pattern, p.qafiya_confidence,
+                   p.verse_count, p.era,
                    array_agg(v.text ORDER BY v.position) as verses
             FROM poems p JOIN verses v ON v.poem_id = p.id
-            WHERE {' AND '.join(where)}
-            GROUP BY p.id ORDER BY random() LIMIT 1
+            WHERE p.qafiya_rule_id IS NULL
+              AND p.verse_count >= 6
+            GROUP BY p.id
+            ORDER BY random()
+            LIMIT 1
         """)).fetchone()
 
     if not row:
@@ -58,88 +50,190 @@ def get_poem(mode: str = "classified", confidence: str = "all"):
     return d
 
 
+@app.get("/api/poem/{pid}")
+def get_poem_by_id(pid: str):
+    with engine.connect() as conn:
+        row = conn.execute(text("""
+            SELECT p.id, p.title, p.poet_name, p.meter, p.rhyme_letter,
+                   p.verse_count, p.era,
+                   array_agg(v.text ORDER BY v.position) as verses
+            FROM poems p JOIN verses v ON v.poem_id = p.id
+            WHERE p.id = CAST(:id AS uuid)
+            GROUP BY p.id
+        """), {"id": pid}).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="poem not found")
+    d = dict(row._mapping)
+    d["id"] = str(d["id"])
+    return d
+
+
 @app.get("/api/stats")
 def get_stats():
     with engine.connect() as conn:
         r = conn.execute(text("""
             SELECT
-              count(*) FILTER (WHERE verse_count >= 6) as total,
-              count(*) FILTER (WHERE qafiya_confidence='high') as high,
-              count(*) FILTER (WHERE qafiya_confidence='medium') as medium,
-              count(*) FILTER (WHERE qafiya_confidence='low') as low,
-              count(*) FILTER (WHERE qafiya_confidence='none'
-                               OR qafiya_confidence IS NULL) as unclassified
+              count(*) FILTER (WHERE verse_count >= 6) AS total,
+              count(*) FILTER (WHERE verse_count >= 6 AND qafiya_rule_id IS NOT NULL) AS classified,
+              count(*) FILTER (WHERE verse_count >= 6 AND qafiya_rule_id IS NULL) AS unclassified
             FROM poems
         """)).fetchone()
-        done = conn.execute(text("SELECT count(*) FROM qafiya_annotations")).scalar()
-        pending = conn.execute(
-            text("SELECT count(*) FROM classifier_guidelines WHERE NOT applied")
-        ).scalar()
-    d = dict(r._mapping)
-    d["done"] = done
-    d["pending_guidelines"] = pending
+        rules_total, rules_proposed, rules_coded, rules_applied = conn.execute(text("""
+            SELECT
+              count(*),
+              count(*) FILTER (WHERE status = 'proposed'),
+              count(*) FILTER (WHERE status = 'coded'),
+              count(*) FILTER (WHERE status = 'applied')
+            FROM rules
+        """)).fetchone()
+    return {
+        **dict(r._mapping),
+        "rules_total": rules_total,
+        "rules_proposed": rules_proposed,
+        "rules_coded": rules_coded,
+        "rules_applied": rules_applied,
+    }
+
+
+@app.get("/api/rules")
+def list_rules():
+    with engine.connect() as conn:
+        rows = conn.execute(text("""
+            SELECT id, code, title_ar, description_ar, status, function_name,
+                   poems_matched, example_poem_id, created_at, coded_at, applied_at
+            FROM rules
+            ORDER BY created_at DESC
+            LIMIT 200
+        """)).fetchall()
+    return [
+        dict(r._mapping) | {
+            "id": str(r._mapping["id"]),
+            "example_poem_id": str(r._mapping["example_poem_id"])
+            if r._mapping["example_poem_id"] else None,
+        }
+        for r in rows
+    ]
+
+
+class RuleIn(BaseModel):
+    title_ar: str
+    description_ar: str
+    example_poem_id: str | None = None
+    # Expected qafiya fields for the example poem (any subset is fine)
+    example_rawiy: str | None = None
+    example_radf: str | None = None
+    example_wasl: str | None = None
+    example_harakah: str | None = None
+    example_type: str | None = None
+
+
+def _example_json(body: RuleIn) -> str | None:
+    ex = {
+        k: v for k, v in {
+            "rawiy": body.example_rawiy,
+            "radf": body.example_radf,
+            "wasl": body.example_wasl,
+            "harakah": body.example_harakah,
+            "type": body.example_type,
+        }.items() if v
+    }
+    return json.dumps(ex, ensure_ascii=False) if ex else None
+
+
+@app.post("/api/rules")
+def add_rule(body: RuleIn):
+    title = (body.title_ar or "").strip()
+    desc = (body.description_ar or "").strip()
+    if not title or not desc:
+        raise HTTPException(status_code=400, detail="title_ar and description_ar are required")
+
+    rid = str(uuid.uuid4())
+    with engine.begin() as conn:
+        conn.execute(text("""
+            INSERT INTO rules
+              (id, title_ar, description_ar, status, example_poem_id, example_qafiya_json)
+            VALUES
+              (:id, :title, :desc, 'proposed', :pid, :ex)
+        """), {
+            "id": rid,
+            "title": title,
+            "desc": desc,
+            "pid": body.example_poem_id or None,
+            "ex": _example_json(body),
+        })
+    return {"ok": True, "id": rid}
+
+
+@app.get("/api/rules/{rid}")
+def get_rule(rid: str):
+    with engine.connect() as conn:
+        row = conn.execute(text("""
+            SELECT id, code, title_ar, description_ar, status, function_name,
+                   poems_matched, example_poem_id, example_qafiya_json,
+                   created_at, coded_at, applied_at
+            FROM rules WHERE id = CAST(:id AS uuid)
+        """), {"id": rid}).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="rule not found")
+    d = dict(row._mapping)
+    d["id"] = str(d["id"])
+    d["example_poem_id"] = str(d["example_poem_id"]) if d["example_poem_id"] else None
     return d
 
 
-@app.get("/api/guidelines")
-def get_guidelines():
-    with engine.connect() as conn:
-        rows = conn.execute(text("""
-            SELECT id, guideline, applied, created_at,
-                   (SELECT poet_name FROM poems WHERE id = example_poem_id) as poet
-            FROM classifier_guidelines ORDER BY created_at DESC LIMIT 50
-        """)).fetchall()
-    return [dict(r._mapping) | {"id": str(r._mapping["id"])} for r in rows]
+@app.patch("/api/rules/{rid}")
+def update_rule(rid: str, body: RuleIn):
+    title = (body.title_ar or "").strip()
+    desc = (body.description_ar or "").strip()
+    if not title or not desc:
+        raise HTTPException(status_code=400, detail="title_ar and description_ar are required")
 
-
-class AnnotationIn(BaseModel):
-    poem_id: str
-    verdict: str
-    notes: str | None = None
-    guideline: str | None = None
-    correct_rawiy: str | None = None
-    correct_radf: str | None = None
-    correct_wasl: str | None = None
-    correct_harakah: str | None = None
-    correct_type: str | None = None
-
-
-@app.post("/api/annotate")
-def annotate(body: AnnotationIn):
     with engine.begin() as conn:
+        row = conn.execute(
+            text("SELECT status FROM rules WHERE id = CAST(:id AS uuid)"),
+            {"id": rid},
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="rule not found")
+        if row[0] != "proposed":
+            raise HTTPException(
+                status_code=409,
+                detail=f"rule is {row[0]}, only 'proposed' rules can be edited",
+            )
         conn.execute(text("""
-            INSERT INTO qafiya_annotations
-              (id, poem_id, verdict, correct_rawiy, correct_radf, correct_wasl,
-               correct_harakah, correct_type, notes)
-            VALUES (:id,:pid,:v,:r,:rd,:w,:h,:t,:n)
+            UPDATE rules SET
+                title_ar = :title,
+                description_ar = :desc,
+                example_poem_id = :pid,
+                example_qafiya_json = :ex
+            WHERE id = CAST(:id AS uuid)
         """), {
-            "id": str(uuid.uuid4()), "pid": body.poem_id,
-            "v": body.verdict,
-            "r": body.correct_rawiy or None,
-            "rd": body.correct_radf or None,
-            "w": body.correct_wasl or None,
-            "h": body.correct_harakah or None,
-            "t": body.correct_type or None,
-            "n": body.notes or None,
+            "id": rid,
+            "title": title,
+            "desc": desc,
+            "pid": body.example_poem_id or None,
+            "ex": _example_json(body),
         })
-        if body.guideline and body.guideline.strip():
-            conn.execute(text("""
-                INSERT INTO classifier_guidelines (id, guideline, example_poem_id)
-                VALUES (:id, :g, :pid)
-            """), {
-                "id": str(uuid.uuid4()),
-                "g": body.guideline.strip(),
-                "pid": body.poem_id,
-            })
-    return {"ok": True}
+    return {"ok": True, "id": rid}
 
 
-@app.post("/api/guidelines/{gid}/apply")
-def mark_applied(gid: str):
+@app.delete("/api/rules/{rid}")
+def delete_rule(rid: str):
     with engine.begin() as conn:
+        row = conn.execute(
+            text("SELECT status FROM rules WHERE id = CAST(:id AS uuid)"),
+            {"id": rid},
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="rule not found")
+        if row[0] != "proposed":
+            raise HTTPException(
+                status_code=409,
+                detail=f"rule is {row[0]}, only 'proposed' rules can be deleted",
+            )
         conn.execute(
-            text("UPDATE classifier_guidelines SET applied = true WHERE id = :id"),
-            {"id": gid},
+            text("DELETE FROM rules WHERE id = CAST(:id AS uuid)"),
+            {"id": rid},
         )
     return {"ok": True}
 

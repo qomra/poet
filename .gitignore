@@ -14,6 +14,8 @@ tools/datasets/diwan/plots/
 **/package.json*
 **/node_modules*
 **/__pycache__*
+**/*.egg-info/
+dataset/ashaar/
 **/html*
 **/html*
 .venv*

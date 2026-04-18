@@ -83,15 +83,18 @@ class Poem(Base):
     sources: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     canonical_source: Mapped[str | None] = mapped_column(String(128))
 
-    # Mechanistic qafiya classification
-    qafiya_rawiy: Mapped[str | None] = mapped_column(String(8))        # extracted rawiy letter(s)
-    qafiya_radf: Mapped[str | None] = mapped_column(String(4))         # radf long vowel if present
-    qafiya_taassis: Mapped[bool | None] = mapped_column(Boolean)       # ta'siis detected
-    qafiya_wasl: Mapped[str | None] = mapped_column(String(4))         # wasl letter if present
-    qafiya_harakah: Mapped[str | None] = mapped_column(String(32))     # maftouha/maksura/madmouma/muqayyada
-    qafiya_type: Mapped[str | None] = mapped_column(String(32))        # mutawatir/mutaradif/etc.
-    qafiya_pattern: Mapped[str | None] = mapped_column(String(32))     # observed suffix pattern e.g. "ـون"
-    qafiya_confidence: Mapped[str | None] = mapped_column(String(16), index=True)  # high/medium/low/none
+    # Qafiya classification — populated by a matching rule (NULL = unclassified)
+    qafiya_rawiy: Mapped[str | None] = mapped_column(String(8))
+    qafiya_radf: Mapped[str | None] = mapped_column(String(4))
+    qafiya_taassis: Mapped[bool | None] = mapped_column(Boolean)
+    qafiya_wasl: Mapped[str | None] = mapped_column(String(4))
+    qafiya_harakah: Mapped[str | None] = mapped_column(String(32))
+    qafiya_type: Mapped[str | None] = mapped_column(String(32))
+    qafiya_pattern: Mapped[str | None] = mapped_column(String(32))
+    qafiya_confidence: Mapped[str | None] = mapped_column(String(16), index=True)
+    qafiya_rule_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("rules.id", ondelete="SET NULL"), index=True
+    )
 
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -207,13 +210,26 @@ class QafiyaAnnotation(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-class ClassifierGuideline(Base):
-    """Rules and notes added by the annotator to guide the next classifier iteration."""
+class Rule(Base):
+    """A qafiya classification rule — proposed by the annotator, coded as a Python
+    function, and applied to the unclassified pool. Each matching poem gets its
+    qafiya_* fields populated and is linked back here via poems.qafiya_rule_id.
+    """
 
-    __tablename__ = "classifier_guidelines"
+    __tablename__ = "rules"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    guideline: Mapped[str] = mapped_column(Text, nullable=False)
-    example_poem_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("poems.id"))
-    applied: Mapped[bool] = mapped_column(Boolean, default=False)
+    code: Mapped[str | None] = mapped_column(String(16), unique=True)  # r001, r002 — set when coded
+    title_ar: Mapped[str] = mapped_column(Text, nullable=False)
+    description_ar: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="proposed", index=True)
+    # proposed → coded → applied
+    function_name: Mapped[str | None] = mapped_column(String(128))
+    poems_matched: Mapped[int] = mapped_column(Integer, default=0)
+    example_poem_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("poems.id", ondelete="SET NULL")
+    )
+    example_qafiya_json: Mapped[str | None] = mapped_column(Text)  # expected qafiya for the example
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    coded_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))
+    applied_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))
