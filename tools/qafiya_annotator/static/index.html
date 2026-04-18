@@ -30,6 +30,13 @@ header{background:var(--dark);color:#fff;height:46px;flex-shrink:0;
 .hbtn:hover{color:var(--gold);border-color:var(--gold)}
 .hbtn.primary{color:var(--gold);border-color:var(--gold)}
 .hbtn.primary:hover{background:var(--gold);color:var(--dark)}
+.tsw{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;color:#aaa;
+     border:1px solid #3a3a55;border-radius:4px;padding:3px 8px 3px 6px;cursor:pointer;
+     transition:all .15s;user-select:none}
+.tsw input[type=checkbox]{accent-color:var(--gold);cursor:pointer;margin:0}
+.tsw:hover:not(:has(input:disabled)){color:var(--gold);border-color:var(--gold)}
+.tsw:has(input:disabled){opacity:.4;cursor:not-allowed}
+.tsw.on{color:var(--gold);border-color:var(--gold);background:rgba(184,134,11,.08)}
 
 /* BODY — 3 columns */
 .body{display:flex;flex:1;min-height:0;overflow:hidden}
@@ -150,8 +157,13 @@ header{background:var(--dark);color:#fff;height:46px;flex-shrink:0;
     <span>مُصنَّف: <b x-text="stats?.classified?.toLocaleString()??'…'"></b></span>
     <span>غير مُصنَّف: <b x-text="stats?.unclassified?.toLocaleString()??'…'"></b></span>
     <span>قواعد: <b x-text="stats?.rules_applied??0"></b>/<b x-text="stats?.rules_total??0"></b></span>
+    <span x-show="stats?.tashkeel_total">تشكيل: <b x-text="tashkeelPct"></b>%</span>
   </div>
   <div class="hctrl">
+    <label class="tsw" :class="showTashkeel ? 'on' : ''" :title="poem?.tashkeel_ready ? 'تبديل التشكيل' : 'هذه القصيدة لم تُشكَّل بعد'">
+      <input type="checkbox" x-model="showTashkeel" :disabled="!poem?.tashkeel_ready"/>
+      <span>تشكيل</span>
+    </label>
     <button class="hbtn" @click="refreshAll()">⟳ تحديث</button>
     <button class="hbtn primary" @click="load()">🔀 قصيدة أخرى</button>
   </div>
@@ -177,7 +189,7 @@ header{background:var(--dark);color:#fff;height:46px;flex-shrink:0;
         </div>
       </div>
       <div class="verses">
-        <template x-for="(v,i) in (poem ? poem.verses : [])" :key="i">
+        <template x-for="(v,i) in displayVerses" :key="i">
           <div>
             <div :class="i%2===0?'vs':'va'" x-text="v"></div>
             <div class="vsep" x-show="i%2===1"></div>
@@ -376,11 +388,25 @@ header{background:var(--dark);color:#fff;height:46px;flex-shrink:0;
 function app(){return{
   poem:null,loading:false,saving:false,
   stats:null,rules:[],toast:'',toastErr:false,tab:'ref',
-  editingId:null,
+  editingId:null,showTashkeel:false,
   f:{title:'',description:'',rawiy:'',radf:'',wasl:'',harakah:'',type:''},
 
   get canSave(){
     return !!(this.f.title.trim() && this.f.description.trim());
+  },
+
+  get displayVerses(){
+    if(!this.poem) return [];
+    if(this.showTashkeel && this.poem.tashkeel_ready){
+      return this.poem.verses_tashkeel;
+    }
+    return this.poem.verses;
+  },
+
+  get tashkeelPct(){
+    const s = this.stats;
+    if(!s || !s.tashkeel_total) return '0';
+    return (s.tashkeel_done * 100 / s.tashkeel_total).toFixed(1);
   },
 
   _clearForm(){

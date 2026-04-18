@@ -20,7 +20,10 @@ RUN pip install --index-url https://download.pytorch.org/whl/cu124 \
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
 
-COPY server.py /app/
+COPY server.py bulk_tashkeel.py /app/
+
+# pyarrow for the bulk script
+RUN pip install pyarrow==18.0.0
 
 EXPOSE 8502
 

@@ -112,7 +112,8 @@ class Verse(Base):
     poem_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("poems.id", ondelete="CASCADE"), index=True)
     position: Mapped[int] = mapped_column(Integer, nullable=False)   # 0-indexed within poem
     text: Mapped[str] = mapped_column(Text, nullable=False)           # no diacritics (search)
-    text_diacritized: Mapped[str | None] = mapped_column(Text)        # with tashkeel
+    text_diacritized: Mapped[str | None] = mapped_column(Text)        # diacritics from source
+    text_tashkeel: Mapped[str | None] = mapped_column(Text)           # model-inferred diacritics
 
     # Per-verse poet attribution — essential for محاورة (alternating poets)
     poet_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("poets.id"), index=True)

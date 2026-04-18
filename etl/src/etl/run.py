@@ -98,6 +98,39 @@ def qafiya_reapply(
     apply_rule(code, dry_run=dry_run)
 
 
+@app.command("tashkeel-export")
+def tashkeel_export(
+    out: str = typer.Argument(..., help="Path to output parquet."),
+    limit: int | None = typer.Option(None, "--limit"),
+) -> None:
+    """Dump verses needing tashkeel to a parquet (id, text)."""
+    from pathlib import Path
+    from etl.tashkeel_bulk import export
+    export(Path(out), limit=limit)
+
+
+@app.command("tashkeel-import")
+def tashkeel_import(
+    path: str = typer.Argument(..., help="Path to result parquet (id, text_tashkeel)."),
+) -> None:
+    """Apply a result parquet to verses.text_tashkeel."""
+    from pathlib import Path
+    from etl.tashkeel_bulk import import_
+    import_(Path(path))
+
+
+@app.command("tashkeel-fill")
+def tashkeel_fill(
+    batch_size: int = typer.Option(64, "--batch-size", "-b"),
+    limit: int | None = typer.Option(None, "--limit", help="Max verses to process."),
+    service: str = typer.Option("http://100.76.65.1:8502", "--service"),
+    retry: int = typer.Option(3, "--retry"),
+) -> None:
+    """Populate verses.text_tashkeel via the Fine-Tashkeel service (idempotent)."""
+    from etl.tashkeel_fill import fill
+    fill(batch_size=batch_size, limit=limit, service=service, retry=retry)
+
+
 @app.command("qafiya-reset")
 def qafiya_reset(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation."),

@@ -13,16 +13,24 @@ FastAPI wrapper around [basharalrfooh/Fine-Tashkeel](https://huggingface.co/bash
 ```bash
 docker build -t poet-tashkeel .
 
+docker volume create poet-tashkeel-hf        # persistent HF cache
+
 docker run -d --name poet-tashkeel \
     --gpus '"device=0"' \
     --restart unless-stopped \
+    --dns 8.8.8.8 --dns 1.1.1.1 \
+    -v poet-tashkeel-hf:/root/.cache/huggingface \
     -e DEVICE=cuda:0 \
     -e DTYPE=float16 \
+    -e MAX_BATCH=256 \
+    -e DEFAULT_MAX_NEW_TOKENS=96 \
     -p 8502:8502 \
     poet-tashkeel
 ```
 
-First start pulls the model (~2.5 GB in fp16) into `/root/.cache/huggingface` inside the container.
+The named volume keeps the model (~2.5 GB in fp16) across container rebuilds.
+The `--dns` flags work around a Docker daemon DNS quirk on some hosts where
+container DNS resolution fails intermittently.
 
 ## Smoke test
 

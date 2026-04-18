@@ -26,14 +26,21 @@ STATIC = Path(__file__).parent / "static"
 
 # ── API ───────────────────────────────────────────────────────────────────────
 
+_POEM_COLS = """
+    p.id, p.title, p.poet_name, p.meter, p.rhyme_letter,
+    p.verse_count, p.era,
+    array_agg(v.text ORDER BY v.position) AS verses,
+    array_agg(COALESCE(v.text_tashkeel, '') ORDER BY v.position) AS verses_tashkeel,
+    bool_and(v.text_tashkeel IS NOT NULL) AS tashkeel_ready
+"""
+
+
 @app.get("/api/poem")
 def get_poem():
     """Random unclassified poem (qafiya_rule_id IS NULL) with at least 6 verses."""
     with engine.connect() as conn:
-        row = conn.execute(text("""
-            SELECT p.id, p.title, p.poet_name, p.meter, p.rhyme_letter,
-                   p.verse_count, p.era,
-                   array_agg(v.text ORDER BY v.position) as verses
+        row = conn.execute(text(f"""
+            SELECT {_POEM_COLS}
             FROM poems p JOIN verses v ON v.poem_id = p.id
             WHERE p.qafiya_rule_id IS NULL
               AND p.verse_count >= 6
@@ -53,10 +60,8 @@ def get_poem():
 @app.get("/api/poem/{pid}")
 def get_poem_by_id(pid: str):
     with engine.connect() as conn:
-        row = conn.execute(text("""
-            SELECT p.id, p.title, p.poet_name, p.meter, p.rhyme_letter,
-                   p.verse_count, p.era,
-                   array_agg(v.text ORDER BY v.position) as verses
+        row = conn.execute(text(f"""
+            SELECT {_POEM_COLS}
             FROM poems p JOIN verses v ON v.poem_id = p.id
             WHERE p.id = CAST(:id AS uuid)
             GROUP BY p.id
@@ -86,12 +91,20 @@ def get_stats():
               count(*) FILTER (WHERE status = 'applied')
             FROM rules
         """)).fetchone()
+    with engine.connect() as conn:
+        ts = conn.execute(text("""
+            SELECT count(*) FILTER (WHERE text_tashkeel IS NOT NULL) AS tashkeel_done,
+                   count(*) AS tashkeel_total
+            FROM verses
+        """)).fetchone()
     return {
         **dict(r._mapping),
         "rules_total": rules_total,
         "rules_proposed": rules_proposed,
         "rules_coded": rules_coded,
         "rules_applied": rules_applied,
+        "tashkeel_done": ts._mapping["tashkeel_done"],
+        "tashkeel_total": ts._mapping["tashkeel_total"],
     }
 
 
