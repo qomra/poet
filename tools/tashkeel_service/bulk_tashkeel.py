@@ -36,6 +36,8 @@ def main() -> None:
     ap.add_argument("--dtype", default="float16")
     ap.add_argument("--batch-size", type=int, default=512)
     ap.add_argument("--max-new-tokens", type=int, default=48)
+    ap.add_argument("--max-input-len", type=int, default=128,
+                    help="Cap tokenizer length (bytes for ByT5). 128 covers nearly all Arabic verses.")
     ap.add_argument("--flush-every", type=int, default=10_000,
                     help="Rows per output shard write.")
     args = ap.parse_args()
@@ -98,7 +100,13 @@ def main() -> None:
             if not work_ids:
                 continue
 
-            enc = tok(work_texts, return_tensors="pt", padding=True, truncation=True).to(args.device)
+            enc = tok(
+                work_texts,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=args.max_input_len,
+            ).to(args.device)
             with torch.no_grad():
                 gen = model.generate(
                     **enc,
