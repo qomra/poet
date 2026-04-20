@@ -96,6 +96,28 @@ def export(out_path: Path, limit: int | None = None) -> int:
     return written
 
 
+def pull(
+    repo_id: str = "mysamai/ashaar-tashkeel",
+    path_in_repo: str = "data/ashaar-tashkeel.parquet",
+    cache_dir: str | None = None,
+) -> Path:
+    """Download the tashkeel parquet from HuggingFace and return its local path."""
+    try:
+        from huggingface_hub import hf_hub_download
+    except ImportError as e:
+        raise RuntimeError("huggingface_hub not installed") from e
+
+    console.print(f"[cyan]pulling[/] {repo_id}:{path_in_repo}")
+    p = hf_hub_download(
+        repo_id=repo_id,
+        filename=path_in_repo,
+        repo_type="dataset",
+        cache_dir=cache_dir,
+    )
+    console.print(f"[green]cached at:[/] {p}")
+    return Path(p)
+
+
 def import_(in_path: Path) -> int:
     """Apply a parquet of (id, text_tashkeel) to verses rows."""
     engine = create_engine(_DB_URL, pool_pre_ping=True)

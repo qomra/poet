@@ -119,6 +119,17 @@ def tashkeel_import(
     import_(Path(path))
 
 
+@app.command("tashkeel-pull")
+def tashkeel_pull(
+    repo: str = typer.Option("mysamai/ashaar-tashkeel", "--repo"),
+    path_in_repo: str = typer.Option("data/ashaar-tashkeel.parquet", "--file"),
+) -> None:
+    """Pull the diacritized verses parquet from HuggingFace and apply it."""
+    from etl.tashkeel_bulk import pull, import_
+    local = pull(repo_id=repo, path_in_repo=path_in_repo)
+    import_(local)
+
+
 @app.command("tashkeel-fill")
 def tashkeel_fill(
     batch_size: int = typer.Option(64, "--batch-size", "-b"),
