@@ -22,6 +22,26 @@ import pkgutil
 from dataclasses import dataclass
 from typing import Callable
 
+# ---------------------------------------------------------------------------
+# Shared Arabic normalization helpers — use these in every rule
+# ---------------------------------------------------------------------------
+
+# All Unicode forms of hamza that are the same rawiy
+_HAMZA_FORMS = {"ء", "ئ", "ؤ", "أ", "إ", "آ"}
+
+def norm_char(c: str) -> str:
+    """Normalize a single Arabic character for rawiy/radf comparison.
+    Collapses all hamza carrier forms to bare hamza (ء).
+    Alef variants already normalised to ا by load._clean_for_search,
+    but hamza-on-chair (ئ) and hamza-on-waw (ؤ) are not — fix them here.
+    """
+    return "ء" if c in _HAMZA_FORMS else c
+
+
+def norm_rawiy(chars: list[str]) -> list[str]:
+    """Apply norm_char to a list of rawiy candidate characters."""
+    return [norm_char(c) for c in chars]
+
 
 @dataclass(frozen=True)
 class Rule:

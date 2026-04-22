@@ -29,7 +29,7 @@ Notes:
 """
 from __future__ import annotations
 
-from etl.qafiya_rules import Rule
+from etl.qafiya_rules import Rule, norm_char
 
 _PUNCT_EDGE = set(".,!?;:،؛؟…—-\"'()[]{}«»")
 _MADD = {"ا", "و", "ي"}
@@ -66,11 +66,11 @@ def match(poem: dict) -> dict | None:
         if is_waa:
             if len(a) < 3:
                 return None
-            rawiys.add(a[-3])
+            rawiys.add(norm_char(a[-3]))
             pre_rawiy.append(a[-4] if len(a) >= 4 else None)
             pre_pre.append(a[-5] if len(a) >= 5 else None)
         else:
-            rawiys.add(a[-1])
+            rawiys.add(norm_char(a[-1]))
             pre_rawiy.append(a[-2] if len(a) >= 2 else None)
             pre_pre.append(a[-3] if len(a) >= 3 else None)
 
