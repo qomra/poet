@@ -44,6 +44,25 @@ def _run_sources(source: str, dry_run: bool) -> None:
         console.print(f"  {k}: {v:,}")
 
 
+@app.command("ashaar-download")
+def ashaar_download(
+    repo: str = typer.Option("arbml/ashaar", "--repo"),
+    split: str = typer.Option("train", "--split"),
+    out: str | None = typer.Option(None, "--out", help="Defaults to $ALSHAER_ROOT/dataset/ashaar"),
+) -> None:
+    """Download the arbml/ashaar dataset from HuggingFace and save in Arrow format."""
+    import os
+    from pathlib import Path
+    from datasets import load_dataset
+    root = Path(os.getenv("ALSHAER_ROOT", "."))
+    out_path = Path(out) if out else root / "dataset" / "ashaar"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    console.print(f"[cyan]downloading[/] {repo} ({split}) → {out_path}")
+    ds = load_dataset(repo)[split]
+    ds.save_to_disk(str(out_path))
+    console.print(f"[green]saved[/] {len(ds):,} records")
+
+
 @app.command()
 def ashaar(dry_run: bool = typer.Option(False, "--dry-run")) -> None:
     """Run the ashaar pipeline (HuggingFace arbml/ashaar → Postgres)."""
@@ -54,6 +73,66 @@ def ashaar(dry_run: bool = typer.Option(False, "--dry-run")) -> None:
 def all_sources(dry_run: bool = typer.Option(False, "--dry-run")) -> None:
     """Run every registered pipeline."""
     _run_sources("all", dry_run)
+
+
+@app.command("rules-seed")
+def rules_seed() -> None:
+    """Upsert every rule discovered in etl.qafiya_rules into the rules table.
+
+    Idempotent. Existing rules are updated (title/description refreshed, status
+    preserved unless missing) but poems_matched / applied_at are left alone.
+    """
+    import os
+    from datetime import datetime, timezone
+    from sqlalchemy import create_engine, text as _sql
+    from etl.qafiya_rules import all_rules
+
+    db_url = os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg://alshaer:alshaer@localhost:5433/alshaer",
+    ).replace("+asyncpg", "+psycopg")
+
+    rules = all_rules()
+    if not rules:
+        console.print("[yellow]no rules found in etl.qafiya_rules[/]")
+        return
+
+    engine = create_engine(db_url, pool_pre_ping=True)
+    now = datetime.now(timezone.utc)
+    for r in rules:
+        fn = f"etl.qafiya_rules.{r.__class__.__module__.split('.')[-1]}:match"
+        # Better: point at the actual module of the match function
+        fn = f"{r.match.__module__}:{r.match.__name__}"
+        with engine.begin() as conn:
+            existing = conn.execute(
+                _sql("SELECT id, status FROM rules WHERE code = :c"),
+                {"c": r.code},
+            ).fetchone()
+            if existing:
+                conn.execute(_sql("""
+                    UPDATE rules
+                       SET title_ar = :title,
+                           description_ar = :desc,
+                           function_name = :fn
+                     WHERE code = :c
+                """), {"c": r.code, "title": r.title_ar, "desc": r.description_ar, "fn": fn})
+                console.print(f"  [cyan]updated[/] {r.code}")
+            else:
+                import uuid as _uuid
+                conn.execute(_sql("""
+                    INSERT INTO rules (id, code, title_ar, description_ar,
+                                       status, function_name, coded_at)
+                    VALUES (:id, :c, :title, :desc, 'coded', :fn, :ts)
+                """), {
+                    "id": str(_uuid.uuid4()),
+                    "c": r.code,
+                    "title": r.title_ar,
+                    "desc": r.description_ar,
+                    "fn": fn,
+                    "ts": now,
+                })
+                console.print(f"  [green]inserted[/] {r.code}")
+    console.print(f"[green]done: seeded {len(rules)} rules[/]")
 
 
 @app.command("qafiya-apply")
