@@ -204,6 +204,18 @@ def rules_import() -> None:
     for f in files:
         data = _json.loads(f.read_text(encoding="utf-8"))
         with engine.begin() as conn:
+            # NULL example_poem_id if the referenced poem no longer exists
+            # (happens after re-running ETL with deterministic UUIDs)
+            pid = data.get("example_poem_id")
+            if pid:
+                exists = conn.execute(
+                    _sql("SELECT 1 FROM poems WHERE id = CAST(:id AS uuid)"),
+                    {"id": pid},
+                ).fetchone()
+                if not exists:
+                    pid = None
+            data["example_poem_id"] = pid
+
             existing = conn.execute(
                 _sql("SELECT id FROM rules WHERE id = CAST(:id AS uuid)"),
                 {"id": data["id"]},

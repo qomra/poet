@@ -11,7 +11,7 @@ import os
 import re
 import unicodedata
 from collections.abc import Iterable
-from uuid import uuid4
+from uuid import UUID, uuid4, uuid5
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
@@ -35,6 +35,27 @@ _DB_URL = os.getenv(
 ).replace("+asyncpg", "+psycopg")  # load uses sync driver for bulk ops
 
 BATCH_SIZE = 500
+
+# Fixed namespace for deterministic UUIDs. Any machine that runs the ETL on
+# the same source (e.g. arbml/ashaar) gets IDENTICAL UUIDs — so the tashkeel
+# parquet on HuggingFace, keyed by verse_id, is portable.
+_NAMESPACE = UUID("6b1a0000-0000-4000-8000-000000000001")
+
+
+def _poet_id(source: str, poet_url: str | None, poet_name: str | None) -> str:
+    key = poet_url or f"{source}:{poet_name or 'unknown'}"
+    return str(uuid5(_NAMESPACE, f"poet:{key}"))
+
+
+def _poem_id(source: str, source_id: str | None) -> str:
+    # source_id is the poem URL for ashaar; always unique per record in upstream
+    key = source_id or ""
+    return str(uuid5(_NAMESPACE, f"poem:{source}:{key}"))
+
+
+def _verse_id(source: str, source_id: str | None, position: int) -> str:
+    key = source_id or ""
+    return str(uuid5(_NAMESPACE, f"verse:{source}:{key}:{position}"))
 
 
 def _clean_for_search(text_: str) -> str:
@@ -92,7 +113,11 @@ def load(records: Iterable[ProcessedPoem], *, dry_run: bool = False) -> dict[str
                     (p for p in all_poems if p.poet_name and p.poet_name.strip() == poet_name),
                     None,
                 )
-                new_id = str(uuid4())
+                new_id = _poet_id(
+                    source=sample.source if sample else "unknown",
+                    poet_url=sample.poet_url if sample else None,
+                    poet_name=poet_name,
+                )
                 conn.execute(
                     text("""
                         INSERT INTO poets
@@ -120,7 +145,7 @@ def load(records: Iterable[ProcessedPoem], *, dry_run: bool = False) -> dict[str
         verse_rows = []
 
         for p in all_poems:
-            poem_id = str(uuid4())
+            poem_id = _poem_id(p.source, p.source_id)
             poet_id = poet_name_to_id.get(p.poet_name.strip()) if p.poet_name else None
             meter = normalize_meter(p.meter_raw)
             rhyme_letter = extract_rhyme_letter(p.rhyme_raw)
@@ -150,7 +175,7 @@ def load(records: Iterable[ProcessedPoem], *, dry_run: bool = False) -> dict[str
 
             for pos, verse_text in enumerate(p.verses):
                 verse_rows.append({
-                    "id": str(uuid4()),
+                    "id": _verse_id(p.source, p.source_id, pos),
                     "poem_id": poem_id,
                     "position": pos,
                     "text": _clean_for_search(verse_text),
