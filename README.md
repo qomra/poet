@@ -87,6 +87,26 @@ uv run etl qafiya-apply --all  # runs each rule over the unclassified pool
 End state: ~63k poems classified by r001–r003. The remaining ~127k await new
 rules (or r004, once defined).
 
+### How rules travel between machines
+
+The **code** is the source of truth. Each rule lives at
+`etl/src/etl/qafiya_rules/rNNN_slug.py` as a `RULE = Rule(...)` object — the
+match function, the Arabic title, and the prose description are all in that
+file, committed to git.
+
+`rules-seed` reads those files and upserts each one into the local `rules`
+table. `qafiya-apply` then runs the match function, populating classification
+results in `poems` and match counts back in `rules`. The DB row is a
+runtime-state pointer; the logic is the git file.
+
+**What does _not_ migrate via git:**
+- Rules a user proposed through the UI but no-one has coded yet
+  (`status='proposed'`, no `.py` file). These are DB-local and will be lost
+  if you skip exporting the `rules` table. Check first:
+  `docker exec alshaer-postgres psql -U alshaer -d alshaer -c "SELECT code, title_ar FROM rules WHERE status='proposed';"`
+- Poem-level annotations under `qafiya_annotations` (we don't use that table
+  in the current workflow, but if you did, back it up separately).
+
 ## 8. Open the annotator
 
 <http://localhost:8501>
