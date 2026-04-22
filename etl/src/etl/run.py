@@ -135,6 +135,126 @@ def rules_seed() -> None:
     console.print(f"[green]done: seeded {len(rules)} rules[/]")
 
 
+@app.command("rules-export")
+def rules_export() -> None:
+    """Dump the rules table to rules/*.json (one file per rule)."""
+    import json as _json
+    import os
+    from pathlib import Path
+    from sqlalchemy import create_engine, text as _sql
+
+    db_url = os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg://alshaer:alshaer@localhost:5433/alshaer",
+    ).replace("+asyncpg", "+psycopg")
+    rules_dir = Path(os.getenv("ALSHAER_ROOT", ".")) / "rules"
+    rules_dir.mkdir(parents=True, exist_ok=True)
+
+    engine = create_engine(db_url, pool_pre_ping=True)
+    with engine.connect() as conn:
+        rows = conn.execute(_sql("""
+            SELECT id, code, title_ar, description_ar, status, function_name,
+                   example_poem_id, example_qafiya_json
+            FROM rules ORDER BY code NULLS LAST, created_at
+        """)).mappings().all()
+
+    for r in rows:
+        data = {
+            "id": str(r["id"]),
+            "code": r["code"],
+            "title_ar": r["title_ar"],
+            "description_ar": r["description_ar"],
+            "status": "coded" if r["function_name"] else "proposed",
+            "function_name": r["function_name"],
+            "example_poem_id": str(r["example_poem_id"]) if r["example_poem_id"] else None,
+            "example_qafiya_json": r["example_qafiya_json"],
+        }
+        name = r["code"] if r["code"] else str(r["id"])[:8]
+        (rules_dir / f"{name}.json").write_text(
+            _json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        console.print(f"  wrote {name}.json")
+    console.print(f"[green]done: wrote {len(rows)} rules to {rules_dir}[/]")
+
+
+@app.command("rules-import")
+def rules_import() -> None:
+    """Import rules/*.json files into the rules table (upsert, keeps runtime state)."""
+    import json as _json
+    import os
+    from datetime import datetime, timezone
+    from pathlib import Path
+    from sqlalchemy import create_engine, text as _sql
+
+    db_url = os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg://alshaer:alshaer@localhost:5433/alshaer",
+    ).replace("+asyncpg", "+psycopg")
+    rules_dir = Path(os.getenv("ALSHAER_ROOT", ".")) / "rules"
+
+    files = sorted(rules_dir.glob("*.json")) if rules_dir.exists() else []
+    if not files:
+        console.print(f"[yellow]no rules/*.json files found in {rules_dir}[/]")
+        return
+
+    engine = create_engine(db_url, pool_pre_ping=True)
+    now = datetime.now(timezone.utc)
+    inserted = updated = 0
+    for f in files:
+        data = _json.loads(f.read_text(encoding="utf-8"))
+        with engine.begin() as conn:
+            existing = conn.execute(
+                _sql("SELECT id FROM rules WHERE id = CAST(:id AS uuid)"),
+                {"id": data["id"]},
+            ).fetchone()
+            if existing:
+                conn.execute(_sql("""
+                    UPDATE rules SET
+                      code = CAST(:code AS varchar),
+                      title_ar = CAST(:title AS text),
+                      description_ar = CAST(:desc AS text),
+                      status = CASE WHEN status='applied' THEN 'applied'
+                                    ELSE CAST(:status AS varchar) END,
+                      function_name = CAST(:fn AS varchar),
+                      example_poem_id = CAST(:pid AS uuid),
+                      example_qafiya_json = CAST(:ex AS text),
+                      coded_at = COALESCE(coded_at, CASE WHEN :fn IS NOT NULL THEN CAST(:now AS timestamptz) END)
+                    WHERE id = CAST(:id AS uuid)
+                """), {
+                    "id": data["id"], "code": data.get("code"),
+                    "title": data["title_ar"], "desc": data["description_ar"],
+                    "status": data.get("status", "proposed"),
+                    "fn": data.get("function_name"),
+                    "pid": data.get("example_poem_id"),
+                    "ex": data.get("example_qafiya_json"),
+                    "now": now,
+                })
+                updated += 1
+            else:
+                conn.execute(_sql("""
+                    INSERT INTO rules
+                      (id, code, title_ar, description_ar, status, function_name,
+                       example_poem_id, example_qafiya_json, coded_at)
+                    VALUES
+                      (CAST(:id AS uuid), CAST(:code AS varchar),
+                       CAST(:title AS text), CAST(:desc AS text),
+                       CAST(:status AS varchar), CAST(:fn AS varchar),
+                       CAST(:pid AS uuid), CAST(:ex AS text),
+                       CASE WHEN :fn IS NOT NULL THEN CAST(:now AS timestamptz) END)
+                """), {
+                    "id": data["id"], "code": data.get("code"),
+                    "title": data["title_ar"], "desc": data["description_ar"],
+                    "status": data.get("status", "proposed"),
+                    "fn": data.get("function_name"),
+                    "pid": data.get("example_poem_id"),
+                    "ex": data.get("example_qafiya_json"),
+                    "now": now,
+                })
+                inserted += 1
+    console.print(f"[green]done: inserted {inserted}, updated {updated}[/]")
+
+
 @app.command("qafiya-apply")
 def qafiya_apply(
     code: str = typer.Argument(None, help="Rule code, e.g. r001. Omit when using --all."),
