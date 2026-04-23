@@ -47,7 +47,7 @@ def _load_poem_batch(conn, last_id: str | None) -> list[dict]:
     poem_ids = [str(r["id"]) for r in rows]
     verses = conn.execute(
         text("""
-            SELECT poem_id, position, text, text_diacritized
+            SELECT poem_id, position, text, text_diacritized, text_tashkeel
             FROM verses
             WHERE poem_id = ANY(CAST(:ids AS uuid[]))
             ORDER BY poem_id, position
@@ -69,6 +69,7 @@ def _load_poem_batch(conn, last_id: str | None) -> list[dict]:
             "rhyme_letter": r["rhyme_letter"],
             "verses": [v["text"] for v in vs],
             "verses_diacritized": [v["text_diacritized"] for v in vs],
+            "verses_tashkeel": [v["text_tashkeel"] for v in vs],
         })
     return result
 
