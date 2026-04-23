@@ -31,11 +31,16 @@ _HAMZA_FORMS = {"ء", "ئ", "ؤ", "أ", "إ", "آ"}
 
 def norm_char(c: str) -> str:
     """Normalize a single Arabic character for rawiy/radf comparison.
-    Collapses all hamza carrier forms to bare hamza (ء).
-    Alef variants already normalised to ا by load._clean_for_search,
-    but hamza-on-chair (ئ) and hamza-on-waw (ؤ) are not — fix them here.
+
+    - Collapses all hamza carrier forms (ئ, ؤ, أ, إ, آ) → bare hamza (ء).
+    - Collapses ta marbuta (ة) → ta (ت): they are the same rawiy in classical
+      prosody — a verse ending in ة and one ending in ت rhyme together.
     """
-    return "ء" if c in _HAMZA_FORMS else c
+    if c in _HAMZA_FORMS:
+        return "ء"
+    if c == "ة":
+        return "ت"
+    return c
 
 
 def norm_rawiy(chars: list[str]) -> list[str]:
