@@ -58,9 +58,14 @@ def _last_letter(s: str) -> str | None:
 
 def match(poem: dict) -> dict | None:
     verses = poem.get("verses") or []
-    ajuzes = [v for i, v in enumerate(verses) if i % 2 == 1 and v and v.strip()]
+    # Odd verse_count → no classical sadr/ajuz pairing (free verse layout):
+    # every line stands alone, so we scan them all.
+    if len(verses) % 2 == 1:
+        ajuzes = [v for v in verses if v and v.strip()]
+    else:
+        ajuzes = [v for i, v in enumerate(verses) if i % 2 == 1 and v and v.strip()]
 
-    if len(ajuzes) < 4:   # need enough lines to judge
+    if len(ajuzes) < 3:
         return None
 
     letters = [_last_letter(a) for a in ajuzes]
