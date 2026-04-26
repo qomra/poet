@@ -94,6 +94,10 @@ class Meter(StrEnum):
     # Modern / free
     TAFILA = "tafila"          # Free verse retaining a foot
     NATHR = "nathr"            # Prose poem
+    # Folk / strophic
+    MUWASHSHAH = "muwashshah"  # موشح — Andalusian strophic
+    MAWALIYA = "mawaliya"      # مواليا — folk basit-derivative
+    DUBAYT = "dubayt"          # دوبيت — quatrain in derived meter
     UNKNOWN = "unknown"
 
 

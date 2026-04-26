@@ -140,7 +140,13 @@ _METER_MAP: dict[str, Meter] = {
     "شعر التفعيله": Meter.TAFILA,
     "شعر حر": Meter.TAFILA,
     "نثر": Meter.NATHR,
+    "نثريه": Meter.NATHR,
     "قصيدة نثر": Meter.NATHR,
+    # Folk / strophic
+    "موشح": Meter.MUWASHSHAH,
+    "بحر موشح": Meter.MUWASHSHAH,
+    "مواليا": Meter.MAWALIYA,
+    "دوبيت": Meter.DUBAYT,
 }
 
 
@@ -153,14 +159,29 @@ def normalize_meter(raw: str | None) -> Meter:
     if not raw:
         return Meter.UNKNOWN
     cleaned = clean_arabic(normalize_ws(raw)).lower()
-    # Reject rhyme strings that snuck into the meter field
     if re.search(r"قافيه?", cleaned):
         return Meter.UNKNOWN
     if cleaned in _METER_MAP_CLEAN:
         return _METER_MAP_CLEAN[cleaned]
-    # Strip بحر prefix and retry
-    stripped = re.sub(r"^بحر\s*", "", cleaned).strip()
-    return _METER_MAP_CLEAN.get(stripped, Meter.UNKNOWN)
+    # Try stripping the بحر prefix
+    s = re.sub(r"^بحر\s*", "", cleaned).strip()
+    if s in _METER_MAP_CLEAN:
+        return _METER_MAP_CLEAN[s]
+    # Try stripping the ال definite article
+    s2 = re.sub(r"^ال", "", s).strip()
+    if s2 in _METER_MAP_CLEAN:
+        return _METER_MAP_CLEAN[s2]
+    # Handle "مجزوء/مخلع/أحذ/مشطور/منهوك X" variants
+    m = re.match(r"^(?:مجزوء|مخلع|احذ|أحذ|مرفل|مذيل|مشطور|منهوك|تفعيله|تفعيلة)\s+ا?ل?(.+)$", s)
+    if m:
+        base = clean_arabic(m.group(1)).strip()
+        compound = f"مجزوء {base}"
+        if compound in _METER_MAP_CLEAN:
+            return _METER_MAP_CLEAN[compound]
+        # Fall back to the parent meter (مجزوء الكامل → الكامل → KAMEL)
+        if base in _METER_MAP_CLEAN:
+            return _METER_MAP_CLEAN[base]
+    return Meter.UNKNOWN
 
 
 # ---------------------------------------------------------------------------
