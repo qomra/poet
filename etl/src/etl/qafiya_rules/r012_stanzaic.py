@@ -50,23 +50,35 @@ def _last2(s: str) -> str:
 
 def match(poem: dict) -> dict | None:
     verses = poem.get("verses") or []
+
+    # Path 1 — classical paired layout (sadr/ajuz). Look at ajuzes only.
     ajuzes = [_strip_punct(v) for i, v in enumerate(verses) if i % 2 == 1 and v]
     ajuzes = [a for a in ajuzes if a]
+    if len(ajuzes) >= 6:
+        suffixes = [s for s in (_last2(a) for a in ajuzes) if len(s) == 2]
+        if suffixes:
+            counts   = Counter(suffixes)
+            if len(counts) >= 3 and counts.most_common(1)[0][1] / len(suffixes) < 0.65:
+                return {"type": "free"}
 
-    if len(ajuzes) < 6:   # need at least 3 stanzas worth
+    # Path 2 — stanzaic / unpaired (مخمس, مربع, موشح). Look at ALL lines and
+    # detect *runs* of consecutive identical 2-char suffixes. If two or more
+    # runs of length ≥3 with different suffixes exist → stanzaic.
+    lines = [_strip_punct(v) for v in verses if v]
+    line_suffixes = [s for s in (_last2(a) for a in lines) if len(s) == 2]
+    if len(line_suffixes) < 6:
         return None
-
-    suffixes = [_last2(a) for a in ajuzes]
-    suffixes = [s for s in suffixes if len(s) == 2]
-
-    if not suffixes:
-        return None
-
-    counts   = Counter(suffixes)
-    distinct = len(counts)
-    dominant_pct = counts.most_common(1)[0][1] / len(suffixes)
-
-    if distinct >= 3 and dominant_pct < 0.65:
+    runs: list[tuple[str, int]] = []
+    i = 0
+    while i < len(line_suffixes):
+        j = i
+        while j < len(line_suffixes) and line_suffixes[j] == line_suffixes[i]:
+            j += 1
+        runs.append((line_suffixes[i], j - i))
+        i = j
+    long_runs = [(s, n) for s, n in runs if n >= 3]
+    distinct_long = {s for s, _ in long_runs}
+    if len(long_runs) >= 2 and len(distinct_long) >= 2:
         return {"type": "free"}
 
     return None
