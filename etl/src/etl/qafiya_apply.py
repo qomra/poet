@@ -58,18 +58,37 @@ def _load_poem_batch(conn, last_id: str | None) -> list[dict]:
     for v in verses:
         by_poem[str(v["poem_id"])].append(v)
 
+    from etl.qafiya_rules import is_real_verse
+
+    def _normalize(verses: list, verses_tk: list) -> tuple[list, list]:
+        """If real ajuzes are at even indices (placeholders at odd), shift the
+        arrays so ajuzes end up at odd indices — keeps the universal
+        `i % 2 == 1` filter working across all rules.
+        """
+        if not verses:
+            return verses, verses_tk
+        odd_real  = sum(1 for i, v in enumerate(verses) if i % 2 == 1 and is_real_verse(v))
+        even_real = sum(1 for i, v in enumerate(verses) if i % 2 == 0 and is_real_verse(v))
+        if even_real > odd_real:
+            # Shift by 1: prepend an empty sadr; ajuzes now at odd positions.
+            return ([""] + list(verses), [None] + list(verses_tk))
+        return verses, verses_tk
+
     result = []
     for r in rows:
         vs = by_poem[str(r["id"])]
+        verses    = [v["text"] for v in vs]
+        verses_tk = [v["text_tashkeel"] for v in vs]
+        verses, verses_tk = _normalize(verses, verses_tk)
         result.append({
             "id": str(r["id"]),
             "title": r["title"],
             "poet_name": r["poet_name"],
             "meter": r["meter"],
             "rhyme_letter": r["rhyme_letter"],
-            "verses": [v["text"] for v in vs],
+            "verses": verses,
             "verses_diacritized": [v["text_diacritized"] for v in vs],
-            "verses_tashkeel": [v["text_tashkeel"] for v in vs],
+            "verses_tashkeel": verses_tk,
         })
     return result
 

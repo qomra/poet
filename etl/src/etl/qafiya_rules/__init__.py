@@ -48,6 +48,46 @@ def norm_rawiy(chars: list[str]) -> list[str]:
     return [norm_char(c) for c in chars]
 
 
+# ---------------------------------------------------------------------------
+# Layout helpers — pick the correct ajuz positions
+# ---------------------------------------------------------------------------
+
+def is_real_verse(s: str | None) -> bool:
+    """A verse is real if it has Arabic content. Placeholder strings like
+    '...' / '…' / empty are treated as missing — some upstream sources elide
+    one parity class to keep verse counts even.
+    """
+    if not s:
+        return False
+    s = s.strip()
+    if s in ("...", "…", "....", ""):
+        return False
+    return any("ء" <= c <= "ي" for c in s)
+
+
+def ajuz_indices(verses: list[str]) -> list[int]:
+    """Return the verse indices that hold the real ajuzes for this poem.
+
+    Most poems store ajuzes at odd indices (classical sadr/ajuz pairing).
+    Some upstream sources put ajuzes at even indices with '...' placeholders
+    at odd ones. We pick whichever parity class has more real verses.
+    """
+    odd  = [i for i, v in enumerate(verses) if i % 2 == 1 and is_real_verse(v)]
+    even = [i for i, v in enumerate(verses) if i % 2 == 0 and is_real_verse(v)]
+    return odd if len(odd) >= len(even) else even
+
+
+def ajuzes_of(poem: dict) -> tuple[list[str], list[str | None]]:
+    """Convenience: return (plain_ajuz_texts, tashkeel_ajuz_texts) using the
+    correct parity class for this poem's layout."""
+    verses    = poem.get("verses") or []
+    verses_tk = poem.get("verses_tashkeel") or []
+    idxs = ajuz_indices(verses)
+    plain = [verses[i] for i in idxs]
+    tk    = [verses_tk[i] if i < len(verses_tk) else None for i in idxs]
+    return plain, tk
+
+
 @dataclass(frozen=True)
 class Rule:
     code: str
