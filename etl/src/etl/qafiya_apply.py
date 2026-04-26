@@ -58,7 +58,11 @@ def _load_poem_batch(conn, last_id: str | None) -> list[dict]:
     for v in verses:
         by_poem[str(v["poem_id"])].append(v)
 
+    import unicodedata
     from etl.qafiya_rules import is_real_verse
+
+    def _nfkc(s):
+        return unicodedata.normalize("NFKC", s) if s else s
 
     def _normalize(verses: list, verses_tk: list) -> tuple[list, list]:
         """If real ajuzes are at even indices (placeholders at odd), shift the
@@ -77,8 +81,10 @@ def _load_poem_batch(conn, last_id: str | None) -> list[dict]:
     result = []
     for r in rows:
         vs = by_poem[str(r["id"])]
-        verses    = [v["text"] for v in vs]
-        verses_tk = [v["text_tashkeel"] for v in vs]
+        # NFKC: collapse Arabic Presentation Forms (ﻗ → ق etc.) to canonical
+        # letters so all rules' is-Arabic-letter checks find them.
+        verses    = [_nfkc(v["text"])           for v in vs]
+        verses_tk = [_nfkc(v["text_tashkeel"])  for v in vs]
         verses, verses_tk = _normalize(verses, verses_tk)
         result.append({
             "id": str(r["id"]),

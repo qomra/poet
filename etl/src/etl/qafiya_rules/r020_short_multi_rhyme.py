@@ -26,7 +26,7 @@ from collections import Counter
 from etl.qafiya_rules import Rule, ajuzes_of
 from etl.qafiya_rules.r019_pronoun_strip_rawiy import _deep_strip_to_rawiy
 
-_MIN_AJUZ = 4
+_MIN_AJUZ = 3
 _MINORITY_FLOOR = 0.25
 _RUN_MIN = 2
 
@@ -67,13 +67,11 @@ def match(poem: dict) -> dict | None:
     if sec_n / len(rawiys) < _MINORITY_FLOOR:
         return None
 
-    # Require at least one run of ≥ 2 for each rawiy
-    runs = _runs(rawiys)
-    runs_top = [n for r, n in runs if r == top and n >= _RUN_MIN]
-    runs_sec = [n for r, n in runs if r == sec and n >= _RUN_MIN]
-    if not runs_top or not runs_sec:
-        return None
-
+    # If we got here we have exactly 2 distinct rawiys with the minority
+    # covering ≥25% — strong evidence the qafiya isn't single across the
+    # whole poem. Whether the layout is grouped (AABB), alternating
+    # (ABAB), or scattered, the unambiguous diagnosis is: no single
+    # qafiya. We label type=free.
     return {"type": "free"}
 
 

@@ -30,8 +30,8 @@ from etl.qafiya_rules import Rule, norm_char
 _PUNCT  = set(".,!?;:،؛؟…—-\"'()[]{}«»")
 _WASL_1 = {"ي", "ا", "ى", "و", "ه", "ن"}
 
-_MIN_AJUZ = 10          # genuine merged composites are long (two qasidas)
-_HALF_MIN = 5           # 5 baits per half as minimum evidence
+_MIN_AJUZ = 6           # min total ajuzes; 3+3 split possible
+_HALF_MIN = 3           # min baits per half
 _DOMINANCE = 0.90       # strict — avoid false-positives on phonological variation
 
 

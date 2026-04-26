@@ -79,8 +79,15 @@ def match(poem: dict) -> dict | None:
     dominant_pct = counts.most_common(1)[0][1] / n
     distinct = len(counts)
 
-    # Free verse: 3+ distinct rawiy candidates AND no dominant letter ≥ 80 %
+    # Free verse / mixed:
+    #   - 3+ distinct rawiy candidates AND no dominant letter ≥ 80%, OR
+    #   - 2+ distinct AND no dominant letter ≥ 70%  (catches the
+    #     "ابتت / ابقق / ابتت" alternating couplet patterns that fall
+    #     between r006's old strict threshold and r020's 2-distinct-with-
+    #     deep-strip detection).
     if distinct >= 3 and dominant_pct < 0.80:
+        return {"type": "free"}
+    if distinct >= 2 and dominant_pct < 0.70:
         return {"type": "free"}
 
     return None
