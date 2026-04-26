@@ -353,6 +353,20 @@ def tashkeel_fill(
     fill(batch_size=batch_size, limit=limit, service=service, retry=retry)
 
 
+@app.command("qafiya-augment")
+def qafiya_augment_cmd(
+    code: str = typer.Argument(None, help="Augment code, e.g. a001. Omit for all."),
+    all_classified: bool = typer.Option(
+        False, "--all-classified",
+        help="Run on every classified poem (default: only those missing qafiya_type).",
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+) -> None:
+    """Run augmentation rules to fill NULL qafiya_* fields on classified poems."""
+    from etl.qafiya_augment_runner import run
+    run(code=code, only_missing_type=not all_classified, dry_run=dry_run)
+
+
 @app.command("qafiya-reset")
 def qafiya_reset(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation."),
