@@ -117,9 +117,30 @@ def _harakah_on_final_consonant(tashkeel_ajuz: str) -> str | None:
     return None
 
 
+def _real(s: str | None) -> bool:
+    if not s:
+        return False
+    s = s.strip()
+    if not s or s == "..." or s == "…" or s == "...":
+        return False
+    return any("ء" <= c <= "ي" for c in s)
+
+
+def _pick_ajuz_positions(verses: list[str]) -> list[int]:
+    """Return the position indices that hold the real ajuzes — the parity
+    class (odd or even) with more non-placeholder verses.
+    """
+    odd  = [i for i, v in enumerate(verses) if i % 2 == 1 and _real(v)]
+    even = [i for i, v in enumerate(verses) if i % 2 == 0 and _real(v)]
+    return odd if len(odd) >= len(even) else even
+
+
 def match(poem: dict) -> dict | None:
-    ajuzes      = [v for i, v in enumerate(poem.get("verses") or [])         if i % 2 == 1 and v]
-    ajuzes_tk   = [v for i, v in enumerate(poem.get("verses_tashkeel") or []) if i % 2 == 1 and v]
+    verses    = poem.get("verses") or []
+    verses_tk = poem.get("verses_tashkeel") or []
+    idxs = _pick_ajuz_positions(verses)
+    ajuzes    = [verses[i]    for i in idxs]
+    ajuzes_tk = [verses_tk[i] if i < len(verses_tk) else None for i in idxs]
     if len(ajuzes) < _MIN_AJUZ:
         return None
 
@@ -162,7 +183,14 @@ def match(poem: dict) -> dict | None:
     has_dominant = max(vowel_counts) / n > _VOWEL_CEILING if n else False
     path_b = len(vowels_with_floor) >= 2 and not has_dominant
 
-    if not (path_a or path_b):
+    # ── Path C: sukun and a vowel coexist substantially (≥30% each) ────────
+    # When the diacritizer assigns sukun to ≥30% of the ajuzes AND no single
+    # vowel dominates beyond 60%, the rawiy carries no intrinsic harakah:
+    # some lines surfaced a grammatical case, others got marked sukun.
+    max_vowel = max(vowel_counts) if any(vowel_counts) else 0
+    path_c = (n_sukun >= 0.30 * n) and (max_vowel / n <= 0.60)
+
+    if not (path_a or path_b or path_c):
         return None
 
     return {
